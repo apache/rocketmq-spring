@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This is a sub-repo of RocketMQ TLP (http://rocketmq.apache.org/), It aims to help developers quickly integrate [RocketMQ](http://rocketmq.apache.org/) in [Spring Boot](http://projects.spring.io/spring-boot/). Support the Spring Message specification to facilitate developers to quickly switch from other MQ to RocketMQ.
+Thi project aims to help developers quickly integrate [RocketMQ](http://rocketmq.apache.org/) in [Spring Boot](http://projects.spring.io/spring-boot/). Support the Spring Message specification to facilitate developers to quickly switch from other MQ to RocketMQ.
 
 ## How To Contribute
 
