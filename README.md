@@ -1,4 +1,4 @@
-# rocketmq-spring-boot
+# Rocketmq-Spring
 
 [中文](./README_zh_CN.md)
 
