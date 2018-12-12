@@ -21,7 +21,7 @@ public enum MessageModel {
     BROADCASTING("BROADCASTING"),
     CLUSTERING("CLUSTERING");
 
-    private String modeCN;
+    private final String modeCN;
 
     MessageModel(String modeCN) {
         this.modeCN = modeCN;

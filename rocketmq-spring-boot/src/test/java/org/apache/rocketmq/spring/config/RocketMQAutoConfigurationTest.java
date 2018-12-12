@@ -49,7 +49,7 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testDefaultMQProducer() {
-        runner.withPropertyValues("spring.rocketmq.nameServer=127.0.0.1:9876",
+        runner.withPropertyValues("spring.rocketmq.name-server=127.0.0.1:9876",
                 "spring.rocketmq.producer.group=spring_rocketmq").
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultMQProducer.class);
@@ -60,7 +60,7 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testRocketMQListenerContainer() {
-        runner.withPropertyValues("spring.rocketmq.nameServer=127.0.0.1:9876").
+        runner.withPropertyValues("spring.rocketmq.name-server=127.0.0.1:9876").
             withUserConfiguration(TestConfig.class).
             run((context) -> {
                 // No producer on consume side
