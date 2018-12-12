@@ -61,7 +61,7 @@ public class RocketMQProperties {
         /**
          * Compress message body threshold, namely, message body larger than 4k will be compressed on default.
          */
-        private int compressMessageBodyOverHowmuch = 1024 * 4;
+        private int compressMessageBodyThreshold = 1024 * 4;
 
         /**
          * Maximum number of retry to perform internally before claiming sending failure in synchronous mode.
@@ -101,12 +101,12 @@ public class RocketMQProperties {
             this.sendMessageTimeout = sendMessageTimeout;
         }
 
-        public int getCompressMessageBodyOverHowmuch() {
-            return compressMessageBodyOverHowmuch;
+        public int getCompressMessageBodyThreshold() {
+            return compressMessageBodyThreshold;
         }
 
-        public void setCompressMessageBodyOverHowmuch(int compressMessageBodyOverHowmuch) {
-            this.compressMessageBodyOverHowmuch = compressMessageBodyOverHowmuch;
+        public void setCompressMessageBodyThreshold(int compressMessageBodyThreshold) {
+            this.compressMessageBodyThreshold = compressMessageBodyThreshold;
         }
 
         public int getRetryTimesWhenSendFailed() {
