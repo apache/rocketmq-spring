@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 
+@Configuration
 public class ListenerContainerConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private final static Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
 
@@ -55,10 +56,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private ObjectMapper objectMapper;
 
-    public ListenerContainerConfiguration() {
-    }
-
-    @Autowired
     public ListenerContainerConfiguration(
         @Qualifier("rocketMQMessageObjectMapper") ObjectMapper objectMapper,
         StandardEnvironment environment,
