@@ -38,18 +38,18 @@ import java.util.Objects;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
-@ConditionalOnProperty(prefix = "spring.rocketmq", value = "nameServer")
+@ConditionalOnProperty(prefix = "spring.rocketmq", value = "name-server")
 @Import(ListenerContainerConfiguration.class)
 public class RocketMQAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DefaultMQProducer.class)
-    @ConditionalOnProperty(prefix = "spring.rocketmq", value = {"nameServer", "producer.group"})
+    @ConditionalOnProperty(prefix = "spring.rocketmq", value = {"name-server", "producer.group"})
     public DefaultMQProducer defaultMQProducer(RocketMQProperties rocketMQProperties) {
         RocketMQProperties.Producer producerConfig = rocketMQProperties.getProducer();
         String nameServer = rocketMQProperties.getNameServer();
         String groupName = producerConfig.getGroup();
-        Assert.hasText(nameServer, "[spring.rocketmq.nameServer] must not be null");
+        Assert.hasText(nameServer, "[spring.rocketmq.name-server] must not be null");
         Assert.hasText(groupName, "[spring.rocketmq.producer.group] must not be null");
 
         DefaultMQProducer producer = new DefaultMQProducer(groupName);
@@ -62,13 +62,6 @@ public class RocketMQAutoConfiguration {
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryAnotherBrokerWhenNotStoreOk());
 
         return producer;
-    }
-
-    @Bean
-    @ConditionalOnClass(name = "com.fasterxml.jackson.databind.ObjectMapper")
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper rocketMQMessageObjectMapper() {
-        return new ObjectMapper();
     }
 
     @Bean(destroyMethod = "destroy")
@@ -101,4 +94,17 @@ public class RocketMQAutoConfiguration {
     public static RocketMQTransactionAnnotationProcessor transactionAnnotationProcessor(TransactionHandlerRegistry transactionHandlerRegistry) {
         return new RocketMQTransactionAnnotationProcessor(transactionHandlerRegistry);
     }
+
+    @Configuration
+    @ConditionalOnClass(ObjectMapper.class)
+    static class JacksonConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(ObjectMapper.class)
+        public ObjectMapper rocketMQMessageObjectMapper() {
+            return new ObjectMapper();
+        }
+
+    }
+
 }
