@@ -64,13 +64,6 @@ public class RocketMQAutoConfiguration {
         return producer;
     }
 
-    @Bean
-    @ConditionalOnClass(name = "com.fasterxml.jackson.databind.ObjectMapper")
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper rocketMQMessageObjectMapper() {
-        return new ObjectMapper();
-    }
-
     @Bean(destroyMethod = "destroy")
     @ConditionalOnBean(DefaultMQProducer.class)
     @ConditionalOnMissingBean(RocketMQTemplate.class)
@@ -102,4 +95,17 @@ public class RocketMQAutoConfiguration {
         TransactionHandlerRegistry transactionHandlerRegistry) {
         return new RocketMQTransactionAnnotationProcessor(transactionHandlerRegistry);
     }
+
+    @Configuration
+    @ConditionalOnClass(ObjectMapper.class)
+    static class JacksonConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(ObjectMapper.class)
+        public ObjectMapper rocketMQMessageObjectMapper() {
+            return new ObjectMapper();
+        }
+
+    }
+
 }

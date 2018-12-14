@@ -39,7 +39,7 @@ We are always very happy to have contributions, whether for trivial cleanups or 
 
 Please see the complete sample [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-Note: Current RELEASE.VERSION=2.0.1
+Note: Current RELEASE.VERSION=2.0.0-SNAPSHOT
 
 ```xml
 <!--add dependency in pom.xml-->
@@ -54,7 +54,7 @@ Note: Current RELEASE.VERSION=2.0.1
 
 ```properties
 ## application.properties
-spring.rocketmq.nameServer=127.0.0.1:9876
+spring.rocketmq.name-server=127.0.0.1:9876
 spring.rocketmq.producer.group=my-group
 ```
 
@@ -93,12 +93,12 @@ public class ProducerApplication implements CommandLineRunner{
 > More relevant configurations for producing:
 >
 > ```properties
-> spring.rocketmq.producer.retryTimesWhenSendAsyncFailed=0
-> spring.rocketmq.producer.sendMessageTimeout=300000
-> spring.rocketmq.producer.compressMessageBodyOverHowmuch=4096
-> spring.rocketmq.producer.maxMessageSize=4194304
-> spring.rocketmq.producer.retryAnotherBrokerWhenNotStoreOk=false
-> spring.rocketmq.producer.retryTimesWhenSendFailed=2
+> spring.rocketmq.producer.retry-times-when-send-async-failed=0
+> spring.rocketmq.producer.send-message-timeout=300000
+> spring.rocketmq.producer.compress-message-body-threshold=4096
+> spring.rocketmq.producer.max-message-size=4194304
+> spring.rocketmq.producer.retry-another-broker-when-not-store-ok=false
+> spring.rocketmq.producer.retry-times-when-send-failed=2
 > ```
 
 
@@ -147,7 +147,7 @@ public class ProducerApplication implements CommandLineRunner{
 
 ```properties
 ## application.properties
-spring.rocketmq.nameServer=127.0.0.1:9876
+spring.rocketmq.name-server=127.0.0.1:9876
 ```
 
 > Note:
