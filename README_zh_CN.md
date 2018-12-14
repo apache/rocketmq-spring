@@ -30,7 +30,7 @@
 
 下面列出来了一些关键点，完整的示例请参考： [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-注意:当前的RELEASE.VERSION=2.0.0
+注意:当前的RELEASE.VERSION=2.0.1-SNAPSHOT 目前在公开review阶段。
 
 ```xml
 <!--在pom.xml中添加依赖-->
@@ -45,7 +45,7 @@
 
 ```properties
 ## application.properties
-spring.rocketmq.nameServer=127.0.0.1:9876
+spring.rocketmq.name-server=127.0.0.1:9876
 spring.rocketmq.producer.group=my-group
 ```
 
@@ -125,12 +125,12 @@ public class ProducerApplication implements CommandLineRunner{
 > 更多发送相关配置
 >
 > ```properties
-> spring.rocketmq.producer.retryTimesWhenSendAsyncFailed=0
-> spring.rocketmq.producer.sendMessageTimeout=300000
-> spring.rocketmq.producer.compressMessageBodyOverHowmuch=4096
-> spring.rocketmq.producer.maxMessageSize=4194304
-> spring.rocketmq.producer.retryAnotherBrokerWhenNotStoreOk=false
-> spring.rocketmq.producer.retryTimesWhenSendFailed=2
+> spring.rocketmq.producer.retry-times-when-send-async-failed=0
+> spring.rocketmq.producer.send-message-timeout=300000
+> spring.rocketmq.producer.compress-message-body-threshold=4096
+> spring.rocketmq.producer.max-message-size=4194304
+> spring.rocketmq.producer.retry-another-broker-when-not-store-ok=false
+> spring.rocketmq.producer.retry-times-when-send-failed=2
 > ```
 
 
@@ -138,7 +138,7 @@ public class ProducerApplication implements CommandLineRunner{
 
 ```properties
 ## application.properties
-spring.rocketmq.nameServer=127.0.0.1:9876
+spring.rocketmq.name-server=127.0.0.1:9876
 ```
 
 > 注意:
