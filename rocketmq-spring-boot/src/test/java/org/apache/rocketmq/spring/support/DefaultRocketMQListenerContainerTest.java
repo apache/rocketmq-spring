@@ -15,47 +15,38 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.spring.support;
+
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
 public class DefaultRocketMQListenerContainerTest {
     @Test
-    public void testGetMessageType() throws NoSuchMethodException {
+    public void testGetMessageType() throws Exception {
         DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
         Method getMessageType = DefaultRocketMQListenerContainer.class.getDeclaredMethod("getMessageType");
         getMessageType.setAccessible(true);
-        try {
-            listenerContainer.setRocketMQListener(new BaseStringConsumer());
-            Class result = (Class) getMessageType.invoke(listenerContainer);
-            assertThat(result.getName().equals(String.class.getName())).isTrue();
-            listenerContainer.setRocketMQListener(new BaseMessageExtConsumer());
-            result = (Class) getMessageType.invoke(listenerContainer);
-            assertThat(result.getName().equals(MessageExt.class.getName())).isTrue();
-            listenerContainer.setRocketMQListener(new ConcreteStringConsumer());
-            result = (Class) getMessageType.invoke(listenerContainer);
-            assertThat(result.getName().equals(String.class.getName())).isTrue();
-            listenerContainer.setRocketMQListener(new ConcreteMessageExtConsumer());
-            result = (Class) getMessageType.invoke(listenerContainer);
-            assertThat(result.getName().equals(MessageExt.class.getName())).isTrue();
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+
+        listenerContainer.setRocketMQListener(new RocketMQListener<String>() {
+            @Override
+            public void onMessage(String message) {
+            }
+        });
+        Class result = (Class)getMessageType.invoke(listenerContainer);
+        assertThat(result.getName().equals(String.class.getName()));
+
+        listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
+            @Override
+            public void onMessage(MessageExt message) {
+            }
+        });
+        result = (Class)getMessageType.invoke(listenerContainer);
+        assertThat(result.getName().equals(MessageExt.class.getName()));
     }
 }
-class BaseStringConsumer implements RocketMQListener<String> {
-    @Override
-    public void onMessage(String message) {
-    }
-}
-class ConcreteStringConsumer extends BaseStringConsumer {
-}
-class BaseMessageExtConsumer implements RocketMQListener<MessageExt> {
-    @Override
-    public void onMessage(MessageExt message) {
-    }
-}
-class ConcreteMessageExtConsumer extends BaseMessageExtConsumer {
-}
+
+
