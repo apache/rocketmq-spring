@@ -69,7 +69,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
 
     private String charset = "UTF-8";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     private RocketMQListener rocketMQListener;
 
