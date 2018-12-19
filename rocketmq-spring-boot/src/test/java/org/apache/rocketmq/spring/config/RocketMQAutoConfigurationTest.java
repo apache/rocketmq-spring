@@ -84,7 +84,7 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testRocketMQListenerWithCustomObjectMapper() {
-        runner.withPropertyValues("spring.rocketmq.name-server=127.0.0.1:9876").
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
                 withUserConfiguration(TestConfig.class, CustomObjectMapperConfig.class).
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
@@ -95,7 +95,7 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testRocketMQListenerWithSeveralObjectMappers() {
-        runner.withPropertyValues("spring.rocketmq.name-server=127.0.0.1:9876").
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
                 withUserConfiguration(TestConfig.class, CustomObjectMappersConfig.class).
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
