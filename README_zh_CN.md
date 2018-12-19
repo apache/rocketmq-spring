@@ -45,8 +45,8 @@
 
 ```properties
 ## application.properties
-spring.rocketmq.name-server=127.0.0.1:9876
-spring.rocketmq.producer.group=my-group
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
 ```
 
 > 注意:
@@ -125,12 +125,12 @@ public class ProducerApplication implements CommandLineRunner{
 > 更多发送相关配置
 >
 > ```properties
-> spring.rocketmq.producer.retry-times-when-send-async-failed=0
-> spring.rocketmq.producer.send-message-timeout=300000
-> spring.rocketmq.producer.compress-message-body-threshold=4096
-> spring.rocketmq.producer.max-message-size=4194304
-> spring.rocketmq.producer.retry-another-broker-when-not-store-ok=false
-> spring.rocketmq.producer.retry-times-when-send-failed=2
+> rocketmq.producer.retry-times-when-send-async-failed=0
+> rocketmq.producer.send-message-timeout=300000
+> rocketmq.producer.compress-message-body-threshold=4096
+> rocketmq.producer.max-message-size=4194304
+> rocketmq.producer.retry-another-broker-when-not-store-ok=false
+> rocketmq.producer.retry-times-when-send-failed=2
 > ```
 
 
@@ -138,7 +138,7 @@ public class ProducerApplication implements CommandLineRunner{
 
 ```properties
 ## application.properties
-spring.rocketmq.name-server=127.0.0.1:9876
+rocketmq.name-server=127.0.0.1:9876
 ```
 
 > 注意:
@@ -183,7 +183,7 @@ public class ConsumerApplication{
 
 1. 生产环境有多个`nameserver`该如何连接？
 
-   `spring.rocketmq.nameServer`支持配置多个`nameserver`地址，采用`;`分隔即可。例如：`172.19.0.1:9876;172.19.0.2:9876`
+   `rocketmq.name-server`支持配置多个`nameserver`地址，采用`;`分隔即可。例如：`172.19.0.1:9876;172.19.0.2:9876`
 
 1. `rocketMQTemplate`在什么时候被销毁？
 
