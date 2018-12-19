@@ -20,7 +20,7 @@ package org.apache.rocketmq.spring.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @SuppressWarnings("WeakerAccess")
-@ConfigurationProperties(prefix = "spring.rocketmq")
+@ConfigurationProperties(prefix = "rocketmq")
 public class RocketMQProperties {
 
     /**
