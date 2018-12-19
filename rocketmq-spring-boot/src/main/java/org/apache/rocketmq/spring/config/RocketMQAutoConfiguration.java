@@ -18,15 +18,16 @@
 package org.apache.rocketmq.spring.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +35,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Role;
 import org.springframework.util.Assert;
 
-import java.util.Objects;
-
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
+@ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server")
-@Import(ListenerContainerConfiguration.class)
+@Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class })
+@AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
 
     @Bean
@@ -67,17 +68,10 @@ public class RocketMQAutoConfiguration {
     @Bean(destroyMethod = "destroy")
     @ConditionalOnBean(DefaultMQProducer.class)
     @ConditionalOnMissingBean(RocketMQTemplate.class)
-    public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer,
-        @Autowired(required = false)
-        @Qualifier("rocketMQMessageObjectMapper")
-            ObjectMapper objectMapper) {
+    public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer, ObjectMapper rocketMQMessageObjectMapper) {
         RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
         rocketMQTemplate.setProducer(mqProducer);
-        if (Objects.nonNull(objectMapper)) {
-            rocketMQTemplate.setObjectMapper(objectMapper);
-        } else {
-            throw new IllegalStateException("Can not inject null objectMapper into RocketMQTemplate!");
-        }
+        rocketMQTemplate.setObjectMapper(rocketMQMessageObjectMapper);
         return rocketMQTemplate;
     }
 
@@ -94,18 +88,6 @@ public class RocketMQAutoConfiguration {
     public static RocketMQTransactionAnnotationProcessor transactionAnnotationProcessor(
         TransactionHandlerRegistry transactionHandlerRegistry) {
         return new RocketMQTransactionAnnotationProcessor(transactionHandlerRegistry);
-    }
-
-    @Configuration
-    @ConditionalOnClass(ObjectMapper.class)
-    static class JacksonConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(ObjectMapper.class)
-        public ObjectMapper rocketMQMessageObjectMapper() {
-            return new ObjectMapper();
-        }
-
     }
 
 }

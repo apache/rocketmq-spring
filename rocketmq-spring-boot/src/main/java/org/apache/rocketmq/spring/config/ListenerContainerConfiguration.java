@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -56,11 +55,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private ObjectMapper objectMapper;
 
-    public ListenerContainerConfiguration(
-        @Qualifier("rocketMQMessageObjectMapper") ObjectMapper objectMapper,
+    public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
         StandardEnvironment environment,
         RocketMQProperties rocketMQProperties) {
-        this.objectMapper = objectMapper;
+        this.objectMapper = rocketMQMessageObjectMapper;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
     }
