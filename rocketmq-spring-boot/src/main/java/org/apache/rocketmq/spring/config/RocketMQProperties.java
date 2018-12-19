@@ -78,7 +78,7 @@ public class RocketMQProperties {
         /**
          * Indicate whether to retry another broker on sending failure internally.
          */
-        private boolean retryAnotherBrokerWhenNotStoreOk = false;
+        private boolean retryNextServer = false;
 
         /**
          * Maximum allowed message size in bytes.
@@ -125,12 +125,12 @@ public class RocketMQProperties {
             this.retryTimesWhenSendAsyncFailed = retryTimesWhenSendAsyncFailed;
         }
 
-        public boolean isRetryAnotherBrokerWhenNotStoreOk() {
-            return retryAnotherBrokerWhenNotStoreOk;
+        public boolean isRetryNextServer() {
+            return retryNextServer;
         }
 
-        public void setRetryAnotherBrokerWhenNotStoreOk(boolean retryAnotherBrokerWhenNotStoreOk) {
-            this.retryAnotherBrokerWhenNotStoreOk = retryAnotherBrokerWhenNotStoreOk;
+        public void setRetryNextServer(boolean retryNextServer) {
+            this.retryNextServer = retryNextServer;
         }
 
         public int getMaxMessageSize() {
