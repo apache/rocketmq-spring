@@ -46,13 +46,13 @@ public class ProducerApplication implements CommandLineRunner {
     private static final String TX_PGROUP_NAME = "myTxProducerGroup";
     @Resource
     private RocketMQTemplate rocketMQTemplate;
-    @Value("${spring.rocketmq.transTopic}")
+    @Value("${demo.rocketmq.transTopic}")
     private String springTransTopic;
-    @Value("${spring.rocketmq.topic}")
+    @Value("${demo.rocketmq.topic}")
     private String springTopic;
-    @Value("${spring.rocketmq.orderTopic}")
+    @Value("${demo.rocketmq.orderTopic}")
     private String orderPaidTopic;
-    @Value("${spring.rocketmq.msgExtTopic}")
+    @Value("${demo.rocketmq.msgExtTopic}")
     private String msgExtTopic;
 
     public static void main(String[] args) {

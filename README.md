@@ -54,8 +54,8 @@ Note: Current RELEASE.VERSION=2.0.1-SNAPSHOT （public review phase）
 
 ```properties
 ## application.properties
-spring.rocketmq.name-server=127.0.0.1:9876
-spring.rocketmq.producer.group=my-group
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
 ```
 
 > Note:
@@ -93,12 +93,12 @@ public class ProducerApplication implements CommandLineRunner{
 > More relevant configurations for producing:
 >
 > ```properties
-> spring.rocketmq.producer.retry-times-when-send-async-failed=0
-> spring.rocketmq.producer.send-message-timeout=300000
-> spring.rocketmq.producer.compress-message-body-threshold=4096
-> spring.rocketmq.producer.max-message-size=4194304
-> spring.rocketmq.producer.retry-another-broker-when-not-store-ok=false
-> spring.rocketmq.producer.retry-times-when-send-failed=2
+> rocketmq.producer.retry-times-when-send-async-failed=0
+> rocketmq.producer.send-message-timeout=300000
+> rocketmq.producer.compress-message-body-threshold=4096
+> rocketmq.producer.max-message-size=4194304
+> rocketmq.producer.retry-another-broker-when-not-store-ok=false
+> rocketmq.producer.retry-times-when-send-failed=2
 > ```
 
 
@@ -147,7 +147,7 @@ public class ProducerApplication implements CommandLineRunner{
 
 ```properties
 ## application.properties
-spring.rocketmq.name-server=127.0.0.1:9876
+rocketmq.name-server=127.0.0.1:9876
 ```
 
 > Note:
@@ -191,7 +191,7 @@ public class ConsumerApplication{
 
 1. How to connected many `nameserver` on production environment？
 
-    `spring.rocketmq.nameServer` support the configuration of multiple `nameserver`, separated by `;`. For example: `172.19.0.1: 9876; 172.19.0.2: 9876`
+    `rocketmq.name-server` support the configuration of multiple `nameserver`, separated by `;`. For example: `172.19.0.1: 9876; 172.19.0.2: 9876`
 
 1. When was `rocketMQTemplate` destroyed?
 
