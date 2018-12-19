@@ -60,7 +60,7 @@ public class RocketMQAutoConfiguration {
         producer.setRetryTimesWhenSendAsyncFailed(producerConfig.getRetryTimesWhenSendAsyncFailed());
         producer.setMaxMessageSize(producerConfig.getMaxMessageSize());
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMessageBodyThreshold());
-        producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryAnotherBrokerWhenNotStoreOk());
+        producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
 
         return producer;
     }

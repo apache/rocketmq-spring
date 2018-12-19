@@ -125,11 +125,11 @@ public class ProducerApplication implements CommandLineRunner{
 > 更多发送相关配置
 >
 > ```properties
-> rocketmq.producer.retry-times-when-send-async-failed=0
 > rocketmq.producer.send-message-timeout=300000
 > rocketmq.producer.compress-message-body-threshold=4096
 > rocketmq.producer.max-message-size=4194304
-> rocketmq.producer.retry-another-broker-when-not-store-ok=false
+> rocketmq.producer.retry-times-when-send-async-failed=0
+> rocketmq.producer.retry-next-server=true
 > rocketmq.producer.retry-times-when-send-failed=2
 > ```
 
