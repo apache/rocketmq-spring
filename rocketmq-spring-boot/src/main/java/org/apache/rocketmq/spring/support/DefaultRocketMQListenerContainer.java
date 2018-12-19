@@ -194,6 +194,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
         this.consumer = consumer;
     }
 
+    @Override
     public void setupMessageListener(RocketMQListener rocketMQListener) {
         this.rocketMQListener = rocketMQListener;
     }
@@ -285,6 +286,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
     public class DefaultMessageListenerConcurrently implements MessageListenerConcurrently {
 
         @SuppressWarnings("unchecked")
+        @Override
         public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
             for (MessageExt messageExt : msgs) {
                 log.debug("received msg: {}", messageExt);
@@ -307,6 +309,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
     public class DefaultMessageListenerOrderly implements MessageListenerOrderly {
 
         @SuppressWarnings("unchecked")
+        @Override
         public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
             for (MessageExt messageExt : msgs) {
                 log.debug("received msg: {}", messageExt);
@@ -396,6 +399,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
             case CLUSTERING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
                 break;
+            default:
+                throw new IllegalArgumentException("Property 'messageModel' was wrong.");
         }
 
         switch (selectorType) {

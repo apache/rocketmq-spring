@@ -447,11 +447,13 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         sendOneWayOrderly(destination, message, hashKey);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(producer, "Property 'producer' is required");
         producer.start();
     }
 
+    @Override
     protected void doSend(String destination, Message<?> message) {
         SendResult sendResult = syncSend(destination, message);
         log.debug("send message to `{}` finished. result:{}", destination, sendResult);
