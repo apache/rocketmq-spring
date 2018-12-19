@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  * StringTransactionalConsumer
  */
 @Service
-@RocketMQMessageListener(topic = "${spring.rocketmq.transTopic}", consumerGroup = "string_trans_consumer")
+@RocketMQMessageListener(topic = "${demo.rocketmq.transTopic}", consumerGroup = "string_trans_consumer")
 public class StringTransactionalConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
