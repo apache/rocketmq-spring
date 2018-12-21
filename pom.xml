@@ -29,6 +29,36 @@
     <description>Build for Apache RocketMQ Spring Boot Support</description>
     <url>https://github.com/apache/rocketmq-spring</url>
 
+
+    <scm>
+        <url>git@github.com:apache/rocketmq-spring.git</url>
+        <connection>scm:git:git@github.com:apache/rocketmq-spring.git</connection>
+        <developerConnection>scm:git:git@github.com:apache/rocketmq-spring.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <mailingLists>
+        <mailingList>
+            <name>Development List</name>
+            <subscribe>dev-subscribe@rocketmq.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@rocketmq.apache.org</unsubscribe>
+            <post>dev@rocketmq.apache.org</post>
+        </mailingList>
+        <mailingList>
+            <name>User List</name>
+            <subscribe>users-subscribe@rocketmq.apache.org</subscribe>
+            <unsubscribe>users-unsubscribe@rocketmq.apache.org</unsubscribe>
+            <post>users@rocketmq.apache.org</post>
+        </mailingList>
+        <mailingList>
+            <name>Commits List</name>
+            <subscribe>commits-subscribe@rocketmq.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@rocketmq.apache.org</unsubscribe>
+            <post>commits@rocketmq.apache.org</post>
+        </mailingList>
+    </mailingLists>
+
+
     <organization>
         <name>Apache Software Foundation</name>
         <url>http://www.apache.org</url>
