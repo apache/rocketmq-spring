@@ -29,10 +29,10 @@ bash bin/mqadmin updateTopic -c DefaultCluster -t spring-transaction-topic
 # open a terminal, run produce
 cd rocketmq-produce-demo
 mvn clean package
-java -jar target/rocketmq-produce-demo-0.0.1-SNAPSHOT.jar
+java -jar target/rocketmq-produce-demo-2.0.1-SNAPSHOT.jar
 
 # open another terminal, run consume
 cd rocketmq-consume-demo
 mvn clean package
-java -jar target/rocketmq-consume-demo-0.0.1-SNAPSHOT.jar
+java -jar target/rocketmq-consume-demo-2.0.1-SNAPSHOT.jar
 ```

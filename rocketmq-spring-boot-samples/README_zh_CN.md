@@ -38,11 +38,11 @@ bash bin/mqadmin updateTopic -c DefaultCluster -t spring-transaction-topic
 # 打开一个终端窗口，编译并启动发送端
 cd rocketmq-produce-demo
 mvn clean package
-java -jar target/rocketmq-produce-demo-0.0.1-SNAPSHOT.jar
+java -jar target/rocketmq-produce-demo-2.0.1-SNAPSHOT.jar
 
 # 打开另一个终端窗口，编译并启动消费端
 cd rocketmq-consume-demo
 mvn clean package
-java -jar target/rocketmq-consume-demo-0.0.1-SNAPSHOT.jar
+java -jar target/rocketmq-consume-demo-2.0.1-SNAPSHOT.jar
 ```
 结合测试代码，观察窗口中消息的发送和接收情况
