@@ -170,6 +170,26 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
         this.selectorType = anno.selectorType();
     }
 
+    public void setConsumeThreadMax(int consumeThreadMax) {
+        this.consumeThreadMax = consumeThreadMax;
+    }
+
+    public void setConsumeMode(ConsumeMode consumeMode) {
+        this.consumeMode = consumeMode;
+    }
+
+    public void setSelectorType(SelectorType selectorType) {
+        this.selectorType = selectorType;
+    }
+
+    public void setSelectorExpression(String selectorExpression) {
+        this.selectorExpression = selectorExpression;
+    }
+
+    public void setMessageModel(MessageModel messageModel) {
+        this.messageModel = messageModel;
+    }
+
     public ConsumeMode getConsumeMode() {
         return consumeMode;
     }

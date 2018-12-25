@@ -29,6 +29,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 @Configuration
+@ConditionalOnClass(name = "org.springframework.beans.factory.config.BeanDefinitionCustomizer")
 public class ListenerContainerConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private final static Logger log = LoggerFactory.getLogger(ListenerContainerConfiguration.class);
 
@@ -91,8 +93,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
-        genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
-            () -> createRocketMQListenerContainer(bean, annotation));
+        registerRocketMQListenerContainerBean(bean, annotation, containerBeanName, genericApplicationContext,
+            environment, rocketMQProperties, objectMapper);
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
             DefaultRocketMQListenerContainer.class);
         if (!container.isRunning()) {
@@ -105,6 +107,16 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         }
 
         log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
+    }
+
+    public void registerRocketMQListenerContainerBean(Object bean, RocketMQMessageListener annotation,
+                                                      String containerBeanName,
+                                                      GenericApplicationContext genericApplicationContext,
+                                                      StandardEnvironment environment,
+                                                      RocketMQProperties rocketMQProperties,
+                                                      ObjectMapper objectMapper) {
+        genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
+            () -> createRocketMQListenerContainer(bean, annotation));
     }
 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(Object bean, RocketMQMessageListener annotation) {
