@@ -36,6 +36,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
@@ -351,7 +352,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
     }
 
     private Class getMessageType() {
-        Class<?> targetClass = AopUtils.getTargetClass(rocketMQListener);
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
         Type[] interfaces = targetClass.getGenericInterfaces();
         Class<?> superclass = targetClass.getSuperclass();
         while ((Objects.isNull(interfaces) || 0 == interfaces.length) && Objects.nonNull(superclass)) {
