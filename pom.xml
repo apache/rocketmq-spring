@@ -31,7 +31,7 @@
     <version>2.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>RocketMQ Spring Boot Build</name>
+    <name>Apache RocketMQ Spring Boot ${project.version}</name>
     <description>Build for Apache RocketMQ Spring Boot Support</description>
     <url>https://github.com/apache/rocketmq-spring</url>
 
