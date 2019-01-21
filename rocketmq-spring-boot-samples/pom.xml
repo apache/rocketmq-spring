@@ -36,7 +36,7 @@
     </modules>
 
     <properties>
-        <rocketmq-spring-boot-starter-version>2.0.1-SNAPSHOT</rocketmq-spring-boot-starter-version>
+        <rocketmq-spring-boot-starter-version>2.0.1</rocketmq-spring-boot-starter-version>
     </properties>
 
     <dependencies>

@@ -6,14 +6,6 @@
 
 这里是一个使用rocketmq-spring-boot-starter的列子。 [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring)
 
-> 注意:
->
-> 如果这个dependency: `org.apache.rocketmq:rocketmq-spring-boot-starter:${RELEASE.VERSION}`在maven中心库不存在, 需要开发者在本地build并安装到本地maven库，执行如下步骤:
-```
- git clone https://github.com/apache/rocketmq-spring
- cd rocketmq-spring
- mvn clean install
-```
 
 ## 在本地运行这个测试例子
 

@@ -6,10 +6,6 @@
 
 It's a demo project for how to use [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring)
 
-> Note:
->
-> If `org.apache.rocketmq:rocketmq-spring-boot-starter:${RELEASE.VERSION}` not exists in maven central repository, before you run this demo, you must git clone [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring) and use `mvn clean install` build it by yourself.
-
 Run the test case locally
 1. build and install the rocketmq-spring-boot-starter
 
