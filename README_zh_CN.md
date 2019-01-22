@@ -1,8 +1,10 @@
-# RocketMQ-Spring
+# RocketMQ-Spring  [![Build Status](https://travis-ci.org/apache/rocketmq-spring.svg?branch=master)](https://travis-ci.org/apache/rocketmq-spring)
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.rocketmq/rocketmq-spring-all/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg:org.apache.rocketmq)
+[![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/apache/rocketmq-spring/releases)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 [English](./README.md)
-
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 帮助开发者在[Spring Boot](http://projects.spring.io/spring-boot/)中快速集成[RocketMQ](http://rocketmq.apache.org/)。支持Spring Message规范，方便开发者从其它MQ快速切换到RocketMQ。
 
@@ -30,7 +32,7 @@
 
 下面列出来了一些关键点，完整的示例请参考： [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-注意:当前的RELEASE.VERSION=2.0.1 (https://mvnrepository.com/artifact/org.apache.rocketmq/rocketmq-spring-boot-starter/2.0.1)
+注意:当前的RELEASE.VERSION=2.0.1 
 
 ```xml
 <!--在pom.xml中添加依赖-->
