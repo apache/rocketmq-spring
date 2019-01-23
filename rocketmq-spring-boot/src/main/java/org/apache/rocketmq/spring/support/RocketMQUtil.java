@@ -114,6 +114,8 @@ public class RocketMQUtil {
 
         if (payloadObj instanceof String) {
             payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
+        } else if (message.getPayload() instanceof byte[]) {
+            payloads = (byte[]) message.getPayload();
         } else {
             try {
                 String jsonObj = objectMapper.writeValueAsString(payloadObj);
