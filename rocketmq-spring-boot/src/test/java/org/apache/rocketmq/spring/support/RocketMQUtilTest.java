@@ -16,7 +16,9 @@
  */
 package org.apache.rocketmq.spring.support;
 
+import java.util.Arrays;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -24,6 +26,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.junit.Assert.assertTrue;
 
 public class RocketMQUtilTest {
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
     public void testMessageBuilder() {
         Message msg = MessageBuilder.withPayload("test").
@@ -34,4 +39,21 @@ public class RocketMQUtilTest {
         assertTrue(msg.getHeaders().get("A") != null);
         assertTrue(msg.getHeaders().get("B") != null);
     }
+
+    @Test
+    public void testPayload() {
+        String charset = "UTF-8";
+        String destination = "test-topic";
+        Message msgWithStringPayload = MessageBuilder.withPayload("test").build();
+        org.apache.rocketmq.common.message.Message rocketMsg1 = RocketMQUtil.convertToRocketMessage(objectMapper,
+            charset, destination, msgWithStringPayload);
+
+        Message msgWithBytePayload = MessageBuilder.withPayload("test".getBytes()).build();
+        org.apache.rocketmq.common.message.Message rocketMsg2 = RocketMQUtil.convertToRocketMessage(objectMapper,
+            charset, destination, msgWithBytePayload);
+
+        assertTrue(Arrays.equals(((String)msgWithStringPayload.getPayload()).getBytes(), rocketMsg1.getBody()));
+        assertTrue(Arrays.equals((byte[])msgWithBytePayload.getPayload(), rocketMsg2.getBody()));
+    }
+
 }
