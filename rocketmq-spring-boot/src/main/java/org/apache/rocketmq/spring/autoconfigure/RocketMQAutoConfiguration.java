@@ -41,7 +41,6 @@ import org.springframework.util.Assert;
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
-@ConditionalOnProperty(prefix = "rocketmq", value = "name-server")
 @Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class })
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
