@@ -179,9 +179,10 @@ public class RocketMQUtil {
             sk = env.resolveRequiredPlaceholders(secretKeyOrExpr);
         } catch (Exception e) {
             // Ignore it
-            ak = null; sk = null;
+            ak = null;
+            sk = null;
         }
-        if(!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
+        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
             return new AclClientRPCHook(new SessionCredentials(ak, sk));
         }
         return null;

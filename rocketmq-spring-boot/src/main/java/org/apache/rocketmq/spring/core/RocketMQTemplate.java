@@ -596,7 +596,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         Assert.notNull(producer, "Property 'producer' is required");
         Assert.notNull(transactionListener, "Parameter 'transactionListener' is required");
         TransactionMQProducer txProducer;
-        if(Objects.nonNull(rpcHook)) {
+        if (Objects.nonNull(rpcHook)) {
             txProducer = new TransactionMQProducer(name, rpcHook);
             txProducer.setVipChannelEnabled(false);
         } else {

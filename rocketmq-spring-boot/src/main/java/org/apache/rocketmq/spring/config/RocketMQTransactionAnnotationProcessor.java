@@ -105,7 +105,7 @@ public class RocketMQTransactionAnnotationProcessor
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
             listener.accessKey(), listener.secretKey());
 
-        if(Objects.nonNull(rpcHook)) {
+        if (Objects.nonNull(rpcHook)) {
             transactionHandler.setRpcHook(rpcHook);
         } else {
             log.debug("Access-key or secret-key not configure in " + listener + ".");
