@@ -85,6 +85,16 @@ public class RocketMQProperties {
          */
         private int maxMessageSize = 1024 * 1024 * 4;
 
+        /**
+         * The property of "access-key"
+         */
+        private String accessKey;
+
+        /**
+         * The property of "secret-key"
+         */
+        private String secretKey;
+
         public String getGroup() {
             return group;
         }
@@ -139,6 +149,22 @@ public class RocketMQProperties {
 
         public void setMaxMessageSize(int maxMessageSize) {
             this.maxMessageSize = maxMessageSize;
+        }
+
+        public String getAccessKey() {
+            return accessKey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretKey = secretKey;
         }
     }
 }
