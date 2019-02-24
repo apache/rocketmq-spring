@@ -69,4 +69,14 @@ public @interface RocketMQMessageListener {
      */
     int consumeThreadMax() default 64;
 
+    /**
+     * The property of "access-key"
+     */
+    String accessKey() default "${rocketmq.consumer.access-key}";
+
+    /**
+     * The property of "secret-key"
+     */
+    String secretKey() default "${rocketmq.consumer.secret-key}";
+
 }
