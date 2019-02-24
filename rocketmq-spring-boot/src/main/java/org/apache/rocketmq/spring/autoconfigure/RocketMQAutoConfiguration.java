@@ -62,7 +62,7 @@ public class RocketMQAutoConfiguration {
         DefaultMQProducer producer;
         String ak = rocketMQProperties.getProducer().getAccessKey();
         String sk = rocketMQProperties.getProducer().getSecretKey();
-        if(!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
+        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
             producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
             producer.setVipChannelEnabled(false);
         } else {

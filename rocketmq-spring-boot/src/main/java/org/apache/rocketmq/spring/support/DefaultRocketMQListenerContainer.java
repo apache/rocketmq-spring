@@ -401,7 +401,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
             this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
 
-        if(Objects.nonNull(rpcHook)) {
+        if (Objects.nonNull(rpcHook)) {
             consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely());
             consumer.setVipChannelEnabled(false);
         } else {
