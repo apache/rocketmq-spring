@@ -400,13 +400,17 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
             this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
-
+        boolean enableMsgTrace = rocketMQMessageListener.enableMsgTrace();
         if (Objects.nonNull(rpcHook)) {
-            consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely());
+            consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely(),
+                enableMsgTrace, this.applicationContext.getEnvironment().
+                resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
             consumer.setVipChannelEnabled(false);
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
-            consumer = new DefaultMQPushConsumer(consumerGroup);
+            consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
+                    this.applicationContext.getEnvironment().
+                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
 
         consumer.setNamesrvAddr(nameServer);
