@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import org.apache.rocketmq.common.MixAll;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @SuppressWarnings("WeakerAccess")
@@ -86,14 +87,24 @@ public class RocketMQProperties {
         private int maxMessageSize = 1024 * 1024 * 4;
 
         /**
-         * The property of "access-key"
+         * The property of "access-key".
          */
         private String accessKey;
 
         /**
-         * The property of "secret-key"
+         * The property of "secret-key".
          */
         private String secretKey;
+
+        /**
+         * Switch flag instance for message trace.
+         */
+        private boolean enableMsgTrace = true;
+
+        /**
+         * The name value of message trace topic.If you don't config,you can use the default trace topic name.
+         */
+        private String customizedTraceTopic = MixAll.RMQ_SYS_TRACE_TOPIC;
 
         public String getGroup() {
             return group;
@@ -165,6 +176,22 @@ public class RocketMQProperties {
 
         public void setSecretKey(String secretKey) {
             this.secretKey = secretKey;
+        }
+
+        public boolean isEnableMsgTrace() {
+            return enableMsgTrace;
+        }
+
+        public void setEnableMsgTrace(boolean enableMsgTrace) {
+            this.enableMsgTrace = enableMsgTrace;
+        }
+
+        public String getCustomizedTraceTopic() {
+            return customizedTraceTopic;
+        }
+
+        public void setCustomizedTraceTopic(String customizedTraceTopic) {
+            this.customizedTraceTopic = customizedTraceTopic;
         }
     }
 }

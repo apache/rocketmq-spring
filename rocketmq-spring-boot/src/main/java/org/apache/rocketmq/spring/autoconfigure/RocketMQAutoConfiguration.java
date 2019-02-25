@@ -63,10 +63,13 @@ public class RocketMQAutoConfiguration {
         String ak = rocketMQProperties.getProducer().getAccessKey();
         String sk = rocketMQProperties.getProducer().getSecretKey();
         if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
-            producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
+            producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)),
+                rocketMQProperties.getProducer().isEnableMsgTrace(),
+                rocketMQProperties.getProducer().getCustomizedTraceTopic());
             producer.setVipChannelEnabled(false);
         } else {
-            producer = new DefaultMQProducer(groupName);
+            producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
+                rocketMQProperties.getProducer().getCustomizedTraceTopic());
         }
 
         producer.setNamesrvAddr(nameServer);
