@@ -406,6 +406,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 enableMsgTrace, this.applicationContext.getEnvironment().
                 resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
             consumer.setVipChannelEnabled(false);
+            consumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
             consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
