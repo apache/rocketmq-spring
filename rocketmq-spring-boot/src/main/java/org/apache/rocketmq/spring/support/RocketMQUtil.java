@@ -187,4 +187,14 @@ public class RocketMQUtil {
         }
         return null;
     }
+
+    public static String getInstanceName(RPCHook rpcHook, String identify) {
+        String separator = "|";
+        StringBuilder instanceName = new StringBuilder();
+        SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
+        instanceName.append(sessionCredentials.getAccessKey())
+            .append(separator).append(sessionCredentials.getSecretKey())
+            .append(separator).append(identify);
+        return instanceName.toString();
+    }
 }

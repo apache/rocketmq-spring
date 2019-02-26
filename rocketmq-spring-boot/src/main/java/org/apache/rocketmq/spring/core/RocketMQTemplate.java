@@ -599,6 +599,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         if (Objects.nonNull(rpcHook)) {
             txProducer = new TransactionMQProducer(name, rpcHook);
             txProducer.setVipChannelEnabled(false);
+            txProducer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, name));
         } else {
             txProducer = new TransactionMQProducer(name);
         }
