@@ -35,6 +35,8 @@ We are always very happy to have contributions, whether for trivial cleanups or 
 - [x] concurrently consume(broadcasting/clustering)
 - [x] one-way transmission
 - [x] transaction transmission
+- [x] message trace
+- [x] ACL
 - [ ] pull consume
 
 ## Quick Start
@@ -188,6 +190,90 @@ public class ConsumerApplication{
 >
 > see: [RocketMQMessageListener](src/main/java/org/apache/rocketmq/spring/starter/annotation/RocketMQMessageListener.java)
 
+### Message Trace
+
+We need 2 more configurations for support message trace in producer.
+
+```properties
+## application.properties
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
+
+rocketmq.producer.enable-msg-trace=true
+rocketmq.producer.customized-trace-topic=my-trace-topic
+```
+
+The message trace in consumer should configure in `@RocketMQMessageListener`.
+
+```
+@Service
+@RocketMQMessageListener(
+    topic = "test-topic-1", 
+    consumerGroup = "my-consumer_test-topic-1",
+    enableMsgTrace = true,
+    customizedTraceTopic = "my-trace-topic"
+)
+public class MyConsumer implements RocketMQListener<String> {
+    ...
+}
+```
+
+
+> Note:
+> 
+> Maybe you need change `127.0.0.1:9876` with your real NameServer address for RocketMQ
+
+> By default, the message track feature of Producer and Consumer is turned on and the trace-topic is RMQ_SYS_TRACE_TOPIC
+> The topic of message trace can be configured with `rocketmq.consumer.customized-trace-topic` configuration item, not required to be configured in each `@RocketMQTransactionListener`
+
+
+### ACL
+
+We need 2 more configurations for support ACL in producer.
+
+```properties
+## application.properties
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
+
+rocketmq.producer.access-key=AK
+rocketmq.producer.secret-key=SK
+```
+Transaction Message should configure AK/SK in `@RocketMQTransactionListener`. 
+
+```
+@RocketMQTransactionListener(
+    txProducerGroup = "test,
+    accessKey = "AK",
+    secretKey = "SK"
+)
+class TransactionListenerImpl implements RocketMQLocalTransactionListener {
+    ...
+}
+```
+
+> Note:
+> 
+> You do not need to configure AK/SK for each `@RocketMQTransactionListener`, you could configure `rocketmq.producer.access-key` and `rocketmq.producer.secret-key` as default value
+
+The ACL feature in consumer should configure AK/SK in `@RocketMQMessageListener`.
+
+```
+@Service
+@RocketMQMessageListener(
+    topic = "test-topic-1", 
+    consumerGroup = "my-consumer_test-topic-1",
+    accessKey = "AK",
+    secretKey = "SK"
+)
+public class MyConsumer implements RocketMQListener<String> {
+    ...
+}
+```
+
+> Note:
+> 
+> You do not need to configure AK/SK for each `@RocketMQMessageListener`, you could configure `rocketmq.consumer.access-key` and `rocketmq.consumer.secret-key` as default value
 
 ## FAQ
 
