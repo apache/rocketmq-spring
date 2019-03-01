@@ -78,18 +78,22 @@ public class RocketMQUtil {
         org.apache.rocketmq.common.message.MessageExt message) {
         MessageBuilder messageBuilder =
             MessageBuilder.withPayload(message.getBody()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.KEYS, message.getKeys()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS, message.getTags()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TOPIC, message.getTopic()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.MESSAGE_ID, message.getMsgId()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.BORN_TIMESTAMP, message.getBornTimestamp()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.BORN_HOST, message.getBornHostString()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.FLAG, message.getFlag()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.QUEUE_ID, message.getQueueId()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.SYS_FLAG, message.getSysFlag()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TRANSACTION_ID, message.getTransactionId());
+                setHeader(toRocketHeaderKey(RocketMQHeaders.KEYS), message.getKeys()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TAGS), message.getTags()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TOPIC), message.getTopic()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.MESSAGE_ID), message.getMsgId()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.BORN_TIMESTAMP), message.getBornTimestamp()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.BORN_HOST), message.getBornHostString()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.QUEUE_ID), message.getQueueId()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.SYS_FLAG), message.getSysFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
         addUserProperties(message.getProperties(), messageBuilder);
         return messageBuilder.build();
+    }
+
+    public static String toRocketHeaderKey(String rawKey) {
+        return RocketMQHeaders.PREFIX + rawKey;
     }
 
     private static void addUserProperties(Map<String, String> properties, MessageBuilder messageBuilder) {
@@ -107,11 +111,11 @@ public class RocketMQUtil {
         org.apache.rocketmq.common.message.Message message) {
         MessageBuilder messageBuilder =
             MessageBuilder.withPayload(message.getBody()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.KEYS, message.getKeys()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS, message.getTags()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TOPIC, message.getTopic()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.FLAG, message.getFlag()).
-                setHeader(RocketMQHeaders.PREFIX + RocketMQHeaders.TRANSACTION_ID, message.getTransactionId());
+                setHeader(toRocketHeaderKey(RocketMQHeaders.KEYS), message.getKeys()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TAGS), message.getTags()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TOPIC), message.getTopic()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
         addUserProperties(message.getProperties(), messageBuilder);
         return messageBuilder.build();
     }
