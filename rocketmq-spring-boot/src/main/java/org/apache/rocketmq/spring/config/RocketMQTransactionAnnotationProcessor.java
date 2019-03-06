@@ -18,28 +18,31 @@
 package org.apache.rocketmq.spring.config;
 
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RocketMQTransactionAnnotationProcessor
-    implements BeanPostProcessor, Ordered, BeanFactoryAware {
+    implements BeanPostProcessor, Ordered, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(RocketMQTransactionAnnotationProcessor.class);
 
-    private BeanFactory beanFactory;
+    private ApplicationContext applicationContext;
     private final Set<Class<?>> nonProcessedClasses =
         Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
@@ -50,8 +53,8 @@ public class RocketMQTransactionAnnotationProcessor
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -92,12 +95,21 @@ public class RocketMQTransactionAnnotationProcessor
                 null);
         }
         TransactionHandler transactionHandler = new TransactionHandler();
-        transactionHandler.setBeanFactory(this.beanFactory);
+        transactionHandler.setBeanFactory(this.applicationContext.getAutowireCapableBeanFactory());
         transactionHandler.setName(listener.txProducerGroup());
         transactionHandler.setBeanName(bean.getClass().getName());
         transactionHandler.setListener((RocketMQLocalTransactionListener) bean);
         transactionHandler.setCheckExecutor(listener.corePoolSize(), listener.maximumPoolSize(),
                 listener.keepAliveTime(), listener.blockingQueueSize());
+
+        RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
+            listener.accessKey(), listener.secretKey());
+
+        if (Objects.nonNull(rpcHook)) {
+            transactionHandler.setRpcHook(rpcHook);
+        } else {
+            log.debug("Access-key or secret-key not configure in " + listener + ".");
+        }
 
         transactionHandlerRegistry.registerTransactionHandler(transactionHandler);
     }

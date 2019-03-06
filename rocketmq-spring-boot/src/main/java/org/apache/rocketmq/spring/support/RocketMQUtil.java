@@ -17,13 +17,17 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -166,5 +170,31 @@ public class RocketMQUtil {
         }
 
         return rocketMsg;
+    }
+
+    public static RPCHook getRPCHookByAkSk(Environment env, String accessKeyOrExpr, String secretKeyOrExpr) {
+        String ak, sk;
+        try {
+            ak = env.resolveRequiredPlaceholders(accessKeyOrExpr);
+            sk = env.resolveRequiredPlaceholders(secretKeyOrExpr);
+        } catch (Exception e) {
+            // Ignore it
+            ak = null;
+            sk = null;
+        }
+        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
+            return new AclClientRPCHook(new SessionCredentials(ak, sk));
+        }
+        return null;
+    }
+
+    public static String getInstanceName(RPCHook rpcHook, String identify) {
+        String separator = "|";
+        StringBuilder instanceName = new StringBuilder();
+        SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
+        instanceName.append(sessionCredentials.getAccessKey())
+            .append(separator).append(sessionCredentials.getSecretKey())
+            .append(separator).append(identify);
+        return instanceName.toString();
     }
 }

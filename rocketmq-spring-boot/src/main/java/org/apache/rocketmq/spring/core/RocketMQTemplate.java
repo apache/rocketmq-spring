@@ -27,6 +27,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.springframework.beans.factory.DisposableBean;
@@ -565,18 +566,20 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param txProducerGroup     Producer (group) name, unique for each producer
      * @param transactionListener TransactoinListener impl class
      * @param executorService     Nullable.
+     * @param rpcHook Nullable.
      * @return true if producer is created and started; false if the named producer already exists in cache.
      * @throws MessagingException
      */
-    public boolean createAndStartTransactionMQProducer(String txProducerGroup, RocketMQLocalTransactionListener transactionListener,
-                                                       ExecutorService executorService) throws MessagingException {
+    public boolean createAndStartTransactionMQProducer(String txProducerGroup,
+                                                       RocketMQLocalTransactionListener transactionListener,
+                                                       ExecutorService executorService, RPCHook rpcHook) throws MessagingException {
         txProducerGroup = getTxProducerGroupName(txProducerGroup);
         if (cache.containsKey(txProducerGroup)) {
             log.info(String.format("get TransactionMQProducer '%s' from cache", txProducerGroup));
             return false;
         }
 
-        TransactionMQProducer txProducer = createTransactionMQProducer(txProducerGroup, transactionListener, executorService);
+        TransactionMQProducer txProducer = createTransactionMQProducer(txProducerGroup, transactionListener, executorService, rpcHook);
         try {
             txProducer.start();
             cache.put(txProducerGroup, txProducer);
@@ -587,11 +590,19 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         return true;
     }
 
-    private TransactionMQProducer createTransactionMQProducer(String name, RocketMQLocalTransactionListener transactionListener,
-                                                              ExecutorService executorService) {
+    private TransactionMQProducer createTransactionMQProducer(String name,
+                                                              RocketMQLocalTransactionListener transactionListener,
+                                                              ExecutorService executorService, RPCHook rpcHook) {
         Assert.notNull(producer, "Property 'producer' is required");
         Assert.notNull(transactionListener, "Parameter 'transactionListener' is required");
-        TransactionMQProducer txProducer = new TransactionMQProducer(name);
+        TransactionMQProducer txProducer;
+        if (Objects.nonNull(rpcHook)) {
+            txProducer = new TransactionMQProducer(name, rpcHook);
+            txProducer.setVipChannelEnabled(false);
+            txProducer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, name));
+        } else {
+            txProducer = new TransactionMQProducer(name);
+        }
         txProducer.setTransactionListener(RocketMQUtil.convert(transactionListener));
 
         txProducer.setNamesrvAddr(producer.getNamesrvAddr());

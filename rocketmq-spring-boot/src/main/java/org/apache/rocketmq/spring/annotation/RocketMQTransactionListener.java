@@ -66,4 +66,14 @@ public @interface RocketMQTransactionListener {
      * Set ExecutorService params -- blockingQueueSize
      */
     int blockingQueueSize() default 2000;
+
+    /**
+     * The property of "access-key"
+     */
+    String accessKey() default "${rocketmq.producer.access-key}";
+
+    /**
+     * The property of "secret-key"
+     */
+    String secretKey() default "${rocketmq.producer.secret-key}";
 }
