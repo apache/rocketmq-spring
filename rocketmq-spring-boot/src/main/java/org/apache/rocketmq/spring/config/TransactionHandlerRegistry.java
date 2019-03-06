@@ -47,6 +47,6 @@ public class TransactionHandlerRegistry implements DisposableBean {
         }
         listenerContainers.add(handler.getName());
 
-        rocketMQTemplate.createAndStartTransactionMQProducer(handler.getName(), handler.getListener(), handler.getCheckExecutor());
+        rocketMQTemplate.createAndStartTransactionMQProducer(handler.getName(), handler.getListener(), handler.getCheckExecutor(), handler.getRpcHook());
     }
 }

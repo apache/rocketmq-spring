@@ -28,6 +28,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface RocketMQMessageListener {
 
+    String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
+    String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
+    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
+
     /**
      * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve
      * load balance. It's required and needs to be globally unique.
@@ -68,5 +72,25 @@ public @interface RocketMQMessageListener {
      * Max consumer thread number.
      */
     int consumeThreadMax() default 64;
+
+    /**
+     * The property of "access-key".
+     */
+    String accessKey() default ACCESS_KEY_PLACEHOLDER;
+
+    /**
+     * The property of "secret-key".
+     */
+    String secretKey() default SECRET_KEY_PLACEHOLDER;
+
+    /**
+     * Switch flag instance for message trace.
+     */
+    boolean enableMsgTrace() default true;
+
+    /**
+     * The name value of message trace topic.If you don't config,you can use the default trace topic name.
+     */
+    String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
 
 }

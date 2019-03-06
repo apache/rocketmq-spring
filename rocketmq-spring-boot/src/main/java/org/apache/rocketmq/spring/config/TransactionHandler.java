@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.config;
 
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.springframework.beans.factory.BeanFactory;
 
@@ -30,6 +31,7 @@ class TransactionHandler {
     private RocketMQLocalTransactionListener bean;
     private BeanFactory beanFactory;
     private ThreadPoolExecutor checkExecutor;
+    private RPCHook rpcHook;
 
     public String getBeanName() {
         return beanName;
@@ -45,6 +47,14 @@ class TransactionHandler {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public RPCHook getRpcHook() {
+        return rpcHook;
+    }
+
+    public void setRpcHook(RPCHook rpcHook) {
+        this.rpcHook = rpcHook;
     }
 
     public BeanFactory getBeanFactory() {

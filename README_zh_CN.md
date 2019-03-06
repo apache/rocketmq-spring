@@ -26,6 +26,8 @@
 - [x] 并发消费（广播/集群）
 - [x] one-way方式发送
 - [x] 事务方式发送
+- [x] 消息轨迹
+- [x] ACL
 - [ ] pull消费
 
 ## Quick Start
@@ -180,6 +182,88 @@ public class ConsumerApplication{
 >
 > see: [RocketMQMessageListener](src/main/java/org/apache/rocketmq/spring/starter/annotation/RocketMQMessageListener.java) 
 
+### 消息轨迹
+
+Producer 端要想使用消息轨迹，需要多配置两个配置项:
+
+```properties
+## application.properties
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
+
+rocketmq.producer.enable-msg-trace=true
+rocketmq.producer.customized-trace-topic=my-trace-topic
+```
+
+Consumer 端消息轨迹的功能需要在 `@RocketMQMessageListener` 中进行配置对应的属性:
+
+```
+@Service
+@RocketMQMessageListener(
+    topic = "test-topic-1", 
+    consumerGroup = "my-consumer_test-topic-1",
+    enableMsgTrace = true,
+    customizedTraceTopic = "my-trace-topic"
+)
+public class MyConsumer implements RocketMQListener<String> {
+    ...
+}
+```
+
+> 注意:
+> 
+> 默认情况下 Producer 和 Consumer 的消息轨迹功能是开启的且 trace-topic 为 RMQ_SYS_TRACE_TOPIC
+> Consumer 端的消息轨迹 trace-topic 可以在配置文件中配置 `rocketmq.consumer.customized-trace-topic` 配置项，不需要为在每个 `@RocketMQTransactionListener` 配置
+
+
+### ACL
+
+Producer 端要想使用 ACL 功能，需要多配置两个配置项:
+
+```properties
+## application.properties
+rocketmq.name-server=127.0.0.1:9876
+rocketmq.producer.group=my-group
+
+rocketmq.producer.access-key=AK
+rocketmq.producer.secret-key=SK
+```
+
+事务消息的发送需要在 `@RocketMQTransactionListener` 注解里配置上 AK/SK:
+
+```
+@RocketMQTransactionListener(
+    txProducerGroup = "test,
+    accessKey = "AK",
+    secretKey = "SK"
+)
+class TransactionListenerImpl implements RocketMQLocalTransactionListener {
+    ...
+}
+```
+
+> 注意:
+> 
+> 可以不用为每个 `@RocketMQTransactionListener` 注解配置 AK/SK，在配置文件中配置 `rocketmq.producer.access-key` 和 `rocketmq.producer.secret-key` 配置项，这两个配置项的值就是默认值
+
+Consumer 端 ACL 功能需要在 `@RocketMQMessageListener` 中进行配置
+
+```
+@Service
+@RocketMQMessageListener(
+    topic = "test-topic-1", 
+    consumerGroup = "my-consumer_test-topic-1",
+    accessKey = "AK",
+    secretKey = "SK"
+)
+public class MyConsumer implements RocketMQListener<String> {
+    ...
+}
+```
+
+> 注意:
+> 
+> 可以不用为每个 `@RocketMQMessageListener` 注解配置 AK/SK，在配置文件中配置 `rocketmq.consumer.access-key` 和 `rocketmq.consumer.secret-key` 配置项，这两个配置项的值就是默认值
 
 ## FAQ
 
