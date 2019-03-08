@@ -23,6 +23,7 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
@@ -31,10 +32,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Objects;
 
 public class RocketMQUtil {
@@ -77,37 +80,48 @@ public class RocketMQUtil {
 
     public static org.springframework.messaging.Message convertToSpringMessage(
         org.apache.rocketmq.common.message.MessageExt message) {
-        org.springframework.messaging.Message retMessage =
+        MessageBuilder messageBuilder =
             MessageBuilder.withPayload(message.getBody()).
-                setHeader(RocketMQHeaders.KEYS, message.getKeys()).
-                setHeader(RocketMQHeaders.TAGS, message.getTags()).
-                setHeader(RocketMQHeaders.TOPIC, message.getTopic()).
-                setHeader(RocketMQHeaders.MESSAGE_ID, message.getMsgId()).
-                setHeader(RocketMQHeaders.BORN_TIMESTAMP, message.getBornTimestamp()).
-                setHeader(RocketMQHeaders.BORN_HOST, message.getBornHostString()).
-                setHeader(RocketMQHeaders.FLAG, message.getFlag()).
-                setHeader(RocketMQHeaders.QUEUE_ID, message.getQueueId()).
-                setHeader(RocketMQHeaders.SYS_FLAG, message.getSysFlag()).
-                setHeader(RocketMQHeaders.TRANSACTION_ID, message.getTransactionId()).
-                setHeader(RocketMQHeaders.PROPERTIES, message.getProperties()).
-                build();
+                setHeader(toRocketHeaderKey(RocketMQHeaders.KEYS), message.getKeys()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TAGS), message.getTags()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TOPIC), message.getTopic()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.MESSAGE_ID), message.getMsgId()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.BORN_TIMESTAMP), message.getBornTimestamp()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.BORN_HOST), message.getBornHostString()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.QUEUE_ID), message.getQueueId()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.SYS_FLAG), message.getSysFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
+        addUserProperties(message.getProperties(), messageBuilder);
+        return messageBuilder.build();
+    }
 
-        return retMessage;
+    public static String toRocketHeaderKey(String rawKey) {
+        return RocketMQHeaders.PREFIX + rawKey;
+    }
+
+    private static void addUserProperties(Map<String, String> properties, MessageBuilder messageBuilder) {
+        if (!CollectionUtils.isEmpty(properties)) {
+            properties.forEach((key, val) -> {
+                if (!MessageConst.STRING_HASH_SET.contains(key) && !MessageHeaders.ID.equals(key)
+                    && !MessageHeaders.TIMESTAMP.equals(key)) {
+                    messageBuilder.setHeader(key, val);
+                }
+            });
+        }
     }
 
     public static org.springframework.messaging.Message convertToSpringMessage(
         org.apache.rocketmq.common.message.Message message) {
-        org.springframework.messaging.Message retMessage =
+        MessageBuilder messageBuilder =
             MessageBuilder.withPayload(message.getBody()).
-                setHeader(RocketMQHeaders.KEYS, message.getKeys()).
-                setHeader(RocketMQHeaders.TAGS, message.getTags()).
-                setHeader(RocketMQHeaders.TOPIC, message.getTopic()).
-                setHeader(RocketMQHeaders.FLAG, message.getFlag()).
-                setHeader(RocketMQHeaders.TRANSACTION_ID, message.getTransactionId()).
-                setHeader(RocketMQHeaders.PROPERTIES, message.getProperties()).
-                build();
-
-        return retMessage;
+                setHeader(toRocketHeaderKey(RocketMQHeaders.KEYS), message.getKeys()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TAGS), message.getTags()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TOPIC), message.getTopic()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
+        addUserProperties(message.getProperties(), messageBuilder);
+        return messageBuilder.build();
     }
 
     public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
@@ -160,11 +174,12 @@ public class RocketMQUtil {
             rocketMsg.setWaitStoreMsgOK(waitStoreMsgOK);
 
             headers.entrySet().stream()
-                .filter(entry -> !Objects.equals(entry.getKey(), RocketMQHeaders.KEYS)
-                    && !Objects.equals(entry.getKey(), "FLAG")
-                    && !Objects.equals(entry.getKey(), "WAIT_STORE_MSG_OK")) // exclude "KEYS", "FLAG", "WAIT_STORE_MSG_OK"
+                .filter(entry -> !Objects.equals(entry.getKey(), "FLAG")
+                    && !Objects.equals(entry.getKey(), "WAIT_STORE_MSG_OK")) // exclude "FLAG", "WAIT_STORE_MSG_OK"
                 .forEach(entry -> {
-                    rocketMsg.putUserProperty("USERS_" + entry.getKey(), String.valueOf(entry.getValue())); // add other properties with prefix "USERS_"
+                    if (!MessageConst.STRING_HASH_SET.contains(entry.getKey())) {
+                        rocketMsg.putUserProperty(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
                 });
 
         }
