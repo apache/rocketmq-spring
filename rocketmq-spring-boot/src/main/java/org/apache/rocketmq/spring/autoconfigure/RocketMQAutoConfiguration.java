@@ -18,6 +18,8 @@
 package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
@@ -58,7 +60,19 @@ public class RocketMQAutoConfiguration {
         }
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
 
-        DefaultMQProducer producer = new DefaultMQProducer(groupName);
+        DefaultMQProducer producer;
+        String ak = rocketMQProperties.getProducer().getAccessKey();
+        String sk = rocketMQProperties.getProducer().getSecretKey();
+        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
+            producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)),
+                rocketMQProperties.getProducer().isEnableMsgTrace(),
+                rocketMQProperties.getProducer().getCustomizedTraceTopic());
+            producer.setVipChannelEnabled(false);
+        } else {
+            producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
+                rocketMQProperties.getProducer().getCustomizedTraceTopic());
+        }
+
         producer.setNamesrvAddr(nameServer);
         producer.setSendMsgTimeout(producerConfig.getSendMessageTimeout());
         producer.setRetryTimesWhenSendFailed(producerConfig.getRetryTimesWhenSendFailed());

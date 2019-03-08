@@ -14,21 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.spring.support;
+
+package org.apache.rocketmq.samples.springboot;
+
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.stereotype.Service;
 
 /**
- * Represents the RocketMQ message protocol that is used during the data exchange.
+ * RocketMQMessageListener
  */
-public class RocketMQHeaders {
-    public static final String PREFIX = "rocketmq_";
-    public static final String KEYS = "KEYS";
-    public static final String TAGS = "TAGS";
-    public static final String TOPIC = "TOPIC";
-    public static final String MESSAGE_ID = "MESSAGE_ID";
-    public static final String BORN_TIMESTAMP = "BORN_TIMESTAMP";
-    public static final String BORN_HOST = "BORN_HOST";
-    public static final String FLAG = "FLAG";
-    public static final String QUEUE_ID = "QUEUE_ID";
-    public static final String SYS_FLAG = "SYS_FLAG";
-    public static final String TRANSACTION_ID = "TRANSACTION_ID";
+@Service
+@RocketMQMessageListener(
+    topic = "normal_topic_define_in_Aliware_MQ",
+    consumerGroup = "group_define_in_Aliware_MQ"
+    //accessKey = "AK" // It will read by `rocketmq.consumer.access-key` key
+    //secretKey = "SK" // It will read by `rocketmq.consumer.access-key` key
+)
+public class ACLStringConsumer implements RocketMQListener<String> {
+    @Override
+    public void onMessage(String message) {
+        System.out.printf("------- ACL StringConsumer received: %s \n", message);
+    }
 }

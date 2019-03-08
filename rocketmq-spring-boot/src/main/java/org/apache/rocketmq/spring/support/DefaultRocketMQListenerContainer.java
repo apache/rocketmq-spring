@@ -26,8 +26,10 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
+import org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -37,7 +39,10 @@ import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.util.Assert;
 
@@ -48,8 +53,11 @@ import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class DefaultRocketMQListenerContainer implements InitializingBean, RocketMQListenerContainer, SmartLifecycle {
+public class DefaultRocketMQListenerContainer implements InitializingBean,
+    RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(DefaultRocketMQListenerContainer.class);
+
+    private ApplicationContext applicationContext;
 
     private long suspendCurrentQueueTimeMillis = 1000;
 
@@ -271,6 +279,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
     }
 
     @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
             "consumerGroup='" + consumerGroup + '\'' +
@@ -385,7 +398,22 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
         Assert.notNull(nameServer, "Property 'nameServer' is required");
         Assert.notNull(topic, "Property 'topic' is required");
 
-        consumer = new DefaultMQPushConsumer(consumerGroup);
+        RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
+            this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
+        boolean enableMsgTrace = rocketMQMessageListener.enableMsgTrace();
+        if (Objects.nonNull(rpcHook)) {
+            consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely(),
+                enableMsgTrace, this.applicationContext.getEnvironment().
+                resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+            consumer.setVipChannelEnabled(false);
+            consumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
+        } else {
+            log.debug("Access-key or secret-key not configure in " + this + ".");
+            consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
+                    this.applicationContext.getEnvironment().
+                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+        }
+
         consumer.setNamesrvAddr(nameServer);
         consumer.setConsumeThreadMax(consumeThreadMax);
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
