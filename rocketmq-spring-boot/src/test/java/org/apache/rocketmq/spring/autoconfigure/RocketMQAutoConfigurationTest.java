@@ -36,7 +36,7 @@ public class RocketMQAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
 
 
-    @Test(expected = NoSuchBeanDefinitionException.class)
+    @Test
     public void testRocketMQAutoConfigurationNotCreatedByDefault() {
         runner.run(context -> context.getBean(RocketMQAutoConfiguration.class));
     }
@@ -62,23 +62,23 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testDefaultMQProducer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
-            "rocketmq.producer.group=spring_rocketmq").
-            run((context) -> {
-                assertThat(context).hasSingleBean(DefaultMQProducer.class);
-            });
+                "rocketmq.producer.group=spring_rocketmq").
+                run((context) -> {
+                    assertThat(context).hasSingleBean(DefaultMQProducer.class);
+                });
 
     }
 
     @Test
     public void testRocketMQListenerContainer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-            withUserConfiguration(TestConfig.class).
-            run((context) -> {
-                // No producer on consume side
-                assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
-                // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
-                assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
-            });
+                withUserConfiguration(TestConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+                    assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
+                });
 
     }
 

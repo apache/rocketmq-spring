@@ -35,6 +35,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -56,8 +57,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private ObjectMapper objectMapper;
 
     public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        StandardEnvironment environment,
-        RocketMQProperties rocketMQProperties) {
+                                          StandardEnvironment environment,
+                                          RocketMQProperties rocketMQProperties) {
         this.objectMapper = rocketMQMessageObjectMapper;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -88,13 +89,13 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         validate(annotation);
 
         String containerBeanName = String.format("%s_%s", DefaultRocketMQListenerContainer.class.getName(),
-            counter.incrementAndGet());
+                counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
-            () -> createRocketMQListenerContainer(bean, annotation));
+                () -> createRocketMQListenerContainer(bean, annotation));
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
-            DefaultRocketMQListenerContainer.class);
+                DefaultRocketMQListenerContainer.class);
         if (!container.isRunning()) {
             try {
                 container.start();
@@ -108,6 +109,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     }
 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(Object bean, RocketMQMessageListener annotation) {
+        if (!StringUtils.hasText(rocketMQProperties.getNameServer())) {
+            throw new RocketMQProperties.RocketMQPropertiesErrorException(rocketMQProperties, "[rocketmq.name-server] must not be null");
+        }
+
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
         container.setNameServer(rocketMQProperties.getNameServer());
@@ -122,9 +127,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private void validate(RocketMQMessageListener annotation) {
         if (annotation.consumeMode() == ConsumeMode.ORDERLY &&
-            annotation.messageModel() == MessageModel.BROADCASTING) {
+                annotation.messageModel() == MessageModel.BROADCASTING) {
             throw new BeanDefinitionValidationException(
-                "Bad annotation definition in @RocketMQMessageListener, messageModel BROADCASTING does not support ORDERLY message!");
+                    "Bad annotation definition in @RocketMQMessageListener, messageModel BROADCASTING does not support ORDERLY message!");
         }
     }
 }

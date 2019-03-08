@@ -37,11 +37,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Role;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
-@ConditionalOnProperty(prefix = "rocketmq", value = "name-server")
 @Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class })
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
@@ -53,7 +53,9 @@ public class RocketMQAutoConfiguration {
         RocketMQProperties.Producer producerConfig = rocketMQProperties.getProducer();
         String nameServer = rocketMQProperties.getNameServer();
         String groupName = producerConfig.getGroup();
-        Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
+        if (!StringUtils.hasText(nameServer)) {
+            throw new RocketMQProperties.RocketMQPropertiesErrorException(rocketMQProperties,"[rocketmq.name-server] must not be null");
+        }
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
 
         DefaultMQProducer producer = new DefaultMQProducer(groupName);

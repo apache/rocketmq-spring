@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @SuppressWarnings("WeakerAccess")
@@ -139,6 +140,20 @@ public class RocketMQProperties {
 
         public void setMaxMessageSize(int maxMessageSize) {
             this.maxMessageSize = maxMessageSize;
+        }
+    }
+
+    public static class RocketMQPropertiesErrorException extends BeanCreationException {
+
+        private final RocketMQProperties properties;
+
+        public RocketMQPropertiesErrorException(RocketMQProperties properties, String msg) {
+            super(msg);
+            this.properties = properties;
+        }
+
+        public RocketMQProperties getProperties() {
+            return properties;
         }
     }
 }

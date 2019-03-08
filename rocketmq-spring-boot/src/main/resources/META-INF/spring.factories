@@ -1,2 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
+
+# Failure analyzers
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+org.apache.rocketmq.spring.autoconfigure.RocketMQPropertiesErrorFailureAnalyzer
