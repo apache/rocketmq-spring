@@ -91,6 +91,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
+        //TODO-- listener对应的消费者的namesvr 可以配置,而不是使用默认值.
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
             () -> createRocketMQListenerContainer(bean, annotation));
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,

@@ -60,6 +60,17 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Test
+    public void testDefaultMQProducerWithRelaxPropertyNameV2() {
+        runner.withPropertyValues("test.nameServer=127.0.0.1:9876",
+                "test.producer.group=spring_rocketmq").
+                run((context) -> {
+                    assertThat(context).hasSingleBean(DefaultMQProducer.class);
+                    assertThat(context).hasSingleBean(RocketMQProperties.class);
+                });
+
+    }
+
+    @Test
     public void testDefaultMQProducer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
             "rocketmq.producer.group=spring_rocketmq").

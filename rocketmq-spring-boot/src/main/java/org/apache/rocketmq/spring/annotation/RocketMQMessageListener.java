@@ -93,4 +93,10 @@ public @interface RocketMQMessageListener {
      */
     String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
 
+    /**
+     * to use to create the message listener container responsible to serve this endpoint.
+     * <p>If not specified, the default container factory is used, if any.
+     */
+    String containerFactory() default "";
+
 }
