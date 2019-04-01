@@ -18,6 +18,7 @@
 package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -111,14 +112,25 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(Object bean, RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
-        container.setNameServer(rocketMQProperties.getNameServer());
+        //TODO--这里创建的时候，namesrv 从配置中获取
+        String tempNameSvr = resovelNameSvr(rocketMQProperties, annotation);  //get namesrv
+        container.setNameServer(tempNameSvr);
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener) bean);
         container.setObjectMapper(objectMapper);
+        log.debug("createRocketMQListenerContainer:{}", container);
 
         return container;
+    }
+
+    private String resovelNameSvr(RocketMQProperties rocketMQProperties, RocketMQMessageListener annotation) {
+        String namesvr = environment.resolvePlaceholders(annotation.namesrv());
+        if(StringUtils.isBlank(namesvr)) {
+            namesvr = rocketMQProperties.getNameServer();
+        }
+        return namesvr;
     }
 
     private void validate(RocketMQMessageListener annotation) {

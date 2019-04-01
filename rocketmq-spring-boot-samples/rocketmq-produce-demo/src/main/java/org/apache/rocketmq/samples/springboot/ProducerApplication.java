@@ -25,6 +25,7 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQHeaders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SpringBootApplication
 public class ProducerApplication implements CommandLineRunner {
     private static final String TX_PGROUP_NAME = "myTxProducerGroup";
-    @Resource
+    @Autowired
     private RocketMQTemplate rocketMQTemplate;
     @Value("${demo.rocketmq.transTopic}")
     private String springTransTopic;

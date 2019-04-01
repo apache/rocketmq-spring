@@ -302,7 +302,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         @Override
         public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
             for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
+                log.debug("container config:{} received msg: {}",DefaultRocketMQListenerContainer.this.toString(), messageExt);
                 try {
                     long now = System.currentTimeMillis();
                     rocketMQListener.onMessage(doConvertMessage(messageExt));

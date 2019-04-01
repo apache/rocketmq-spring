@@ -99,4 +99,7 @@ public @interface RocketMQMessageListener {
      */
     String containerFactory() default "";
 
+
+    String namesrv() default "";
+
 }

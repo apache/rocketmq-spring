@@ -82,13 +82,13 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testRocketMQListenerContainer() {
-        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876","test.rocketmq.name-server=127.0.0.2:9785").
             withUserConfiguration(TestConfig.class).
             run((context) -> {
                 // No producer on consume side
                 assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
                 // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
-                assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
+//                assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
             });
 
     }
@@ -122,6 +122,11 @@ public class RocketMQAutoConfigurationTest {
         public Object consumeListener() {
             return new MyMessageListener();
         }
+
+        @Bean
+        public Object consumeListennerWithNameSrv() {
+            return new MyMessageListenerWithNamesrv();
+        }
     }
 
     @Configuration
@@ -149,8 +154,18 @@ public class RocketMQAutoConfigurationTest {
 
     }
 
-    @RocketMQMessageListener(consumerGroup = "abc", topic = "test")
+//    @RocketMQMessageListener(consumerGroup = "abc", topic = "test")
+    @RocketMQMessageListener(consumerGroup = "abc", topic = "${demo.rocketmq.topic}")
     static class MyMessageListener implements RocketMQListener {
+
+        @Override
+        public void onMessage(Object message) {
+
+        }
+    }
+
+    @RocketMQMessageListener(consumerGroup = "abcd", topic = "test", namesrv="${test.rocketmq.nameServer}")
+    static class MyMessageListenerWithNamesrv implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
