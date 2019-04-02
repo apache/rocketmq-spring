@@ -304,7 +304,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ", selectorType=" + selectorType +
             ", selectorExpression='" + selectorExpression + '\'' +
             ", messageModel=" + messageModel +
-            ", instanceName=" + instanceName +     
+            ", instanceName=" + instanceName +
             '}';
     }
 

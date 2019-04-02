@@ -133,7 +133,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return {@link SendResult}
      */
     public SendResult syncSend(String destination, Message<?> message, long timeout, int delayLevel) {
-        log.error("test version.");
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("syncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");

@@ -22,13 +22,13 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Service;
 
 /**
- * RocketMQMessageListener
+ * RocketMQMessageListener，consume another rocketmq server
  */
 @Service
-@RocketMQMessageListener(namesrv = "${rocketmq2.name-server}",topic = "${demo.rocketmq.topic}", consumerGroup = "string_withnamesrv_consumer")
+@RocketMQMessageListener(namesrv = "${rocketmq2.name-server}",topic = "${demo.rocketmq.topic}", consumerGroup = "string_withnamesrv_consumer", instanceName = "rocketmq2")
 public class StringWithNamesrvConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
+        System.out.printf("------- StringWithNamesrvConsumer received: %s \n", message);
     }
 }

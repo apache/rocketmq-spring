@@ -26,6 +26,7 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -55,6 +56,11 @@ public class ProducerApplication implements CommandLineRunner {
     private String orderPaidTopic;
     @Value("${demo.rocketmq.msgExtTopic}")
     private String msgExtTopic;
+
+
+    @Autowired
+    @Qualifier("secondRocketMQTemplate")
+    private RocketMQTemplate secondRocketMQTemplate;
 
     public static void main(String[] args) {
         SpringApplication.run(ProducerApplication.class, args);
@@ -90,6 +96,10 @@ public class ProducerApplication implements CommandLineRunner {
 
         // Send transactional messages
         testTransaction();
+
+        // test multiple send result.
+        SendResult sendResult2 = secondRocketMQTemplate.syncSend(springTopic, "Hello, World!");
+        System.out.printf("syncSend1 to topic %s sendResult2=%s %n", springTopic, sendResult2);
     }
 
 

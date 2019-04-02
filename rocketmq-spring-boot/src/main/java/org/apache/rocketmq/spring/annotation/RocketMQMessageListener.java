@@ -94,15 +94,16 @@ public @interface RocketMQMessageListener {
     String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
 
     /**
-     * to use to create the message listener container responsible to serve this endpoint.
-     * <p>If not specified, the default container factory is used, if any.
+     * The property of  namesrv. If you want consume multiple mq srv,you can set it.
+     * @return
      */
-    String containerFactory() default "";
-
-
     String namesrv() default "";
 
 
+    /**
+     * The property of  instanceName. A progress consume multiple mq srv, the instanceName need different.
+     * @return
+     */
     String instanceName() default "";
 
 }
