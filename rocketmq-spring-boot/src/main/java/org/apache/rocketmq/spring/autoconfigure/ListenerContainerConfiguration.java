@@ -131,14 +131,14 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
      */
     private void resolveInstanceName(DefaultRocketMQListenerContainer container, RocketMQMessageListener annotation) {
         String instanceName = environment.resolvePlaceholders(annotation.instanceName());
-        if(StringUtils.isNotBlank(instanceName)) {
+        if (StringUtils.isNotBlank(instanceName)) {
             container.setInstanceName(instanceName);
         }
     }
 
     private String resovelNameSvr(RocketMQProperties rocketMQProperties, RocketMQMessageListener annotation) {
         String namesvr = environment.resolvePlaceholders(annotation.namesrv());
-        if(StringUtils.isBlank(namesvr)) {
+        if (StringUtils.isBlank(namesvr)) {
             namesvr = rocketMQProperties.getNameServer();
         }
         return namesvr;

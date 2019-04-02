@@ -427,7 +427,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
 
         consumer.setNamesrvAddr(nameServer);
-        if(StringUtils.isNotBlank(instanceName)) {
+        if (StringUtils.isNotBlank(instanceName)) {
             consumer.setInstanceName(instanceName);
         }
         consumer.setConsumeThreadMax(consumeThreadMax);
