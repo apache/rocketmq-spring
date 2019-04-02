@@ -92,7 +92,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
-        //TODO-- listener对应的消费者的namesvr 可以配置,而不是使用默认值.
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
             () -> createRocketMQListenerContainer(bean, annotation));
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
@@ -112,7 +111,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(Object bean, RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
-        //TODO--这里创建的时候，namesrv 从配置中获取
         String tempNameSvr = resovelNameSvr(rocketMQProperties, annotation);  //get namesrv
         container.setNameServer(tempNameSvr);
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
@@ -120,9 +118,21 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener) bean);
         container.setObjectMapper(objectMapper);
+        resolveInstanceName(container,annotation);
         log.debug("createRocketMQListenerContainer:{}", container);
 
         return container;
+    }
+
+    /**
+     * if annotation set instanceName,use it. otherwise use default.
+     * @param container
+     * @param annotation
+     */
+    private void resolveInstanceName(DefaultRocketMQListenerContainer container, RocketMQMessageListener annotation) {
+        if(StringUtils.isNotBlank(annotation.instanceName())) {
+            container.setInstanceName(annotation.instanceName());
+        }
     }
 
     private String resovelNameSvr(RocketMQProperties rocketMQProperties, RocketMQMessageListener annotation) {

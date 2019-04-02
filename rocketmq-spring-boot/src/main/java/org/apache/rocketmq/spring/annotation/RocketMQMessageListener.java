@@ -102,4 +102,7 @@ public @interface RocketMQMessageListener {
 
     String namesrv() default "";
 
+
+    String instanceName() default "";
+
 }

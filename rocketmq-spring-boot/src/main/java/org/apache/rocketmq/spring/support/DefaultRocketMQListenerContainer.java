@@ -18,6 +18,7 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -72,6 +73,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String consumerGroup;
 
     private String topic;
+
+    private String instanceName;
 
     private int consumeThreadMax = 64;
 
@@ -166,6 +169,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public RocketMQMessageListener getRocketMQMessageListener() {
         return rocketMQMessageListener;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public void setRocketMQMessageListener(RocketMQMessageListener anno) {
@@ -293,6 +304,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ", selectorType=" + selectorType +
             ", selectorExpression='" + selectorExpression + '\'' +
             ", messageModel=" + messageModel +
+            ", instanceName=" + instanceName +     
             '}';
     }
 
@@ -415,6 +427,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
 
         consumer.setNamesrvAddr(nameServer);
+        if(StringUtils.isNotBlank(instanceName)) {
+            consumer.setInstanceName(instanceName);
+        }
         consumer.setConsumeThreadMax(consumeThreadMax);
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
             consumer.setConsumeThreadMin(consumeThreadMax);
