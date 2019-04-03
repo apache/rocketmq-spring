@@ -180,7 +180,7 @@ public class ConsumerApplication{
 
 > 更多消费相关配置
 >
-> see: [RocketMQMessageListener](src/main/java/org/apache/rocketmq/spring/starter/annotation/RocketMQMessageListener.java) 
+> see: [RocketMQMessageListener](rocketmq-spring-boot/src/main/java/org/apache/rocketmq/spring/annotation/RocketMQMessageListener.java) 
 
 ### 消息轨迹
 
