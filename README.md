@@ -188,7 +188,7 @@ public class ConsumerApplication{
 
 > More relevant configurations for consuming:
 >
-> see: [RocketMQMessageListener](rocketmq-spring/rocketmq-spring-boot/src/main/java/org/apache/rocketmq/spring/annotation/RocketMQMessageListener.java)
+> see: [RocketMQMessageListener](rocketmq-spring-boot/src/main/java/org/apache/rocketmq/spring/annotation/RocketMQMessageListener.java)
 
 ### Message Trace
 
