@@ -59,6 +59,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private ApplicationContext applicationContext;
 
+    /**
+     * The name of the DefaultRocketMQListenerContainer instance
+     */
+    private String name;
+
     private long suspendCurrentQueueTimeMillis = 1000;
 
     /**
@@ -94,6 +99,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private SelectorType selectorType;
     private String selectorExpression;
     private MessageModel messageModel;
+    private long consumeTimeout;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -176,6 +182,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.messageModel = anno.messageModel();
         this.selectorExpression = anno.selectorExpression();
         this.selectorType = anno.selectorType();
+        this.consumeTimeout = anno.consumeTimeout();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -294,6 +301,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ", selectorExpression='" + selectorExpression + '\'' +
             ", messageModel=" + messageModel +
             '}';
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public class DefaultMessageListenerConcurrently implements MessageListenerConcurrently {
@@ -424,6 +435,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
             consumer.setConsumeThreadMin(consumeThreadMax);
         }
+        consumer.setConsumeTimeout(consumeTimeout);
+        consumer.setInstanceName(this.name);
 
         switch (messageModel) {
             case BROADCASTING:
