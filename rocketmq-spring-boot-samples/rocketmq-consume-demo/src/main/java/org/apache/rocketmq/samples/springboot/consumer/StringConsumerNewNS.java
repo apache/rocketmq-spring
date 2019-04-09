@@ -29,6 +29,6 @@ import org.springframework.stereotype.Service;
 public class StringConsumerNewNS implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
+        System.out.printf("------- StringConsumerNewNS received: %s \n", message);
     }
 }

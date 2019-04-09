@@ -93,7 +93,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
-            () -> createRocketMQListenerContainer(bean, annotation));
+            () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
             DefaultRocketMQListenerContainer.class);
         if (!container.isRunning()) {
@@ -108,7 +108,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
     }
 
-    private DefaultRocketMQListenerContainer createRocketMQListenerContainer(Object bean, RocketMQMessageListener annotation) {
+    private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean, RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
@@ -119,6 +119,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener) bean);
         container.setObjectMapper(objectMapper);
+        container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 
         return container;
     }
