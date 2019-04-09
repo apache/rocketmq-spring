@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server")
-@Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class })
+@Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class })
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
 
@@ -94,7 +94,7 @@ public class RocketMQAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RocketMQTemplate.class)
+    @ConditionalOnBean(value = RocketMQTemplate.class, name = "rocketMQTemplate")
     @ConditionalOnMissingBean(TransactionHandlerRegistry.class)
     public TransactionHandlerRegistry transactionHandlerRegistry(RocketMQTemplate template) {
         return new TransactionHandlerRegistry(template);

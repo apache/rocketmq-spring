@@ -352,3 +352,39 @@ public class MyConsumer implements RocketMQListener<String> {
 	在客户端，首先用户需要实现RocketMQLocalTransactionListener接口，并在接口类上注解声明@RocketMQTransactionListener，实现确认和回查方法；然后再使用资源模板RocketMQTemplate，
 	调用方法sendMessageInTransaction()来进行消息的发布。 注意：这个方法通过指定发送者组名与具体的声明了txProducerGroup的TransactionListener进行关联，您也可以不指定这个值，从而使用默认的事务发送者组。
     
+1. 如何声明不同name-server或者其他特定的属性来定义非标的RocketMQTemplate？
+    ```java
+    // 第一步： 定义非标的RocketMQTemplate使用你需要的属性，注意，这里的'nameServer'属性必须要定义，并且其取值不能与全局配置属性'rocketmq.name-server'相同
+    // 也可以定义其他属性，如果不定义，它们取全局的配置属性值或默认值。
+ 
+    // 这个RocketMQTemplate的Spring Bean名是'extRocketMQTemplate', 与所定义的类名相同(但首字母小写)
+    @ExtRocketMQTemplateConfiguration(nameServer="127.0.0.1:9876"
+       , ... // 定义其他属性，如果有必要。
+    )
+    public class ExtRocketMQTemplate extends RocketMQTemplate {
+      //类里面不需要做任何修改
+    }
+ 
+ 
+    // 第二步: 使用这个非标RocketMQTemplate
+    @Resource(name = "extRocketMQTemplate") // 这里必须定义name属性来指向上具体的Spring Bean.
+    private RocketMQTemplate extRocketMQTemplate; 
+    // 接下来就可以正常使用这个extRocketMQTemplate了.
+    
+    ```
+ 
+1. MessageListener消费端，是否可以指定不同的name-server而不是使用全局定义的'rocketmq.name-server'属性值 ?  
+    
+    ```java
+    @Service
+    @RocketMQMessageListener(
+       nameServer = "NEW-NAMESERVER-LIST", // 可以使用这个optional属性来指定不同的name-server
+       topic = "test-topic-1", 
+       consumerGroup = "my-consumer_test-topic-1",
+       enableMsgTrace = true,
+       customizedTraceTopic = "my-trace-topic"
+    )
+    public class MyNameServerConsumer implements RocketMQListener<String> {
+       ...
+    }
+    ``` 
