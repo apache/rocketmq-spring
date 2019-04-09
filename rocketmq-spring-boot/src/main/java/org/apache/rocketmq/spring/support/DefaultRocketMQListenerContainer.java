@@ -414,7 +414,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
 
-        consumer.setNamesrvAddr(nameServer);
+        String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
+        if (customizedNameServer != null) {
+            consumer.setNamesrvAddr(customizedNameServer);
+        } else {
+            consumer.setNamesrvAddr(nameServer);
+        }
         consumer.setConsumeThreadMax(consumeThreadMax);
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
             consumer.setConsumeThreadMin(consumeThreadMax);
