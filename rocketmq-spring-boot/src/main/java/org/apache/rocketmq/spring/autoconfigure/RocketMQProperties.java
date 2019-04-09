@@ -66,8 +66,8 @@ public class RocketMQProperties {
         private int compressMessageBodyThreshold = 1024 * 4;
 
         /**
-         * Maximum number of retry to perform internally before claiming sending failure in synchronous mode.
-         * This may potentially cause message duplication which is up to application developers to resolve.
+         * Maximum number of retry to perform internally before claiming sending failure in synchronous mode. This may
+         * potentially cause message duplication which is up to application developers to resolve.
          */
         private int retryTimesWhenSendFailed = 2;
 

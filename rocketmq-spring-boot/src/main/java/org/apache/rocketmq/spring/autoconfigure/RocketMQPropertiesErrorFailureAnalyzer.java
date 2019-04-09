@@ -28,8 +28,7 @@ import org.springframework.util.StringUtils;
  * Configuration error analyzer
  */
 public final class RocketMQPropertiesErrorFailureAnalyzer extends AbstractFailureAnalyzer<RocketMQProperties.RocketMQPropertiesErrorException>
-        implements EnvironmentAware {
-
+    implements EnvironmentAware {
 
     private Environment environment;
 
@@ -39,7 +38,8 @@ public final class RocketMQPropertiesErrorFailureAnalyzer extends AbstractFailur
     }
 
     @Override
-    protected FailureAnalysis analyze(Throwable rootFailure, RocketMQProperties.RocketMQPropertiesErrorException cause) {
+    protected FailureAnalysis analyze(Throwable rootFailure,
+        RocketMQProperties.RocketMQPropertiesErrorException cause) {
         return getFailureAnalysis(cause);
     }
 
@@ -56,7 +56,7 @@ public final class RocketMQPropertiesErrorFailureAnalyzer extends AbstractFailur
             description.append("'nameServer' attribute is not specified and ");
         }
         description
-                .append(String.format("no embedded RocketMQTemplate could be configured.%n"));
+            .append(String.format("no embedded RocketMQTemplate could be configured.%n"));
         description.append(String.format("%nReason: %s%n", cause.getMessage()));
         return description.toString();
     }
@@ -68,7 +68,7 @@ public final class RocketMQPropertiesErrorFailureAnalyzer extends AbstractFailur
             action.append(String.format("\tRemove 'rocketmq-spring-boot-starter' without using RocketMQ.%n"));
         }
         action.append("\tIf you have RocketMQ settings to be loaded from a particular "
-                + "profile you may need to activate it").append(getActiveProfiles());
+            + "profile you may need to activate it").append(getActiveProfiles());
         return action.toString();
     }
 
@@ -77,7 +77,8 @@ public final class RocketMQPropertiesErrorFailureAnalyzer extends AbstractFailur
         String[] profiles = this.environment.getActiveProfiles();
         if (ObjectUtils.isEmpty(profiles)) {
             message.append(" (no profiles are currently active).");
-        } else {
+        }
+        else {
             message.append(" (the profiles ");
             message.append(StringUtils.arrayToCommaDelimitedString(profiles));
             message.append(" are currently active).");

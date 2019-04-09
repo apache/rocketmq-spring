@@ -55,8 +55,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private ObjectMapper objectMapper;
 
-    public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        StandardEnvironment environment,
+    public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper, StandardEnvironment environment,
         RocketMQProperties rocketMQProperties) {
         this.objectMapper = rocketMQMessageObjectMapper;
         this.environment = environment;

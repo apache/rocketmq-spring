@@ -43,8 +43,8 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
-@ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
-@Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class })
+@ConditionalOnClass({MQAdmin.class, ObjectMapper.class})
+@Import({JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class})
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
 
@@ -56,7 +56,7 @@ public class RocketMQAutoConfiguration {
         String nameServer = rocketMQProperties.getNameServer();
         String groupName = producerConfig.getGroup();
         if (!StringUtils.hasText(nameServer)) {
-            throw new RocketMQProperties.RocketMQPropertiesErrorException(rocketMQProperties,"[rocketmq.name-server] must not be null");
+            throw new RocketMQProperties.RocketMQPropertiesErrorException(rocketMQProperties, "[rocketmq.name-server] must not be null");
         }
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
 
@@ -68,7 +68,8 @@ public class RocketMQAutoConfiguration {
                 rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
             producer.setVipChannelEnabled(false);
-        } else {
+        }
+        else {
             producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
         }
