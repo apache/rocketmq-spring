@@ -464,8 +464,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(producer, "Property 'producer' is required");
-        producer.start();
+        if (producer != null) {
+            producer.start();
+        }
     }
 
     @Override
