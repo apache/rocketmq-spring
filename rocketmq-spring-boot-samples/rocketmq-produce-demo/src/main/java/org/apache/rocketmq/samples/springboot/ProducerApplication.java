@@ -35,6 +35,8 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -93,8 +95,24 @@ public class ProducerApplication implements CommandLineRunner {
         rocketMQTemplate.convertAndSend(msgExtTopic + ":tag1", "I'm from tag1");
         System.out.printf("syncSend topic %s tag %s %n", msgExtTopic, "tag1");
 
+
+        // Send a batch of strings
+        testBatchMessages();
+
         // Send transactional messages
         testTransaction();
+    }
+
+    private void testBatchMessages() {
+        List<Message> msgs = new ArrayList<Message>();
+        for (int i = 0; i < 10; i++) {
+            msgs.add(MessageBuilder.withPayload("Hello RocketMQ Batch Msg#" + i).
+                    setHeader(RocketMQHeaders.KEYS, "KEY_" + i).build());
+        }
+
+        SendResult sr = rocketMQTemplate.syncSend(springTopic, msgs, 60000);
+
+        System.out.printf("--- Batch messages send result :" + sr);
     }
 
 
