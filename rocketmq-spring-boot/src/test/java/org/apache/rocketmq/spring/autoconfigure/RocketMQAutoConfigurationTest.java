@@ -19,13 +19,19 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -62,23 +68,28 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testDefaultMQProducer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
-            "rocketmq.producer.group=spring_rocketmq").
-            run((context) -> {
-                assertThat(context).hasSingleBean(DefaultMQProducer.class);
-            });
+                "rocketmq.producer.group=spring_rocketmq").
+                run((context) -> {
+                    assertThat(context).hasSingleBean(DefaultMQProducer.class);
+                });
 
     }
 
     @Test
     public void testRocketMQListenerContainer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-            withUserConfiguration(TestConfig.class).
-            run((context) -> {
-                // No producer on consume side
-                assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
-                // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
-                assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
-            });
+                withUserConfiguration(TestConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+                    assertThat(context).hasBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1");
+                    assertThat(context).hasBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_2");
+                    assertThat(context).getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1").
+                            hasFieldOrPropertyWithValue("nameServer", "127.0.0.1:9876");
+                    assertThat(context).getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_2").
+                            hasFieldOrPropertyWithValue("nameServer", "127.0.1.1:9876");
+                });
 
     }
 
@@ -87,8 +98,8 @@ public class RocketMQAutoConfigurationTest {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
                 withUserConfiguration(TestConfig.class, CustomObjectMapperConfig.class).
                 run((context) -> {
-                    assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
-                    assertThat(context.getBean(DefaultRocketMQListenerContainer.class).getObjectMapper())
+                    assertThat(context.getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1",
+                            DefaultRocketMQListenerContainer.class).getObjectMapper())
                             .isSameAs(context.getBean(CustomObjectMapperConfig.class).testObjectMapper());
                 });
     }
@@ -98,9 +109,32 @@ public class RocketMQAutoConfigurationTest {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
                 withUserConfiguration(TestConfig.class, CustomObjectMappersConfig.class).
                 run((context) -> {
-                    assertThat(context).hasSingleBean(DefaultRocketMQListenerContainer.class);
-                    assertThat(context.getBean(DefaultRocketMQListenerContainer.class).getObjectMapper())
+                    assertThat(context.getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1",
+                            DefaultRocketMQListenerContainer.class).getObjectMapper())
                             .isSameAs(context.getBean(CustomObjectMappersConfig.class).rocketMQMessageObjectMapper());
+                });
+    }
+
+
+    @Test
+    public void testExtRocketMQTemplate() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                run(new ContextConsumer<AssertableApplicationContext>() {
+                    @Override
+                    public void accept(AssertableApplicationContext context) throws Throwable {
+                        Throwable th = context.getStartupFailure();
+                        System.out.printf("th==" + th + "\n");
+                        Assert.assertTrue(th instanceof BeanDefinitionValidationException);
+                    }
+                });
+
+        runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
+                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("producer");
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
                 });
     }
 
@@ -111,6 +145,12 @@ public class RocketMQAutoConfigurationTest {
         public Object consumeListener() {
             return new MyMessageListener();
         }
+
+        @Bean
+        public Object consumeListener1() {
+            return new MyMessageListener1();
+        }
+
     }
 
     @Configuration
@@ -145,6 +185,30 @@ public class RocketMQAutoConfigurationTest {
         public void onMessage(Object message) {
 
         }
+    }
+
+    @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abc1", topic = "test")
+    static class MyMessageListener1 implements RocketMQListener {
+
+        @Override
+        public void onMessage(Object message) {
+
+        }
+    }
+
+    @Configuration
+    static class ExtRocketMQTemplateConfig {
+
+        @Bean
+        public RocketMQTemplate extRocketMQTemplate() {
+            return new MyExtRocketMQTemplate();
+        }
+
+    }
+
+    @ExtRocketMQTemplateConfiguration(group = "test", nameServer = "127.0.0.1:9876")
+    static class MyExtRocketMQTemplate extends RocketMQTemplate {
+
     }
 }
 

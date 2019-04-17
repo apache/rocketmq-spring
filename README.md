@@ -361,5 +361,45 @@ public class MyConsumer implements RocketMQListener<String> {
 
 
 1. How do I send transactional messages?
-   It needs two steps on client side: a) Define a class which is annotated with @RocketMQTransactionListener and implements RocketMQLocalTransactionListener interface, in which, the executeLocalTransaction() and checkLocalTransaction() methods are implemented;
+   It needs two steps on client side: 
+   
+   a) Define a class which is annotated with @RocketMQTransactionListener and implements RocketMQLocalTransactionListener interface, in which, the executeLocalTransaction() and checkLocalTransaction() methods are implemented;
+   
    b) Invoke the sendMessageInTransaction() method with the RocketMQTemplate API. Note: The first parameter of this method is correlated with the txProducerGroup attribute of @RocketMQTransactionListener. It can be null if using the default transaction producer group.
+
+1. How do I create more than one RocketMQTemplate with a different name-server or other specific properties?
+    ```java
+    // Step1. Define an extra RocketMQTemplate with required properties, note, the 'nameServer' property must be different from the value of global
+    // Spring configuration 'rocketmq.name-server', other properties are optionally defined, they will use the global configuration 
+    // definition by default.  
+ 
+    // The RocketMQTemplate's Spring Bean name is 'extRocketMQTemplate', same with the simplified class name (Initials lowercase)
+    @ExtRocketMQTemplateConfiguration(nameServer="127.0.0.1:9876"
+       , ... // override other specific properties if needed
+    )
+    public class ExtRocketMQTemplate extends RocketMQTemplate {
+      // keep the body empty
+    }
+ 
+ 
+    // Step2. Use the extra RocketMQTemplate. e.g.
+    @Resource(name = "extRocketMQTemplate") // Must define the name to qualify to extra-defined RocketMQTemplate bean.
+    private RocketMQTemplate extRocketMQTemplate; 
+    // you can use the template as normal.
+    
+    ```
+ 
+1. How do I create a consumer Listener with different name-server other than the global Spring configuration 'rocketmq.name-server' ?  
+    ```java
+    @Service
+    @RocketMQMessageListener(
+       nameServer = "NEW-NAMESERVER-LIST", // define new nameServer list
+       topic = "test-topic-1", 
+       consumerGroup = "my-consumer_test-topic-1",
+       enableMsgTrace = true,
+       customizedTraceTopic = "my-trace-topic"
+    )
+    public class MyNameServerConsumer implements RocketMQListener<String> {
+       ...
+    }
+    ```  

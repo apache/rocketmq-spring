@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.spring.config;
+package org.apache.rocketmq.samples.springboot.consumer;
 
-public class RocketMQConfigUtils {
-    /**
-     * The bean name of the internally managed RocketMQ transaction annotation processor.
-     */
-    public static final String ROCKETMQ_TRANSACTION_ANNOTATION_PROCESSOR_BEAN_NAME =
-        "org.springframework.rocketmq.spring.starter.internalRocketMQTransAnnotationProcessor";
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.stereotype.Service;
 
-    public static final String ROCKETMQ_TRANSACTION_DEFAULT_GLOBAL_NAME =
-        "rocketmq_transaction_default_global_name";
-
-    public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
-            "rocketMQTemplate";
+/**
+ * RocketMQMessageListener
+ */
+@Service
+@RocketMQMessageListener(nameServer = "${demo.rocketmq.myNameServer}", topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer")
+public class StringConsumerNewNS implements RocketMQListener<String> {
+    @Override
+    public void onMessage(String message) {
+        System.out.printf("------- StringConsumerNewNS received: %s \n", message);
+    }
 }
