@@ -29,6 +29,7 @@ We are always very happy to have contributions, whether for trivial cleanups or 
 
 - [x] synchronous transmission
 - [x] synchronous ordered transmission
+- [x] synchronous batch transmission
 - [x] asynchronous transmission
 - [x] asynchronous ordered transmission
 - [x] orderly consume
