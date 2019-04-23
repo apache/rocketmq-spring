@@ -245,7 +245,33 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         Message<?> message = this.doConvert(payload, null, null);
         return syncSendOrderly(destination, message, hashKey, producer.getSendMsgTimeout());
     }
+    /**
+     * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout and delay level specified in addition.
+     *
+     * @param destination  formats: `topicName:tags`
+     * @param message      {@link org.springframework.messaging.Message}
+     * @param sendCallback {@link SendCallback}
+     * @param timeout      send timeout with millis
+     * @param delayLevel   level for the delay message
+     */
+    public void asyncSend(String destination, Message<?> message, SendCallback sendCallback, long timeout, int delayLevel) {
+        if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
+            log.error("asyncSend failed. destination:{}, message is null ", destination);
+            throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
+        }
 
+        try {
+            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
+                charset, destination, message);
+            if (delayLevel > 0) {
+                rocketMsg.setDelayTimeLevel(delayLevel);
+            }
+            producer.send(rocketMsg, sendCallback, timeout);
+        } catch (Exception e) {
+            log.info("asyncSend failed. destination:{}, message:{} ", destination, message);
+            throw new MessagingException(e.getMessage(), e);
+        }
+    }
     /**
      * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout specified in addition.
      *
@@ -255,19 +281,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      */
     public void asyncSend(String destination, Message<?> message, SendCallback sendCallback, long timeout) {
-        if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
-            log.error("asyncSend failed. destination:{}, message is null ", destination);
-            throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
-            producer.send(rocketMsg, sendCallback, timeout);
-        } catch (Exception e) {
-            log.info("asyncSend failed. destination:{}, message:{} ", destination, message);
-            throw new MessagingException(e.getMessage(), e);
-        }
+        asyncSend(destination,message,sendCallback,timeout,0);
     }
 
     /**
@@ -450,8 +464,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(producer, "Property 'producer' is required");
-        producer.start();
+        if (producer != null) {
+            producer.start();
+        }
     }
 
     @Override

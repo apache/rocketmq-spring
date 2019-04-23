@@ -26,6 +26,7 @@ import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.config.RocketMQTransactionAnnotationProcessor;
 import org.apache.rocketmq.spring.config.TransactionHandlerRegistry;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -44,7 +45,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class, ObjectMapper.class})
-@Import({JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class})
+@Import({JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class})
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
 
@@ -87,7 +88,7 @@ public class RocketMQAutoConfiguration {
 
     @Bean(destroyMethod = "destroy")
     @ConditionalOnBean(DefaultMQProducer.class)
-    @ConditionalOnMissingBean(RocketMQTemplate.class)
+    @ConditionalOnMissingBean(name = RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
     public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer, ObjectMapper rocketMQMessageObjectMapper) {
         RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
         rocketMQTemplate.setProducer(mqProducer);
@@ -96,9 +97,11 @@ public class RocketMQAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(RocketMQTemplate.class)
+    @ConditionalOnBean(name = RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
     @ConditionalOnMissingBean(TransactionHandlerRegistry.class)
-    public TransactionHandlerRegistry transactionHandlerRegistry(RocketMQTemplate template) {
+    public TransactionHandlerRegistry transactionHandlerRegistry(
+        @Qualifier(RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
+            RocketMQTemplate template) {
         return new TransactionHandlerRegistry(template);
     }
 

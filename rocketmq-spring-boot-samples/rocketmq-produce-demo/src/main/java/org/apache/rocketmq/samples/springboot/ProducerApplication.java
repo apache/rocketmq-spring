@@ -17,6 +17,10 @@
 
 package org.apache.rocketmq.samples.springboot;
 
+import java.math.BigDecimal;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Resource;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
@@ -32,11 +36,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Producer, using RocketMQTemplate sends a variety of messages
@@ -54,6 +53,8 @@ public class ProducerApplication implements CommandLineRunner {
     private String orderPaidTopic;
     @Value("${demo.rocketmq.msgExtTopic}")
     private String msgExtTopic;
+    @Resource(name = "extRocketMQTemplate")
+    private RocketMQTemplate extRocketMQTemplate;
 
     public static void main(String[] args) {
         SpringApplication.run(ProducerApplication.class, args);
@@ -64,6 +65,10 @@ public class ProducerApplication implements CommandLineRunner {
         // Send string
         SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
+
+        // Use the extRocketMQTemplate
+        sendResult = extRocketMQTemplate.syncSend(springTopic, "Hello, World!");
+        System.out.printf("extRocketMQTemplate.syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
         // Send string with spring Message
         sendResult = rocketMQTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World! I'm from spring message").build());

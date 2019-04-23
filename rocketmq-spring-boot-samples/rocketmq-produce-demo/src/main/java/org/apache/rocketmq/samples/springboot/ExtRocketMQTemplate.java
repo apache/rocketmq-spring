@@ -14,19 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.samples.springboot;
 
-package org.apache.rocketmq.spring.config;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
-public class RocketMQConfigUtils {
-    /**
-     * The bean name of the internally managed RocketMQ transaction annotation processor.
-     */
-    public static final String ROCKETMQ_TRANSACTION_ANNOTATION_PROCESSOR_BEAN_NAME =
-        "org.springframework.rocketmq.spring.starter.internalRocketMQTransAnnotationProcessor";
-
-    public static final String ROCKETMQ_TRANSACTION_DEFAULT_GLOBAL_NAME =
-        "rocketmq_transaction_default_global_name";
-
-    public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
-            "rocketMQTemplate";
+@ExtRocketMQTemplateConfiguration(nameServer = "${demo.rocketmq.extNameServer}")
+public class ExtRocketMQTemplate extends RocketMQTemplate {
 }
