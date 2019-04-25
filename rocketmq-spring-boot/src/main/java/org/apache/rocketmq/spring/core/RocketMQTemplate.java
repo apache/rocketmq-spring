@@ -40,6 +40,9 @@ import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,6 +124,43 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      */
     public SendResult syncSend(String destination, Message<?> message, long timeout) {
         return syncSend(destination, message, timeout, 0);
+    }
+
+    /**
+     * syncSend batch messages in a given timeout.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param messages    Collection of {@link org.springframework.messaging.Message}
+     * @param timeout     send timeout with millis
+     * @return {@link SendResult}
+     */
+    public SendResult syncSend(String destination, Collection<Message<?>> messages, long timeout) {
+        if (Objects.isNull(messages) || messages.size() == 0) {
+            log.error("syncSend with batch failed. destination:{}, messages is empty ", destination);
+            throw new IllegalArgumentException("`messages` can not be empty");
+        }
+
+        try {
+            long now = System.currentTimeMillis();
+            Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
+            org.apache.rocketmq.common.message.Message rocketMsg;
+            for (Message<?> msg:messages) {
+                if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
+                    log.warn("Found a message empty in the batch, skip it");
+                    continue;
+                }
+                rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper, charset, destination, msg);
+                rmqMsgs.add(rocketMsg);
+            }
+
+            SendResult sendResult = producer.send(rmqMsgs, timeout);
+            long costTime = System.currentTimeMillis() - now;
+            log.debug("send messages cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            return sendResult;
+        } catch (Exception e) {
+            log.error("syncSend with batch failed. destination:{}, messages.size:{} ", destination, messages.size());
+            throw new MessagingException(e.getMessage(), e);
+        }
     }
 
     /**
