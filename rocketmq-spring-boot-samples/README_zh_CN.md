@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-这里是一个使用rocketmq-spring-boot-starter的列子。 [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring)
+这里是一个使用rocketmq-spring-boot-starter的例子。 [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring)
 
 
 ## 在本地运行这个测试例子
