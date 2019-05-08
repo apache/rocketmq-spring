@@ -43,13 +43,8 @@ public class RocketMQAutoConfigurationTest {
 
 
     @Test(expected = NoSuchBeanDefinitionException.class)
-    public void testRocketMQAutoConfigurationNotCreatedByDefault() {
-        runner.run(context -> context.getBean(RocketMQAutoConfiguration.class));
-    }
-
-
-    @Test(expected = NoSuchBeanDefinitionException.class)
     public void testDefaultMQProducerNotCreatedByDefault() {
+        // You will see the WARN log message about missing rocketmq.name-server spring property when running this test case.
         runner.run(context -> context.getBean(DefaultMQProducer.class));
     }
 

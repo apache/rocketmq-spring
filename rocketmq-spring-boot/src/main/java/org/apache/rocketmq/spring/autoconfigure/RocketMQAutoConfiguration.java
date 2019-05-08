@@ -26,6 +26,9 @@ import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.config.RocketMQTransactionAnnotationProcessor;
 import org.apache.rocketmq.spring.config.TransactionHandlerRegistry;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -39,16 +42,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Role;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
-@ConditionalOnProperty(prefix = "rocketmq", value = "name-server")
+@ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
 @Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class })
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class RocketMQAutoConfiguration {
+    private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
+
+    @Autowired
+    private Environment environment;
+
+    @PostConstruct
+    public void checkProperties() {
+        String nameServer = environment.getProperty("rocketmq.name-server", String.class);
+        log.debug("rocketmq.nameServer = {}", nameServer);
+        if (nameServer == null) {
+            log.warn("The necessary spring property 'rocketmq.name-server' is not defined, all rockertmq beans creation are skipped!");
+        }
+    }
+
 
     @Bean
     @ConditionalOnMissingBean(DefaultMQProducer.class)
