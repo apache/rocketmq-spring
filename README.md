@@ -121,10 +121,10 @@ public class ProducerApplication implements CommandLineRunner{
     public void run(String... args) throws Exception {
         try {
             // Build a SpringMessage for sending in transaction
-            Message msg = MessageBuilder.withPayload(..)...
+            Message msg = MessageBuilder.withPayload(..)...;
             // In sendMessageInTransaction(), the first parameter transaction name ("test")
             // must be same with the @RocketMQTransactionListener's member field 'transName'
-            rocketMQTemplate.sendMessageInTransaction("test", "test-topic" msg, null);
+            rocketMQTemplate.sendMessageInTransaction("test", "test-topic", msg, null);
         } catch (MQClientException e) {
             e.printStackTrace(System.out);
         }
@@ -385,7 +385,7 @@ public class MyConsumer implements RocketMQListener<String> {
  
     // Step2. Use the extra RocketMQTemplate. e.g.
     @Resource(name = "extRocketMQTemplate") // Must define the name to qualify to extra-defined RocketMQTemplate bean.
-    private RocketMQTemplate extRocketMQTemplate; 
+    private RocketMQTemplate extRocketMQTemplate;
     // you can use the template as normal.
     
     ```
