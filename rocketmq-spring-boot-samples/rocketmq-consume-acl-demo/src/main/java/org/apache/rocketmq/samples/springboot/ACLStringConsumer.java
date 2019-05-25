@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
     consumerGroup = "group_define_in_Aliware_MQ"
     //accessKey = "AK" // It will read by `rocketmq.consumer.access-key` key
     //secretKey = "SK" // It will read by `rocketmq.consumer.access-key` key
-)
+    )
 public class ACLStringConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String message) {
