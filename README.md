@@ -1,6 +1,6 @@
 # RocketMQ-Spring [![Build Status](https://travis-ci.org/apache/rocketmq-spring.svg?branch=master)](https://travis-ci.org/apache/rocketmq-spring) [![Coverage Status](https://coveralls.io/repos/github/apache/rocketmq-spring/badge.svg?branch=master)](https://coveralls.io/github/apache/rocketmq-spring?branch=master)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.rocketmq/rocketmq-spring-all/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg:org.apache.rocketmq)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.rocketmq/rocketmq-spring-all/badge.svg)](https://search.maven.org/search?q=g:org.apache.rocketmq%20AND%20a:rocketmq-spring-all)
 [![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/apache/rocketmq-spring/releases)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -44,7 +44,7 @@ We are always very happy to have contributions, whether for trivial cleanups or 
 
 Please see the complete sample [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-Note: Current RELEASE.VERSION=2.0.2 
+Note: Current RELEASE.VERSION=2.0.3 
 
 ```xml
 <!--add dependency in pom.xml-->
@@ -121,10 +121,10 @@ public class ProducerApplication implements CommandLineRunner{
     public void run(String... args) throws Exception {
         try {
             // Build a SpringMessage for sending in transaction
-            Message msg = MessageBuilder.withPayload(..)...
+            Message msg = MessageBuilder.withPayload(..)...;
             // In sendMessageInTransaction(), the first parameter transaction name ("test")
             // must be same with the @RocketMQTransactionListener's member field 'transName'
-            rocketMQTemplate.sendMessageInTransaction("test", "test-topic" msg, null);
+            rocketMQTemplate.sendMessageInTransaction("test", "test-topic", msg, null);
         } catch (MQClientException e) {
             e.printStackTrace(System.out);
         }
@@ -385,7 +385,7 @@ public class MyConsumer implements RocketMQListener<String> {
  
     // Step2. Use the extra RocketMQTemplate. e.g.
     @Resource(name = "extRocketMQTemplate") // Must define the name to qualify to extra-defined RocketMQTemplate bean.
-    private RocketMQTemplate extRocketMQTemplate; 
+    private RocketMQTemplate extRocketMQTemplate;
     // you can use the template as normal.
     
     ```
