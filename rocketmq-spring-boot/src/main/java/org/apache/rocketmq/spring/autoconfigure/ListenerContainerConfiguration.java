@@ -18,6 +18,7 @@
 package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -113,7 +114,11 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
         nameServer = StringUtils.isEmpty(nameServer) ? rocketMQProperties.getNameServer() : nameServer;
+        String accessChannel = environment.resolvePlaceholders(annotation.accessChannel());
         container.setNameServer(nameServer);
+        if (!StringUtils.isEmpty(accessChannel)) {
+            container.setAccessChannel(AccessChannel.valueOf(accessChannel));
+        }
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQMessageListener(annotation);
