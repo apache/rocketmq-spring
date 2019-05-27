@@ -91,7 +91,7 @@ public class ProducerACLApplication implements CommandLineRunner {
         txProducerGroup = TX_PGROUP_NAME,
         accessKey = "AK", // if not setting, it will read by `rocketmq.producer.access-key` key
         secretKey = "SK"  // if not setting, it will read by `rocketmq.producer.secret-key` key
-    )
+        )
     class TransactionListenerImpl implements RocketMQLocalTransactionListener {
         private AtomicInteger transactionIndex = new AtomicInteger(0);
 

@@ -33,10 +33,12 @@
     <modules>
         <module>rocketmq-produce-demo</module>
         <module>rocketmq-consume-demo</module>
+        <module>rocketmq-produce-acl-demo</module>
+        <module>rocketmq-consume-acl-demo</module>
     </modules>
 
     <properties>
-        <rocketmq-spring-boot-starter-version>2.0.3-SNAPSHOT</rocketmq-spring-boot-starter-version>
+        <rocketmq-spring-boot-starter-version>2.0.4-SNAPSHOT</rocketmq-spring-boot-starter-version>
     </properties>
 
     <dependencies>
