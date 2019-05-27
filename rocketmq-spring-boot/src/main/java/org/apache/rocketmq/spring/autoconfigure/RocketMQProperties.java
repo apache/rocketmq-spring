@@ -29,6 +29,11 @@ public class RocketMQProperties {
      */
     private String nameServer;
 
+    /**
+     * Enum type for accesChannel, values: LOCAL, CLOUD
+     */
+    private String accessChannel;
+
     private Producer producer;
 
     public String getNameServer() {
@@ -37,6 +42,14 @@ public class RocketMQProperties {
 
     public void setNameServer(String nameServer) {
         this.nameServer = nameServer;
+    }
+
+    public String getAccessChannel() {
+        return accessChannel;
+    }
+
+    public void setAccessChannel(String accessChannel) {
+        this.accessChannel = accessChannel;
     }
 
     public RocketMQProperties.Producer getProducer() {

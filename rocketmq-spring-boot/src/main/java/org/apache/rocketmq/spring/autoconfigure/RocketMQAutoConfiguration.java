@@ -20,6 +20,7 @@ package org.apache.rocketmq.spring.autoconfigure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
+import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
@@ -80,6 +81,8 @@ public class RocketMQAutoConfiguration {
         Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
 
+        String accessChannel = rocketMQProperties.getAccessChannel();
+
         DefaultMQProducer producer;
         String ak = rocketMQProperties.getProducer().getAccessKey();
         String sk = rocketMQProperties.getProducer().getSecretKey();
@@ -94,6 +97,9 @@ public class RocketMQAutoConfiguration {
         }
 
         producer.setNamesrvAddr(nameServer);
+        if (!StringUtils.isEmpty(accessChannel)) {
+            producer.setAccessChannel(AccessChannel.valueOf(accessChannel));
+        }
         producer.setSendMsgTimeout(producerConfig.getSendMessageTimeout());
         producer.setRetryTimesWhenSendFailed(producerConfig.getRetryTimesWhenSendFailed());
         producer.setRetryTimesWhenSendAsyncFailed(producerConfig.getRetryTimesWhenSendAsyncFailed());
