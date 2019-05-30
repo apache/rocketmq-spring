@@ -106,7 +106,7 @@ public class RocketMQUtil {
             properties.forEach((key, val) -> {
                 if (!MessageConst.STRING_HASH_SET.contains(key) && !MessageHeaders.ID.equals(key)
                         && !MessageHeaders.TIMESTAMP.equals(key) &&
-                        !MessageConst.STRING_HASH_SET.contains(key.replaceFirst("^" + RocketMQHeaders.PREFIX, ""))) {
+                        (!key.startsWith(RocketMQHeaders.PREFIX) || !MessageConst.STRING_HASH_SET.contains(key.replaceFirst("^" + RocketMQHeaders.PREFIX, "")))) {
                     messageBuilder.setHeader(key, val);
                 }
             });
