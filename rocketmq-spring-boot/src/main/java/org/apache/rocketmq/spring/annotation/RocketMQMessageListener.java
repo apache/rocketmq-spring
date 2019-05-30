@@ -32,6 +32,7 @@ public @interface RocketMQMessageListener {
     String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
     String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
+    String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
 
     /**
      * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve
@@ -103,4 +104,9 @@ public @interface RocketMQMessageListener {
      * The property of "name-server".
      */
     String nameServer() default NAME_SERVER_PLACEHOLDER;
+
+    /**
+     * The property of "access-channel".
+     */
+    String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
 }

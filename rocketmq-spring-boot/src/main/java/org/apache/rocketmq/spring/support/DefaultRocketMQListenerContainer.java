@@ -18,6 +18,7 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -74,6 +75,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private String nameServer;
 
+    private AccessChannel accessChannel = AccessChannel.LOCAL;
+
     private String consumerGroup;
 
     private String topic;
@@ -123,6 +126,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setNameServer(String nameServer) {
         this.nameServer = nameServer;
+    }
+
+    public AccessChannel getAccessChannel() {
+        return accessChannel;
+    }
+
+    public void setAccessChannel(AccessChannel accessChannel) {
+        this.accessChannel = accessChannel;
     }
 
     public String getConsumerGroup() {
@@ -430,6 +441,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             consumer.setNamesrvAddr(customizedNameServer);
         } else {
             consumer.setNamesrvAddr(nameServer);
+        }
+        if (accessChannel != null) {
+            consumer.setAccessChannel(accessChannel);
         }
         consumer.setConsumeThreadMax(consumeThreadMax);
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
