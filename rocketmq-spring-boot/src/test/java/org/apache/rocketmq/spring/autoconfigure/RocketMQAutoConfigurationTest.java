@@ -52,12 +52,24 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testDefaultMQProducerWithRelaxPropertyName() {
         runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
-                "rocketmq.producer.group=spring_rocketmq").
+                "rocketmq.producer.group=spring_rocketmq",
+                "rocketmq.accessChannel=LOCAL").
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultMQProducer.class);
                     assertThat(context).hasSingleBean(RocketMQProperties.class);
                 });
 
+    }
+
+    @Test
+    public void testBadAccessChannelProperty() {
+        runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
+                "rocketmq.producer.group=spring_rocketmq",
+                "rocketmq.accessChannel=LOCAL123").
+                run((context) -> {
+                    //Should throw exception for bad accessChannel property
+                    assertThat(context).getFailure();
+                });
     }
 
     @Test
