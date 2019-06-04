@@ -16,16 +16,14 @@
  */
 package org.apache.rocketmq.spring.support;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
 
 public class RocketMQUtilTest {
 
@@ -88,6 +86,10 @@ public class RocketMQUtilTest {
         assertEquals(String.valueOf("1"), rocketMsg.getProperty("test"));
         assertEquals(String.valueOf("tags"), rocketMsg.getProperty(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
         assertNull(rocketMsg.getTags());
+
+        rmqMsg.putUserProperty(RocketMQUtil.toRocketHeaderKey(RocketMQHeaders.TAGS), "tags2");
+        springMsg = RocketMQUtil.convertToSpringMessage(rmqMsg);
+        assertEquals("tags", springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
     }
 
 }
