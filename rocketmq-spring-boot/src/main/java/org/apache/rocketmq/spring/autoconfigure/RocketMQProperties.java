@@ -40,7 +40,7 @@ public class RocketMQProperties {
     private Producer producer;
 
     /**
-     * configure enable listener or not.
+     * Configure enable listener or not.
      * In some particular cases, if you don't want the the listener is enabled when container startup,
      * the configuration pattern is like this :
      * rocketmq.consumer.listeners.<group-name>.<topic-name>.enabled=<boolean value, true or false>
@@ -76,7 +76,7 @@ public class RocketMQProperties {
     public static class Producer {
 
         /**
-         * Name of producer.
+         * Group name of producer.
          */
         private String group;
 
@@ -229,9 +229,6 @@ public class RocketMQProperties {
         this.consumer = consumer;
     }
 
-    /**
-     * Consumer Configuration
-     */
     public static final class Consumer {
         /**
          * listener configuration container
