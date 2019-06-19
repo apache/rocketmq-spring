@@ -20,6 +20,9 @@ package org.apache.rocketmq.spring.autoconfigure;
 import org.apache.rocketmq.common.MixAll;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SuppressWarnings("WeakerAccess")
 @ConfigurationProperties(prefix = "rocketmq")
 public class RocketMQProperties {
@@ -35,6 +38,16 @@ public class RocketMQProperties {
     private String accessChannel;
 
     private Producer producer;
+
+    /**
+     * Configure enable listener or not.
+     * In some particular cases, if you don't want the the listener is enabled when container startup,
+     * the configuration pattern is like this :
+     * rocketmq.consumer.listeners.<group-name>.<topic-name>.enabled=<boolean value, true or false>
+     * <p>
+     * the listener is enabled by default.
+     */
+    private Consumer consumer = new Consumer();
 
     public String getNameServer() {
         return nameServer;
@@ -63,7 +76,7 @@ public class RocketMQProperties {
     public static class Producer {
 
         /**
-         * Name of producer.
+         * Group name of producer.
          */
         private String group;
 
@@ -207,4 +220,32 @@ public class RocketMQProperties {
             this.customizedTraceTopic = customizedTraceTopic;
         }
     }
+
+    public Consumer getConsumer() {
+        return consumer;
+    }
+
+    public void setConsumer(Consumer consumer) {
+        this.consumer = consumer;
+    }
+
+    public static final class Consumer {
+        /**
+         * listener configuration container
+         * the pattern is like this:
+         * group1.topic1 = false
+         * group2.topic2 = true
+         * group3.topic3 = false
+         */
+        private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
+
+        public Map<String, Map<String, Boolean>> getListeners() {
+            return listeners;
+        }
+
+        public void setListeners(Map<String, Map<String, Boolean>> listeners) {
+            this.listeners = listeners;
+        }
+    }
+
 }

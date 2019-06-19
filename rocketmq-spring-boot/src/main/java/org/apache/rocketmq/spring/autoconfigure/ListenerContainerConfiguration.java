@@ -38,6 +38,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -87,6 +88,20 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         }
 
         RocketMQMessageListener annotation = clazz.getAnnotation(RocketMQMessageListener.class);
+
+        String consumerGroup = this.environment.resolvePlaceholders(annotation.consumerGroup());
+        String topic = this.environment.resolvePlaceholders(annotation.topic());
+
+        boolean listenerEnabled =
+            (boolean)rocketMQProperties.getConsumer().getListeners().getOrDefault(consumerGroup, Collections.EMPTY_MAP)
+                .getOrDefault(topic, true);
+
+        if (!listenerEnabled) {
+            log.debug(
+                "Consumer Listener (group:{},topic:{}) is not enabled by configuration, will ignore initialization.",
+                consumerGroup, topic);
+            return;
+        }
         validate(annotation);
 
         String containerBeanName = String.format("%s_%s", DefaultRocketMQListenerContainer.class.getName(),
