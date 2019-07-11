@@ -280,7 +280,7 @@ public class MyConsumer implements RocketMQListener<String> {
 
 1. How to connected many `nameserver` on production environment？
 
-    `rocketmq.name-server` support the configuration of multiple `nameserver`, separated by `;`. For example: `172.19.0.1: 9876; 172.19.0.2: 9876`
+    `rocketmq.name-server` support the configuration of multiple `nameserver`, separated by `;`. For example: `172.19.0.1:9876; 172.19.0.2:9876`
 
 1. When was `rocketMQTemplate` destroyed?
 
