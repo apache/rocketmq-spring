@@ -39,6 +39,7 @@ import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import java.util.ArrayList;
@@ -519,9 +520,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     @Override
     protected Message<?> doConvert(Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
-        String content;
+        String content = null;
+        byte[] contentBytes = null;
         if (payload instanceof String) {
             content = (String) payload;
+        } else if (payload instanceof byte[]) {
+            contentBytes = (byte[]) payload;
         } else {
             // If payload not as string, use objectMapper change it.
             try {
@@ -532,11 +536,20 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             }
         }
 
-        MessageBuilder<?> builder = MessageBuilder.withPayload(content);
+        MessageBuilder<?> builder = null;
+        MimeType mimeType = null;
+        if (contentBytes != null) {
+            builder = MessageBuilder.withPayload(contentBytes);
+            mimeType = MimeTypeUtils.APPLICATION_OCTET_STREAM;
+        } else {
+            builder = MessageBuilder.withPayload(content);
+            mimeType = MimeTypeUtils.TEXT_PLAIN;
+        }
         if (headers != null) {
             builder.copyHeaders(headers);
         }
-        builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN);
+
+        builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, mimeType);
 
         Message<?> message = builder.build();
         if (postProcessor != null) {
