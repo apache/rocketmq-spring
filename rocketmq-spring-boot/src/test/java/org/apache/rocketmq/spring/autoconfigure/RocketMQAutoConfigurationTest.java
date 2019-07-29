@@ -21,7 +21,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.junit.Assert;
@@ -34,6 +37,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -148,17 +152,29 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testConsumerListener() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
-            "rocketmq.producer.group=spring_rocketmq",
-            "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC=false",
-            "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC2=true").
-            run((context) -> {
-                RocketMQProperties rocketMQProperties = context.getBean(RocketMQProperties.class);
-                assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC").booleanValue()).isEqualTo(false);
-                assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC2").booleanValue()).isEqualTo(true);
-            });
+                "rocketmq.producer.group=spring_rocketmq",
+                "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC=false",
+                "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC2=true").
+                run((context) -> {
+                    RocketMQProperties rocketMQProperties = context.getBean(RocketMQProperties.class);
+                    assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC").booleanValue()).isEqualTo(false);
+                    assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC2").booleanValue()).isEqualTo(true);
+                });
 
     }
 
+    @Test
+    public void testRocketMQTransactionListener() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "rocketmq.producer.group=spring_rocketmq",
+                "demo.rocketmq.transaction.producer.group=transaction-group1").
+                withUserConfiguration(TestTransactionListenerConfig.class).
+                run((context) -> {
+                    assertThat(context).hasSingleBean(MyRocketMQLocalTransactionListener.class);
+
+                });
+
+    }
 
     @Configuration
     static class TestConfig {
@@ -215,6 +231,30 @@ public class RocketMQAutoConfigurationTest {
         @Override
         public void onMessage(Object message) {
 
+        }
+    }
+
+    @Configuration
+    static class TestTransactionListenerConfig {
+        @Bean
+        public Object rocketMQLocalTransactionListener() {
+            return new MyRocketMQLocalTransactionListener();
+        }
+
+    }
+
+    @RocketMQTransactionListener(txProducerGroup = "${demo.rocketmq.transaction.producer.group}")
+    static class MyRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
+
+
+        @Override
+        public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
+            return RocketMQLocalTransactionState.COMMIT;
+        }
+
+        @Override
+        public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
+            return RocketMQLocalTransactionState.COMMIT;
         }
     }
 
