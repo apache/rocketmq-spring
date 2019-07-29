@@ -152,14 +152,14 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testConsumerListener() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
-            "rocketmq.producer.group=spring_rocketmq",
-            "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC=false",
-            "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC2=true").
-            run((context) -> {
-                RocketMQProperties rocketMQProperties = context.getBean(RocketMQProperties.class);
-                assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC").booleanValue()).isEqualTo(false);
-                assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC2").booleanValue()).isEqualTo(true);
-            });
+                "rocketmq.producer.group=spring_rocketmq",
+                "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC=false",
+                "rocketmq.consumer.listeners.spring_rocketmq.FOO_TEST_TOPIC2=true").
+                run((context) -> {
+                    RocketMQProperties rocketMQProperties = context.getBean(RocketMQProperties.class);
+                    assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC").booleanValue()).isEqualTo(false);
+                    assertThat(rocketMQProperties.getConsumer().getListeners().get("spring_rocketmq").get("FOO_TEST_TOPIC2").booleanValue()).isEqualTo(true);
+                });
 
     }
 
