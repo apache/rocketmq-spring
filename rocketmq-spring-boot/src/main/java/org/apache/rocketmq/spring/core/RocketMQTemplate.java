@@ -283,7 +283,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      */
     public SendResult syncSendOrderly(String destination, Object payload, String hashKey, long timeout) {
         Message<?> message = this.doConvert(payload, null, null);
-        return syncSendOrderly(destination, message, hashKey, producer.getSendMsgTimeout());
+        return syncSendOrderly(destination, message, hashKey, timeout);
     }
     /**
      * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout and delay level specified in addition.
