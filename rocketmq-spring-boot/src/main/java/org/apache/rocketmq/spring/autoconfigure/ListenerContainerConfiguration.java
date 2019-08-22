@@ -135,10 +135,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
-		String tags = environment.resolvePlaceholders(annotation.selectorExpression());
-		if (!StringUtils.isEmpty(tags)) {
-			container.setSelectorExpression(tags);
-		}
+        String tags = environment.resolvePlaceholders(annotation.selectorExpression());
+        if (!StringUtils.isEmpty(tags)) {
+            container.setSelectorExpression(tags);
+        }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener) bean);
