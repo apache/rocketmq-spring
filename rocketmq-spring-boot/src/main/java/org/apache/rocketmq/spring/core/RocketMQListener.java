@@ -21,7 +21,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 
 public interface RocketMQListener<T> {
 
-    default boolean isDuplicate(MessageExt message){
+    default boolean isDuplicate(MessageExt message) {
         return false;
     }
 
