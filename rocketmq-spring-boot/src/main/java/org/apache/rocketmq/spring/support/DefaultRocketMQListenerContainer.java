@@ -326,6 +326,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             for (MessageExt messageExt : msgs) {
                 log.debug("received msg: {}", messageExt);
                 try {
+                    if (rocketMQListener.isDuplicate(messageExt)) {
+                        log.warn("duplicate message received. messageExt: {}", messageExt);
+                        continue;
+                    }
                     long now = System.currentTimeMillis();
                     rocketMQListener.onMessage(doConvertMessage(messageExt));
                     long costTime = System.currentTimeMillis() - now;
@@ -349,6 +353,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             for (MessageExt messageExt : msgs) {
                 log.debug("received msg: {}", messageExt);
                 try {
+                    if (rocketMQListener.isDuplicate(messageExt)) {
+                        log.warn("duplicate message received. messageExt: {}", messageExt);
+                        continue;
+                    }
                     long now = System.currentTimeMillis();
                     rocketMQListener.onMessage(doConvertMessage(messageExt));
                     long costTime = System.currentTimeMillis() - now;
