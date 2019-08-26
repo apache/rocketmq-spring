@@ -33,6 +33,11 @@ public class DefaultRocketMQListenerContainerTest {
 
         listenerContainer.setRocketMQListener(new RocketMQListener<String>() {
             @Override
+            public boolean isDuplicate(MessageExt message) {
+                return false;
+            }
+
+            @Override
             public void onMessage(String message) {
             }
         });
@@ -40,6 +45,11 @@ public class DefaultRocketMQListenerContainerTest {
         assertThat(result.getName().equals(String.class.getName()));
 
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
+            @Override
+            public boolean isDuplicate(MessageExt message) {
+                return false;
+            }
+
             @Override
             public void onMessage(MessageExt message) {
             }
