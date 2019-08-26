@@ -19,6 +19,7 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
@@ -218,6 +219,10 @@ public class RocketMQAutoConfigurationTest {
 
     @RocketMQMessageListener(consumerGroup = "abc", topic = "test")
     static class MyMessageListener implements RocketMQListener {
+        @Override
+        public boolean isDuplicate(MessageExt message) {
+            return true;
+        }
 
         @Override
         public void onMessage(Object message) {

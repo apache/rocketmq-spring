@@ -47,7 +47,7 @@ public class DefaultRocketMQListenerContainerTest {
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
             @Override
             public boolean isDuplicate(MessageExt message) {
-                return false;
+                return true;
             }
 
             @Override
