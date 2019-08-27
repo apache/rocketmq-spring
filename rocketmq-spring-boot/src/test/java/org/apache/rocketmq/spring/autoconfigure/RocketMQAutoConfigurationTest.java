@@ -39,6 +39,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 
+import java.net.InetAddress;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RocketMQAutoConfigurationTest {
@@ -100,6 +102,22 @@ public class RocketMQAutoConfigurationTest {
                             hasFieldOrPropertyWithValue("nameServer", "127.0.0.1:9876");
                     assertThat(context).getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_2").
                             hasFieldOrPropertyWithValue("nameServer", "127.0.1.1:9876");
+                });
+
+    }
+
+    @Test
+    public void testRocketMQListenerContainerSpelTopic() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+                withUserConfiguration(ListenerSpelTopicConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+                    assertThat(context).hasBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1");
+
+                    DefaultRocketMQListenerContainer listener1 = (DefaultRocketMQListenerContainer)context.getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1");
+                    assertThat(listener1.getTopic()).isEqualTo("TP_" + InetAddress.getLocalHost().getHostAddress().replace('.', '_'));
                 });
 
     }
@@ -192,6 +210,16 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Configuration
+    static class ListenerSpelTopicConfig {
+
+        @Bean
+        public Object consumeListener2() {
+            return new SpelTopicMessageListener();
+        }
+
+    }
+
+    @Configuration
     static class CustomObjectMapperConfig {
 
         @Bean
@@ -227,6 +255,15 @@ public class RocketMQAutoConfigurationTest {
 
     @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abc1", topic = "test")
     static class MyMessageListener1 implements RocketMQListener {
+
+        @Override
+        public void onMessage(Object message) {
+
+        }
+    }
+
+    @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abc1", topic = "spel:'TP_' + T(java.net.InetAddress).getLocalHost().getHostAddress().replace('.', '_')")
+    static class SpelTopicMessageListener implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
