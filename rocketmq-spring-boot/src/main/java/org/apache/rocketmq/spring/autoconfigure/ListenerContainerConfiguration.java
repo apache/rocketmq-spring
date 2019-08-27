@@ -22,6 +22,7 @@ import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -134,7 +137,17 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         if (!StringUtils.isEmpty(accessChannel)) {
             container.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
-        container.setTopic(environment.resolvePlaceholders(annotation.topic()));
+        String topicRowString = annotation.topic();
+        //spel
+        if (topicRowString.startsWith(RocketMQConfigUtils.ROCKETMQ_LISTENER_TOPIC_PREFIX_SPEL)) {
+            ExpressionParser parser = new SpelExpressionParser();
+            String spel = topicRowString.substring(RocketMQConfigUtils.ROCKETMQ_LISTENER_TOPIC_PREFIX_SPEL.length());
+            container.setTopic(parser.parseExpression(spel).getValue(String.class));
+        }
+        //default placeholder
+        else {
+            container.setTopic(environment.resolvePlaceholders(annotation.topic()));
+        }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener) bean);

@@ -29,4 +29,6 @@ public class RocketMQConfigUtils {
 
     public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
             "rocketMQTemplate";
+
+    public static final String ROCKETMQ_LISTENER_TOPIC_PREFIX_SPEL = "spel:";
 }
