@@ -22,6 +22,7 @@ import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
+import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -211,7 +212,8 @@ public class RocketMQUtil {
         SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
         instanceName.append(sessionCredentials.getAccessKey())
             .append(separator).append(sessionCredentials.getSecretKey())
-            .append(separator).append(identify);
+            .append(separator).append(identify)
+            .append(separator).append(UtilAll.getPid());
         return instanceName.toString();
     }
 }
