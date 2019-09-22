@@ -464,7 +464,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
         switch (selectorType) {
             case TAG:
-                consumer.subscribe(topic, selectorExpression);
+                consumer.subscribe(topic, applicationContext.getEnvironment().resolvePlaceholders(selectorExpression));
                 break;
             case SQL92:
                 consumer.subscribe(topic, MessageSelector.bySql(selectorExpression));
