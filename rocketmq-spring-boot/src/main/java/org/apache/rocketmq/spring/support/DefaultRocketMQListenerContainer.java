@@ -191,7 +191,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumeMode = anno.consumeMode();
         this.consumeThreadMax = anno.consumeThreadMax();
         this.messageModel = anno.messageModel();
-        this.selectorExpression = anno.selectorExpression();
         this.selectorType = anno.selectorType();
         this.consumeTimeout = anno.consumeTimeout();
     }
