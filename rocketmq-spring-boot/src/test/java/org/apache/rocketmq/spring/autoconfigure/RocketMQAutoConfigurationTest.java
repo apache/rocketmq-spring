@@ -176,6 +176,27 @@ public class RocketMQAutoConfigurationTest {
 
     }
 
+    @Test
+    public void testPlaceholdersListenerContainer() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "demo.placeholders.consumer.group = abc3",
+                "demo.placeholders.consumer.topic = test",
+                "demo.placeholders.consumer.tags = tag1").
+                withUserConfiguration(TestPlaceholdersConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+                    assertThat(context).hasBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1");
+                    assertThat(context).getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1").
+                        hasFieldOrPropertyWithValue("nameServer", "127.0.0.1:9876").
+                        hasFieldOrPropertyWithValue("consumerGroup", "abc3").
+                        hasFieldOrPropertyWithValue("topic", "test").
+                        hasFieldOrPropertyWithValue("selectorExpression", "tag1");
+                });
+    }
+
+
     @Configuration
     static class TestConfig {
 
@@ -271,6 +292,25 @@ public class RocketMQAutoConfigurationTest {
     @ExtRocketMQTemplateConfiguration(group = "test", nameServer = "127.0.0.1:9876")
     static class MyExtRocketMQTemplate extends RocketMQTemplate {
 
+    }
+
+    @Configuration
+    static class TestPlaceholdersConfig {
+
+        @Bean
+        public Object consumeListener() {
+            return new TestPlaceholdersListener();
+        }
+
+    }
+
+    @RocketMQMessageListener(consumerGroup = "${demo.placeholders.consumer.group}", topic = "${demo.placeholders.consumer.topic}", selectorExpression = "${demo.placeholders.consumer.tags}")
+    static class TestPlaceholdersListener implements RocketMQListener {
+
+        @Override
+        public void onMessage(Object message) {
+
+        }
     }
 }
 
