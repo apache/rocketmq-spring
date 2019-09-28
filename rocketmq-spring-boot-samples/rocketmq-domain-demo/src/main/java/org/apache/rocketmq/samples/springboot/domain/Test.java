@@ -14,41 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.rocketmq.samples.springboot.domain;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
+public class Test {
 
-/**
- * OrderPaidEvent
- */
-public class OrderPaidEvent implements Serializable {
-    private String orderId;
-
-    private BigDecimal paidMoney;
-
-    public OrderPaidEvent() {
-    }
-
-    public OrderPaidEvent(String orderId, BigDecimal paidMoney) {
-        this.orderId = orderId;
-        this.paidMoney = paidMoney;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-    public BigDecimal getPaidMoney() {
-        return paidMoney;
-    }
-
-    public void setPaidMoney(BigDecimal paidMoney) {
-        this.paidMoney = paidMoney;
+    public static void main(String[] args) {
+        //do nothing, just for checkstyle
     }
 }
