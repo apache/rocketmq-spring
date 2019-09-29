@@ -193,7 +193,7 @@ public class RocketMQAutoConfigurationTest {
                         batchMessages.add(new GenericMessage<String>("this is generic message "+i));
                     }
 
-                    SendResult customSendResult = rocketMQTemplate.syncSend("test-batch-message", batchMessages, 60000);
+                    SendResult customSendResult = rocketMQTemplate.syncSend("test", batchMessages, 60000);
                     Assert.assertSame(customSendResult.getSendStatus(), SendStatus.SEND_OK);
                 });
 
