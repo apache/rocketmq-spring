@@ -17,13 +17,16 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -38,8 +41,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
-import java.util.Objects;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Configuration
@@ -53,14 +55,16 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     private RocketMQProperties rocketMQProperties;
 
     private ObjectMapper objectMapper;
+    private RocketMQMessageConverter rocketMQMessageConverter;
 
-    public ExtProducerResetConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-                                             StandardEnvironment environment,
-                                             RocketMQProperties rocketMQProperties) {
-        this.objectMapper = rocketMQMessageObjectMapper;
-        this.environment = environment;
-        this.rocketMQProperties = rocketMQProperties;
-    }
+	public ExtProducerResetConfiguration(ObjectMapper rocketMQMessageObjectMapper,
+			RocketMQMessageConverter rocketMQMessageConverter,
+			StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
+		this.rocketMQMessageConverter = rocketMQMessageConverter;
+		this.objectMapper = rocketMQMessageObjectMapper;
+		this.environment = environment;
+		this.rocketMQProperties = rocketMQProperties;
+	}
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -98,9 +102,8 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         }
         RocketMQTemplate rocketMQTemplate = (RocketMQTemplate) bean;
         rocketMQTemplate.setProducer(mqProducer);
+        rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         rocketMQTemplate.setObjectMapper(objectMapper);
-
-
         log.info("Set real producer to :{} {}", beanName, annotation.value());
     }
 

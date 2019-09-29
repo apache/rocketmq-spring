@@ -17,8 +17,13 @@
 
 package org.apache.rocketmq.spring.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MessageQueueSelector;
@@ -30,6 +35,8 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.messaging.Message;
@@ -41,14 +48,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> implements InitializingBean, DisposableBean {
@@ -56,6 +56,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     private DefaultMQProducer producer;
 
+    @Deprecated
     private ObjectMapper objectMapper;
 
     private String charset = "UTF-8";
@@ -71,11 +72,11 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public void setProducer(DefaultMQProducer producer) {
         this.producer = producer;
     }
-
+    @Deprecated
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
-
+    @Deprecated
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
@@ -95,6 +96,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public void setMessageQueueSelector(MessageQueueSelector messageQueueSelector) {
         this.messageQueueSelector = messageQueueSelector;
     }
+
 
     /**
      * <p> Send message in synchronous mode. This method returns only when the sending procedure totally completes.
@@ -143,19 +145,19 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             long now = System.currentTimeMillis();
             Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
-            org.apache.rocketmq.common.message.Message rocketMsg;
             for (Message<?> msg:messages) {
                 if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
                     log.warn("Found a message empty in the batch, skip it");
                     continue;
                 }
-                rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper, charset, destination, msg);
-                rmqMsgs.add(rocketMsg);
+                rmqMsgs.add(this.createRocketMqMessage(destination, msg));
             }
 
             SendResult sendResult = producer.send(rmqMsgs, timeout);
             long costTime = System.currentTimeMillis() - now;
-            log.debug("send messages cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            if(log.isDebugEnabled()){
+                log.debug("send messages cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            }
             return sendResult;
         } catch (Exception e) {
             log.error("syncSend with batch failed. destination:{}, messages.size:{} ", destination, messages.size());
@@ -177,17 +179,17 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("syncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
             long now = System.currentTimeMillis();
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
             SendResult sendResult = producer.send(rocketMsg, timeout);
             long costTime = System.currentTimeMillis() - now;
-            log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            if(log.isDebugEnabled()){
+                log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            }
             return sendResult;
         } catch (Exception e) {
             log.error("syncSend failed. destination:{}, message:{} ", destination, message);
@@ -215,7 +217,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return {@link SendResult}
      */
     public SendResult syncSend(String destination, Object payload, long timeout) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         return syncSend(destination, message, timeout);
     }
 
@@ -245,14 +247,14 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("syncSendOrderly failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
             long now = System.currentTimeMillis();
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             SendResult sendResult = producer.send(rocketMsg, messageQueueSelector, hashKey, timeout);
             long costTime = System.currentTimeMillis() - now;
-            log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            if(log.isDebugEnabled()){
+                log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            }
             return sendResult;
         } catch (Exception e) {
             log.error("syncSendOrderly failed. destination:{}, message:{} ", destination, message);
@@ -282,7 +284,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return {@link SendResult}
      */
     public SendResult syncSendOrderly(String destination, Object payload, String hashKey, long timeout) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         return syncSendOrderly(destination, message, hashKey, timeout);
     }
     /**
@@ -299,10 +301,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("asyncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
@@ -351,7 +351,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      */
     public void asyncSend(String destination, Object payload, SendCallback sendCallback, long timeout) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         asyncSend(destination, message, sendCallback, timeout);
     }
 
@@ -382,10 +382,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("asyncSendOrderly failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.send(rocketMsg, messageQueueSelector, hashKey, sendCallback, timeout);
         } catch (Exception e) {
             log.error("asyncSendOrderly failed. destination:{}, message:{} ", destination, message);
@@ -428,7 +426,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      */
     public void asyncSendOrderly(String destination, Object payload, String hashKey, SendCallback sendCallback,
                                  long timeout) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         asyncSendOrderly(destination, message, hashKey, sendCallback, timeout);
     }
 
@@ -446,10 +444,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("sendOneWay failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.sendOneway(rocketMsg);
         } catch (Exception e) {
             log.error("sendOneWay failed. destination:{}, message:{} ", destination, message);
@@ -464,7 +460,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param payload     the Object to use as payload
      */
     public void sendOneWay(String destination, Object payload) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         sendOneWay(destination, message);
     }
 
@@ -480,10 +476,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("sendOneWayOrderly failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-
         try {
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.sendOneway(rocketMsg, messageQueueSelector, hashKey);
         } catch (Exception e) {
             log.error("sendOneWayOrderly failed. destination:{}, message:{}", destination, message);
@@ -498,7 +492,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param payload     the Object to use as payload
      */
     public void sendOneWayOrderly(String destination, Object payload, String hashKey) {
-        Message<?> message = this.doConvert(payload, null, null);
+        Message<?> message = MessageBuilder.withPayload(payload).build();
         sendOneWayOrderly(destination, message, hashKey);
     }
 
@@ -512,37 +506,19 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     @Override
     protected void doSend(String destination, Message<?> message) {
         SendResult sendResult = syncSend(destination, message);
-        log.debug("send message to `{}` finished. result:{}", destination, sendResult);
+        if(log.isDebugEnabled()){
+            log.debug("send message to `{}` finished. result:{}", destination, sendResult);
+        }
     }
 
 
 
     @Override
     protected Message<?> doConvert(Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
-        String content;
-        if (payload instanceof String) {
-            content = (String) payload;
-        } else {
-            // If payload not as string, use objectMapper change it.
-            try {
-                content = objectMapper.writeValueAsString(payload);
-            } catch (JsonProcessingException e) {
-                log.error("convert payload to String failed. payload:{}", payload);
-                throw new RuntimeException("convert to payload to String failed.", e);
-            }
-        }
-
-        MessageBuilder<?> builder = MessageBuilder.withPayload(content);
-        if (headers != null) {
-            builder.copyHeaders(headers);
-        }
+        Message<?> message = super.doConvert(payload, headers, postProcessor);
+        MessageBuilder<?> builder = MessageBuilder.fromMessage(message);
         builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN);
-
-        Message<?> message = builder.build();
-        if (postProcessor != null) {
-            message = postProcessor.postProcessMessage(message);
-        }
-        return message;
+        return builder.build();
     }
 
     @Override
@@ -550,7 +526,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         if (Objects.nonNull(producer)) {
             producer.shutdown();
         }
-
         for (Map.Entry<String, TransactionMQProducer> kv : cache.entrySet()) {
             if (Objects.nonNull(kv.getValue())) {
                 kv.getValue().shutdown();
@@ -588,8 +563,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public TransactionSendResult sendMessageInTransaction(final String txProducerGroup, final String destination, final Message<?> message, final Object arg) throws MessagingException {
         try {
             TransactionMQProducer txProducer = this.stageMQProducer(txProducerGroup);
-            org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
-                charset, destination, message);
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             return txProducer.sendMessageInTransaction(rocketMsg, arg);
         } catch (MQClientException e) {
             throw RocketMQUtil.convert(e);
@@ -674,4 +648,13 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
         return txProducer;
     }
+    
+    
+	private org.apache.rocketmq.common.message.Message createRocketMqMessage(
+			String destination, Message<?> message) {
+		Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), null);
+		return RocketMQUtil.convertToRocketMessage(getMessageConverter(), charset,
+				destination, msg);
+	}
+    
 }

@@ -17,7 +17,8 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.annotation.PostConstruct;
+
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.AccessChannel;
@@ -27,6 +28,7 @@ import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.config.RocketMQTransactionAnnotationProcessor;
 import org.apache.rocketmq.spring.config.TransactionHandlerRegistry;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,14 +48,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
-@ConditionalOnClass({ MQAdmin.class, ObjectMapper.class })
+@ConditionalOnClass({ MQAdmin.class, ObjectMapper.class})
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
-@Import({ JacksonFallbackConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class })
-@AutoConfigureAfter(JacksonAutoConfiguration.class)
+@Import({ JacksonFallbackConfiguration.class,MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class })
+@AutoConfigureAfter({JacksonFallbackConfiguration.class,MessageConverterConfiguration.class})
 public class RocketMQAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
 
@@ -113,20 +114,23 @@ public class RocketMQAutoConfiguration {
     @Bean(destroyMethod = "destroy")
     @ConditionalOnBean(DefaultMQProducer.class)
     @ConditionalOnMissingBean(name = RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
-    public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer, ObjectMapper rocketMQMessageObjectMapper) {
-        RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
-        rocketMQTemplate.setProducer(mqProducer);
-        rocketMQTemplate.setObjectMapper(rocketMQMessageObjectMapper);
-        return rocketMQTemplate;
-    }
+	public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer,
+			ObjectMapper rocketMQMessageObjectMapper,
+			RocketMQMessageConverter rocketMQMessageConverter) {
+		RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
+		rocketMQTemplate.setProducer(mqProducer);
+		rocketMQTemplate.setObjectMapper(rocketMQMessageObjectMapper);
+		rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
+		return rocketMQTemplate;
+	}
 
     @Bean
     @ConditionalOnBean(name = RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
     @ConditionalOnMissingBean(TransactionHandlerRegistry.class)
-    public TransactionHandlerRegistry transactionHandlerRegistry(@Qualifier(RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
-                                                                             RocketMQTemplate template) {
-        return new TransactionHandlerRegistry(template);
-    }
+	public TransactionHandlerRegistry transactionHandlerRegistry(
+			@Qualifier(RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME) RocketMQTemplate template) {
+		return new TransactionHandlerRegistry(template);
+	}
 
     @Bean(name = RocketMQConfigUtils.ROCKETMQ_TRANSACTION_ANNOTATION_PROCESSOR_BEAN_NAME)
     @ConditionalOnBean(TransactionHandlerRegistry.class)
