@@ -27,6 +27,7 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -110,8 +111,8 @@ public class RocketMQAutoConfigurationTest {
                 withUserConfiguration(TestConfig.class, CustomObjectMapperConfig.class).
                 run((context) -> {
                     assertThat(context.getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1",
-                            DefaultRocketMQListenerContainer.class).getObjectMapper())
-                            .isSameAs(context.getBean(CustomObjectMapperConfig.class).testObjectMapper());
+                            DefaultRocketMQListenerContainer.class).getMessageConverter())
+                            .isSameAs(context.getBean(CustomObjectMapperConfig.class).rocketMQMessageConverter().getMessageConverter());
                 });
     }
 
@@ -121,8 +122,8 @@ public class RocketMQAutoConfigurationTest {
                 withUserConfiguration(TestConfig.class, CustomObjectMappersConfig.class).
                 run((context) -> {
                     assertThat(context.getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1",
-                            DefaultRocketMQListenerContainer.class).getObjectMapper())
-                            .isSameAs(context.getBean(CustomObjectMappersConfig.class).rocketMQMessageObjectMapper());
+                            DefaultRocketMQListenerContainer.class).getMessageConverter())
+                            .isSameAs(context.getBean(CustomObjectMappersConfig.class).rocketMQMessageConverter().getMessageConverter());
                 });
     }
 
@@ -198,6 +199,11 @@ public class RocketMQAutoConfigurationTest {
         public ObjectMapper testObjectMapper() {
             return new ObjectMapper();
         }
+        @Bean
+        public RocketMQMessageConverter rocketMQMessageConverter() {
+            return new RocketMQMessageConverter();
+        }
+
 
     }
 
@@ -212,6 +218,10 @@ public class RocketMQAutoConfigurationTest {
         @Bean
         public ObjectMapper rocketMQMessageObjectMapper() {
             return new ObjectMapper();
+        }
+        @Bean
+        public RocketMQMessageConverter rocketMQMessageConverter() {
+            return new RocketMQMessageConverter();
         }
 
     }
