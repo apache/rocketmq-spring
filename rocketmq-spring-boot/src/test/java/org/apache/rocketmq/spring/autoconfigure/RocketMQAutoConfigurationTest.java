@@ -19,6 +19,8 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
@@ -38,6 +40,10 @@ import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -172,6 +178,23 @@ public class RocketMQAutoConfigurationTest {
                 run((context) -> {
                     assertThat(context).hasSingleBean(MyRocketMQLocalTransactionListener.class);
 
+                });
+
+    }
+
+    @Test
+    public void testBatchSendMessage() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "rocketmq.producer.group=spring_rocketmq").
+                run((context) -> {
+                    RocketMQTemplate rocketMQTemplate = context.getBean(RocketMQTemplate.class);
+                    List<GenericMessage<String>> batchMessages = new ArrayList<GenericMessage<String>>();
+                    for (int i = 0; i < 10; i++) {
+                        batchMessages.add(new GenericMessage<String>("this is generic message "+i));
+                    }
+
+                    SendResult customSendResult = rocketMQTemplate.syncSend("test-batch-message", batchMessages, 60000);
+                    Assert.assertSame(customSendResult.getSendStatus(), SendStatus.SEND_OK);
                 });
 
     }
