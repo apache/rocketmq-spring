@@ -23,18 +23,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @see RocketMQMessageConverter
- *
- * @author zkz
  */
 @Configuration
 @ConditionalOnMissingBean(RocketMQMessageConverter.class)
 class MessageConverterConfiguration {
 
-	@Bean
-	public RocketMQMessageConverter createRocketMQMessageConverter() {
-		return new RocketMQMessageConverter();
-	}
+    @Bean
+    public RocketMQMessageConverter createRocketMQMessageConverter() {
+        return new RocketMQMessageConverter();
+    }
 
 }

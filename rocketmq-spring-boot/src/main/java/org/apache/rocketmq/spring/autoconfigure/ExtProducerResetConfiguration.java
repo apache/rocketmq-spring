@@ -43,7 +43,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 @Configuration
 public class ExtProducerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private final static Logger log = LoggerFactory.getLogger(ExtProducerResetConfiguration.class);
@@ -57,18 +56,18 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     private ObjectMapper objectMapper;
     private RocketMQMessageConverter rocketMQMessageConverter;
 
-	public ExtProducerResetConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-			RocketMQMessageConverter rocketMQMessageConverter,
-			StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
-		this.rocketMQMessageConverter = rocketMQMessageConverter;
-		this.objectMapper = rocketMQMessageObjectMapper;
-		this.environment = environment;
-		this.rocketMQProperties = rocketMQProperties;
-	}
+    public ExtProducerResetConfiguration(ObjectMapper rocketMQMessageObjectMapper,
+        RocketMQMessageConverter rocketMQMessageConverter,
+        StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
+        this.rocketMQMessageConverter = rocketMQMessageConverter;
+        this.objectMapper = rocketMQMessageObjectMapper;
+        this.environment = environment;
+        this.rocketMQProperties = rocketMQProperties;
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+        this.applicationContext = (ConfigurableApplicationContext)applicationContext;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         }
 
         ExtRocketMQTemplateConfiguration annotation = clazz.getAnnotation(ExtRocketMQTemplateConfiguration.class);
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
+        GenericApplicationContext genericApplicationContext = (GenericApplicationContext)applicationContext;
         validate(annotation, genericApplicationContext);
 
         DefaultMQProducer mqProducer = createProducer(annotation);
@@ -96,11 +95,12 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         mqProducer.setInstanceName(beanName);
         try {
             mqProducer.start();
-        } catch (MQClientException e) {
-            throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",
-                    beanName), e);
         }
-        RocketMQTemplate rocketMQTemplate = (RocketMQTemplate) bean;
+        catch (MQClientException e) {
+            throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",
+                beanName), e);
+        }
+        RocketMQTemplate rocketMQTemplate = (RocketMQTemplate)bean;
         rocketMQTemplate.setProducer(mqProducer);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         rocketMQTemplate.setObjectMapper(objectMapper);
@@ -127,9 +127,10 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
 
         if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
             producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)),
-                    annotation.enableMsgTrace(), customizedTraceTopic);
+                annotation.enableMsgTrace(), customizedTraceTopic);
             producer.setVipChannelEnabled(false);
-        } else {
+        }
+        else {
             producer = new DefaultMQProducer(groupName, annotation.enableMsgTrace(), customizedTraceTopic);
         }
 
@@ -144,18 +145,19 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         return producer;
     }
 
-    private void validate(ExtRocketMQTemplateConfiguration annotation, GenericApplicationContext genericApplicationContext) {
+    private void validate(ExtRocketMQTemplateConfiguration annotation,
+        GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
             throw new BeanDefinitionValidationException(String.format("Bean {} has been used in Spring Application Context, " +
-                            "please check the @ExtRocketMQTemplateConfiguration",
-                    annotation.value()));
+                    "please check the @ExtRocketMQTemplateConfiguration",
+                annotation.value()));
         }
 
         if (rocketMQProperties.getNameServer() == null ||
-                rocketMQProperties.getNameServer().equals(environment.resolvePlaceholders(annotation.nameServer()))) {
+            rocketMQProperties.getNameServer().equals(environment.resolvePlaceholders(annotation.nameServer()))) {
             throw new BeanDefinitionValidationException(
-                    "Bad annotation definition in @ExtRocketMQTemplateConfiguration, nameServer property is same with " +
-                            "global property, please use the default RocketMQTemplate!");
+                "Bad annotation definition in @ExtRocketMQTemplateConfiguration, nameServer property is same with " +
+                    "global property, please use the default RocketMQTemplate!");
         }
     }
 }

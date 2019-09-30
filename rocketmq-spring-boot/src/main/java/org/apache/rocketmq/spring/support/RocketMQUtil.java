@@ -107,8 +107,8 @@ public class RocketMQUtil {
         if (!CollectionUtils.isEmpty(properties)) {
             properties.forEach((key, val) -> {
                 if (!MessageConst.STRING_HASH_SET.contains(key) && !MessageHeaders.ID.equals(key)
-                        && !MessageHeaders.TIMESTAMP.equals(key) &&
-                        (!key.startsWith(RocketMQHeaders.PREFIX) || !MessageConst.STRING_HASH_SET.contains(key.replaceFirst("^" + RocketMQHeaders.PREFIX, "")))) {
+                    && !MessageHeaders.TIMESTAMP.equals(key) &&
+                    (!key.startsWith(RocketMQHeaders.PREFIX) || !MessageConst.STRING_HASH_SET.contains(key.replaceFirst("^" + RocketMQHeaders.PREFIX, "")))) {
                     messageBuilder.setHeader(key, val);
                 }
             });
@@ -136,14 +136,17 @@ public class RocketMQUtil {
         byte[] payloads;
 
         if (payloadObj instanceof String) {
-            payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
-        } else if (payloadObj instanceof byte[]) {
-            payloads = (byte[]) message.getPayload();
-        } else {
+            payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
+        }
+        else if (payloadObj instanceof byte[]) {
+            payloads = (byte[])message.getPayload();
+        }
+        else {
             try {
                 String jsonObj = objectMapper.writeValueAsString(payloadObj);
                 payloads = jsonObj.getBytes(Charset.forName(charset));
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw new RuntimeException("convert to RocketMQ message failed.", e);
             }
         }
@@ -151,14 +154,15 @@ public class RocketMQUtil {
     }
 
     public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
-            String destination, org.springframework.messaging.Message<byte[]> message){
-        return getAndWrapMessage(destination,message.getHeaders(),message.getPayload());
+        String destination, org.springframework.messaging.Message<byte[]> message) {
+        return getAndWrapMessage(destination, message.getHeaders(), message.getPayload());
     }
+
     private static Message getAndWrapMessage(String destination, MessageHeaders headers, byte[] payloads) {
-        if(destination==null || destination.length()<1){
+        if (destination == null || destination.length() < 1) {
             return null;
         }
-        if(payloads == null || payloads.length<1){
+        if (payloads == null || payloads.length < 1) {
             return null;
         }
         String[] tempArr = destination.split(":", 2);
@@ -177,9 +181,10 @@ public class RocketMQUtil {
             int flag = 0;
             try {
                 flag = Integer.parseInt(flagObj.toString());
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e) {
                 // Ignore it
-                if(log.isInfoEnabled()){
+                if (log.isInfoEnabled()) {
                     log.info("flag must be integer, flagObj:{}", flagObj);
                 }
             }
@@ -187,58 +192,56 @@ public class RocketMQUtil {
             Object waitStoreMsgOkObj = headers.getOrDefault("WAIT_STORE_MSG_OK", "true");
             rocketMsg.setWaitStoreMsgOK(Boolean.TRUE.equals(waitStoreMsgOkObj));
             headers.entrySet().stream()
-                    .filter(entry -> !Objects.equals(entry.getKey(), "FLAG")
-                            && !Objects.equals(entry.getKey(), "WAIT_STORE_MSG_OK")) // exclude "FLAG", "WAIT_STORE_MSG_OK"
-                    .forEach(entry -> {
-                        if (!MessageConst.STRING_HASH_SET.contains(entry.getKey())) {
-                            rocketMsg.putUserProperty(entry.getKey(), String.valueOf(entry.getValue()));
-                        }
-                    });
+                .filter(entry -> !Objects.equals(entry.getKey(), "FLAG")
+                    && !Objects.equals(entry.getKey(), "WAIT_STORE_MSG_OK")) // exclude "FLAG", "WAIT_STORE_MSG_OK"
+                .forEach(entry -> {
+                    if (!MessageConst.STRING_HASH_SET.contains(entry.getKey())) {
+                        rocketMsg.putUserProperty(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                });
 
         }
         return rocketMsg;
     }
 
     public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
-            MessageConverter messageConverter, String charset,
-            String destination, org.springframework.messaging.Message<?> message) {
+        MessageConverter messageConverter, String charset,
+        String destination, org.springframework.messaging.Message<?> message) {
         Object payloadObj = message.getPayload();
         byte[] payloads;
         try {
-            if(null == payloadObj){
+            if (null == payloadObj) {
                 throw new RuntimeException("the message cannot be empty");
             }
             if (payloadObj instanceof String) {
-                payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
-            } else if (payloadObj instanceof byte[]) {
-                payloads = (byte[]) message.getPayload();
-            } else {
-                String jsonObj = (String) messageConverter.fromMessage(message, payloadObj.getClass());
+                payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
+            }
+            else if (payloadObj instanceof byte[]) {
+                payloads = (byte[])message.getPayload();
+            }
+            else {
+                String jsonObj = (String)messageConverter.fromMessage(message, payloadObj.getClass());
                 if (null == jsonObj) {
                     throw new RuntimeException(String.format(
-                            "empty after conversion [messageConverter:%s,payloadClass:%s,payloadObj:%s]",
-                            messageConverter.getClass(), payloadObj.getClass(), payloadObj));
+                        "empty after conversion [messageConverter:%s,payloadClass:%s,payloadObj:%s]",
+                        messageConverter.getClass(), payloadObj.getClass(), payloadObj));
                 }
                 payloads = jsonObj.getBytes(Charset.forName(charset));
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("convert to RocketMQ message failed.", e);
         }
         return getAndWrapMessage(destination, message.getHeaders(), payloads);
     }
-
-
-
-
-
-
 
     public static RPCHook getRPCHookByAkSk(Environment env, String accessKeyOrExpr, String secretKeyOrExpr) {
         String ak, sk;
         try {
             ak = env.resolveRequiredPlaceholders(accessKeyOrExpr);
             sk = env.resolveRequiredPlaceholders(secretKeyOrExpr);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             // Ignore it
             ak = null;
             sk = null;
@@ -252,7 +255,7 @@ public class RocketMQUtil {
     public static String getInstanceName(RPCHook rpcHook, String identify) {
         String separator = "|";
         StringBuilder instanceName = new StringBuilder();
-        SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
+        SessionCredentials sessionCredentials = ((AclClientRPCHook)rpcHook).getSessionCredentials();
         instanceName.append(sessionCredentials.getAccessKey())
             .append(separator).append(sessionCredentials.getSecretKey())
             .append(separator).append(identify)

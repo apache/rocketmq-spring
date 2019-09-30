@@ -52,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> implements InitializingBean, DisposableBean {
-    private static final  Logger log = LoggerFactory.getLogger(RocketMQTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(RocketMQTemplate.class);
 
     private DefaultMQProducer producer;
 
@@ -72,10 +72,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public void setProducer(DefaultMQProducer producer) {
         this.producer = producer;
     }
+
     @Deprecated
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
+
     @Deprecated
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -96,7 +98,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public void setMessageQueueSelector(MessageQueueSelector messageQueueSelector) {
         this.messageQueueSelector = messageQueueSelector;
     }
-
 
     /**
      * <p> Send message in synchronous mode. This method returns only when the sending procedure totally completes.
@@ -145,7 +146,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             long now = System.currentTimeMillis();
             Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
-            for (Message<?> msg:messages) {
+            for (Message<?> msg : messages) {
                 if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
                     log.warn("Found a message empty in the batch, skip it");
                     continue;
@@ -155,11 +156,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
             SendResult sendResult = producer.send(rmqMsgs, timeout);
             long costTime = System.currentTimeMillis() - now;
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("send messages cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
             }
             return sendResult;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("syncSend with batch failed. destination:{}, messages.size:{} ", destination, messages.size());
             throw new MessagingException(e.getMessage(), e);
         }
@@ -187,11 +189,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             }
             SendResult sendResult = producer.send(rocketMsg, timeout);
             long costTime = System.currentTimeMillis() - now;
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
             }
             return sendResult;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("syncSend failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
@@ -252,11 +255,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             SendResult sendResult = producer.send(rocketMsg, messageQueueSelector, hashKey, timeout);
             long costTime = System.currentTimeMillis() - now;
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
             }
             return sendResult;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("syncSendOrderly failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
@@ -287,8 +291,10 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         Message<?> message = MessageBuilder.withPayload(payload).build();
         return syncSendOrderly(destination, message, hashKey, timeout);
     }
+
     /**
-     * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout and delay level specified in addition.
+     * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout and delay level specified in
+     * addition.
      *
      * @param destination  formats: `topicName:tags`
      * @param message      {@link org.springframework.messaging.Message}
@@ -296,7 +302,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      * @param delayLevel   level for the delay message
      */
-    public void asyncSend(String destination, Message<?> message, SendCallback sendCallback, long timeout, int delayLevel) {
+    public void asyncSend(String destination, Message<?> message, SendCallback sendCallback, long timeout,
+        int delayLevel) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("asyncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
@@ -307,11 +314,13 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
             producer.send(rocketMsg, sendCallback, timeout);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.info("asyncSend failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
     }
+
     /**
      * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout specified in addition.
      *
@@ -321,11 +330,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      */
     public void asyncSend(String destination, Message<?> message, SendCallback sendCallback, long timeout) {
-        asyncSend(destination,message,sendCallback,timeout,0);
+        asyncSend(destination, message, sendCallback, timeout, 0);
     }
 
     /**
-     * <p> Send message to broker asynchronously. asynchronous transmission is generally used in response time sensitive
+     * <p> Send message to broker asynchronously. asynchronous transmission is generally used in response time
+     * sensitive
      * business scenarios. </p>
      * <p>
      * This method returns immediately. On sending completion, <code>sendCallback</code> will be executed.
@@ -377,7 +387,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      */
     public void asyncSendOrderly(String destination, Message<?> message, String hashKey, SendCallback sendCallback,
-                                 long timeout) {
+        long timeout) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("asyncSendOrderly failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
@@ -385,7 +395,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.send(rocketMsg, messageQueueSelector, hashKey, sendCallback, timeout);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("asyncSendOrderly failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
@@ -425,7 +436,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout      send timeout with millis
      */
     public void asyncSendOrderly(String destination, Object payload, String hashKey, SendCallback sendCallback,
-                                 long timeout) {
+        long timeout) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
         asyncSendOrderly(destination, message, hashKey, sendCallback, timeout);
     }
@@ -447,7 +458,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.sendOneway(rocketMsg);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("sendOneWay failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
@@ -479,7 +491,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             producer.sendOneway(rocketMsg, messageQueueSelector, hashKey);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("sendOneWayOrderly failed. destination:{}, message:{}", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
@@ -506,12 +519,10 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     @Override
     protected void doSend(String destination, Message<?> message) {
         SendResult sendResult = syncSend(destination, message);
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("send message to `{}` finished. result:{}", destination, sendResult);
         }
     }
-
-
 
     @Override
     protected Message<?> doConvert(Object payload, Map<String, Object> headers, MessagePostProcessor postProcessor) {
@@ -560,19 +571,22 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return TransactionSendResult
      * @throws MessagingException
      */
-    public TransactionSendResult sendMessageInTransaction(final String txProducerGroup, final String destination, final Message<?> message, final Object arg) throws MessagingException {
+    public TransactionSendResult sendMessageInTransaction(final String txProducerGroup, final String destination,
+        final Message<?> message, final Object arg) throws MessagingException {
         try {
             TransactionMQProducer txProducer = this.stageMQProducer(txProducerGroup);
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             return txProducer.sendMessageInTransaction(rocketMsg, arg);
-        } catch (MQClientException e) {
+        }
+        catch (MQClientException e) {
             throw RocketMQUtil.convert(e);
         }
     }
 
     /**
      * Remove a TransactionMQProducer from cache by manual.
-     * <p>Note: RocketMQTemplate can release all cached producers when bean destroying, it is not recommended to directly
+     * <p>Note: RocketMQTemplate can release all cached producers when bean destroying, it is not recommended to
+     * directly
      * use this method by user.
      *
      * @param txProducerGroup
@@ -595,13 +609,13 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param txProducerGroup     Producer (group) name, unique for each producer
      * @param transactionListener TransactoinListener impl class
      * @param executorService     Nullable.
-     * @param rpcHook Nullable.
+     * @param rpcHook             Nullable.
      * @return true if producer is created and started; false if the named producer already exists in cache.
      * @throws MessagingException
      */
     public boolean createAndStartTransactionMQProducer(String txProducerGroup,
-                                                       RocketMQLocalTransactionListener transactionListener,
-                                                       ExecutorService executorService, RPCHook rpcHook) throws MessagingException {
+        RocketMQLocalTransactionListener transactionListener,
+        ExecutorService executorService, RPCHook rpcHook) throws MessagingException {
         txProducerGroup = getTxProducerGroupName(txProducerGroup);
         if (cache.containsKey(txProducerGroup)) {
             log.info(String.format("get TransactionMQProducer '%s' from cache", txProducerGroup));
@@ -612,7 +626,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             txProducer.start();
             cache.put(txProducerGroup, txProducer);
-        } catch (MQClientException e) {
+        }
+        catch (MQClientException e) {
             throw RocketMQUtil.convert(e);
         }
 
@@ -620,8 +635,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     }
 
     private TransactionMQProducer createTransactionMQProducer(String name,
-                                                              RocketMQLocalTransactionListener transactionListener,
-                                                              ExecutorService executorService, RPCHook rpcHook) {
+        RocketMQLocalTransactionListener transactionListener,
+        ExecutorService executorService, RPCHook rpcHook) {
         Assert.notNull(producer, "Property 'producer' is required");
         Assert.notNull(transactionListener, "Parameter 'transactionListener' is required");
         TransactionMQProducer txProducer;
@@ -629,7 +644,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             txProducer = new TransactionMQProducer(name, rpcHook);
             txProducer.setVipChannelEnabled(false);
             txProducer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, name));
-        } else {
+        }
+        else {
             txProducer = new TransactionMQProducer(name);
         }
         txProducer.setTransactionListener(RocketMQUtil.convert(transactionListener));
@@ -648,13 +664,12 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
         return txProducer;
     }
-    
-    
-	private org.apache.rocketmq.common.message.Message createRocketMqMessage(
-			String destination, Message<?> message) {
-		Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), null);
-		return RocketMQUtil.convertToRocketMessage(getMessageConverter(), charset,
-				destination, msg);
-	}
-    
+
+    private org.apache.rocketmq.common.message.Message createRocketMqMessage(
+        String destination, Message<?> message) {
+        Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), null);
+        return RocketMQUtil.convertToRocketMessage(getMessageConverter(), charset,
+            destination, msg);
+    }
+
 }
