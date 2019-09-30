@@ -74,13 +74,12 @@ public class ProducerApplication implements CommandLineRunner {
         SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
-        SendResult sendResult2 = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte) 18).setUserName("平头哥"));
+        SendResult sendResult2 = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte)18).setUserName("Kitty"));
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult2);
 
         SendResult sendResult3 = rocketMQTemplate.syncSend(userTopic, MessageBuilder.withPayload(
-                new User().setUserAge((byte) 21).setUserName("小火箭")).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE).build());
+            new User().setUserAge((byte)21).setUserName("Lester")).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE).build());
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult3);
-
 
         // Use the extRocketMQTemplate
         sendResult = extRocketMQTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World!2222".getBytes()).build());
@@ -110,7 +109,6 @@ public class ProducerApplication implements CommandLineRunner {
         rocketMQTemplate.convertAndSend(msgExtTopic + ":tag1", "I'm from tag1");
         System.out.printf("syncSend topic %s tag %s %n", msgExtTopic, "tag1");
 
-
         // Send a batch of strings
         testBatchMessages();
 
@@ -122,7 +120,7 @@ public class ProducerApplication implements CommandLineRunner {
         List<Message> msgs = new ArrayList<Message>();
         for (int i = 0; i < 10; i++) {
             msgs.add(MessageBuilder.withPayload("Hello RocketMQ Batch Msg#" + i).
-                    setHeader(RocketMQHeaders.KEYS, "KEY_" + i).build());
+                setHeader(RocketMQHeaders.KEYS, "KEY_" + i).build());
         }
 
         SendResult sr = rocketMQTemplate.syncSend(springTopic, msgs, 60000);
@@ -130,9 +128,8 @@ public class ProducerApplication implements CommandLineRunner {
         System.out.printf("--- Batch messages send result :" + sr);
     }
 
-
     private void testTransaction() throws MessagingException {
-        String[] tags = new String[]{"TagA", "TagB", "TagC", "TagD", "TagE"};
+        String[] tags = new String[] {"TagA", "TagB", "TagC", "TagD", "TagE"};
         for (int i = 0; i < 10; i++) {
             try {
 
@@ -144,7 +141,8 @@ public class ProducerApplication implements CommandLineRunner {
                     msg.getPayload(), sendResult.getSendStatus());
 
                 Thread.sleep(10);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -207,7 +205,7 @@ public class ProducerApplication implements CommandLineRunner {
         }
     }
 
-    class User{
+    class User {
         private String userName;
         private Byte userAge;
 
@@ -232,11 +230,10 @@ public class ProducerApplication implements CommandLineRunner {
         @Override
         public String toString() {
             return "User{" +
-                    "userName='" + userName + '\'' +
-                    ", userAge=" + userAge +
-                    '}';
+                "userName='" + userName + '\'' +
+                ", userAge=" + userAge +
+                '}';
         }
     }
-
 
 }
