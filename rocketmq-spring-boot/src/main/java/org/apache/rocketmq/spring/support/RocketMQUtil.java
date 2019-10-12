@@ -137,16 +137,13 @@ public class RocketMQUtil {
 
         if (payloadObj instanceof String) {
             payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
-        }
-        else if (payloadObj instanceof byte[]) {
+        } else if (payloadObj instanceof byte[]) {
             payloads = (byte[])message.getPayload();
-        }
-        else {
+        } else {
             try {
                 String jsonObj = objectMapper.writeValueAsString(payloadObj);
                 payloads = jsonObj.getBytes(Charset.forName(charset));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("convert to RocketMQ message failed.", e);
             }
         }
@@ -181,8 +178,7 @@ public class RocketMQUtil {
             int flag = 0;
             try {
                 flag = Integer.parseInt(flagObj.toString());
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // Ignore it
                 if (log.isInfoEnabled()) {
                     log.info("flag must be integer, flagObj:{}", flagObj);
@@ -215,11 +211,9 @@ public class RocketMQUtil {
             }
             if (payloadObj instanceof String) {
                 payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
-            }
-            else if (payloadObj instanceof byte[]) {
+            } else if (payloadObj instanceof byte[]) {
                 payloads = (byte[])message.getPayload();
-            }
-            else {
+            } else {
                 String jsonObj = (String)messageConverter.fromMessage(message, payloadObj.getClass());
                 if (null == jsonObj) {
                     throw new RuntimeException(String.format(
@@ -228,8 +222,7 @@ public class RocketMQUtil {
                 }
                 payloads = jsonObj.getBytes(Charset.forName(charset));
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("convert to RocketMQ message failed.", e);
         }
         return getAndWrapMessage(destination, message.getHeaders(), payloads);
@@ -240,8 +233,7 @@ public class RocketMQUtil {
         try {
             ak = env.resolveRequiredPlaceholders(accessKeyOrExpr);
             sk = env.resolveRequiredPlaceholders(secretKeyOrExpr);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // Ignore it
             ak = null;
             sk = null;

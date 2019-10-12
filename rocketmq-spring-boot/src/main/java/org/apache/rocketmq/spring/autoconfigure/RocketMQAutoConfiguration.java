@@ -91,8 +91,7 @@ public class RocketMQAutoConfiguration {
                 rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
             producer.setVipChannelEnabled(false);
-        }
-        else {
+        } else {
             producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
         }

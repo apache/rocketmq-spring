@@ -20,6 +20,7 @@ package org.apache.rocketmq.samples.springboot;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
@@ -74,12 +75,12 @@ public class ProducerApplication implements CommandLineRunner {
         SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
-        SendResult sendResult2 = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte)18).setUserName("Kitty"));
-        System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult2);
+        sendResult = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte)18).setUserName("Kitty"));
+        System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult);
 
-        SendResult sendResult3 = rocketMQTemplate.syncSend(userTopic, MessageBuilder.withPayload(
+        sendResult = rocketMQTemplate.syncSend(userTopic, MessageBuilder.withPayload(
             new User().setUserAge((byte)21).setUserName("Lester")).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE).build());
-        System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult3);
+        System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult);
 
         // Use the extRocketMQTemplate
         sendResult = extRocketMQTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World!2222".getBytes()).build());
@@ -141,8 +142,7 @@ public class ProducerApplication implements CommandLineRunner {
                     msg.getPayload(), sendResult.getSendStatus());
 
                 Thread.sleep(10);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -202,37 +202,6 @@ public class ProducerApplication implements CommandLineRunner {
                     " msgTransactionId=%s, TransactionState=%s status=%s %n",
                 transId, retState, status);
             return retState;
-        }
-    }
-
-    class User {
-        private String userName;
-        private Byte userAge;
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public User setUserName(String userName) {
-            this.userName = userName;
-            return this;
-        }
-
-        public Byte getUserAge() {
-            return userAge;
-        }
-
-        public User setUserAge(Byte userAge) {
-            this.userAge = userAge;
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return "User{" +
-                "userName='" + userName + '\'' +
-                ", userAge=" + userAge +
-                '}';
         }
     }
 

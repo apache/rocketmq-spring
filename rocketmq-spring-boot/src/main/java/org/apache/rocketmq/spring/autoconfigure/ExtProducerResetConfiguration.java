@@ -95,8 +95,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         mqProducer.setInstanceName(beanName);
         try {
             mqProducer.start();
-        }
-        catch (MQClientException e) {
+        } catch (MQClientException e) {
             throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",
                 beanName), e);
         }
@@ -129,8 +128,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
             producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)),
                 annotation.enableMsgTrace(), customizedTraceTopic);
             producer.setVipChannelEnabled(false);
-        }
-        else {
+        } else {
             producer = new DefaultMQProducer(groupName, annotation.enableMsgTrace(), customizedTraceTopic);
         }
 

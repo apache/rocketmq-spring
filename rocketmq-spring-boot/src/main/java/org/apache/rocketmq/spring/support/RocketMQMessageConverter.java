@@ -64,8 +64,8 @@ public class RocketMQMessageConverter {
                     (MessageConverter)ClassUtils.forName(
                         "com.alibaba.fastjson.support.spring.messaging.MappingFastJsonMessageConverter",
                         ClassUtils.getDefaultClassLoader()).newInstance());
-            }
-            catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ignored) {
+                //ignore this exception
             }
         }
         messageConverter = new CompositeMessageConverter(messageConverters);

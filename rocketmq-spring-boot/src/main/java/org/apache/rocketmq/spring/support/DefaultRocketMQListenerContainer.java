@@ -88,6 +88,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private String charset = "UTF-8";
 
+    @Deprecated
     private ObjectMapper objectMapper;
 
     private MessageConverter messageConverter;
@@ -169,10 +170,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.charset = charset;
     }
 
+    @Deprecated
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
 
+    @Deprecated
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
@@ -389,7 +392,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             } else {
                 // If msgType not string, use objectMapper change it.
                 try {
-                    return messageConverter.fromMessage(MessageBuilder.withPayload(str).build(),messageType);
+                    return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
                     throw new RuntimeException("cannot convert message to " + messageType, e);

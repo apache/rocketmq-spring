@@ -118,8 +118,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         if (!container.isRunning()) {
             try {
                 container.start();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Started container failed. {}", container, e);
                 throw new RuntimeException(e);
             }
