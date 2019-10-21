@@ -454,7 +454,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             consumer.setConsumeThreadMin(consumeThreadMax);
         }
         consumer.setConsumeTimeout(consumeTimeout);
-        consumer.setInstanceName(this.name);
 
         switch (messageModel) {
             case BROADCASTING:
