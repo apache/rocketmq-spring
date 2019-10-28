@@ -19,7 +19,6 @@ package org.apache.rocketmq.samples.springboot;
 
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.samples.springboot.domain.Notice;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
@@ -32,7 +31,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 import javax.annotation.Resource;
@@ -54,8 +52,6 @@ public class ProducerApplication implements CommandLineRunner {
     private String springTransTopic;
     @Value("${demo.rocketmq.topic}")
     private String springTopic;
-    @Value("${demo.notice.topic}")
-    private String noticeTopic;
     @Value("${demo.rocketmq.orderTopic}")
     private String orderPaidTopic;
     @Value("${demo.rocketmq.msgExtTopic}")
@@ -108,7 +104,7 @@ public class ProducerApplication implements CommandLineRunner {
     }
 
     private void testBatchMessages() {
-        List<Message<String>> msgs = new ArrayList<Message<String>>();
+        List<Message> msgs = new ArrayList<Message>();
         for (int i = 0; i < 10; i++) {
             msgs.add(MessageBuilder.withPayload("Hello RocketMQ Batch Msg#" + i).
                     setHeader(RocketMQHeaders.KEYS, "KEY_" + i).build());
@@ -116,18 +112,9 @@ public class ProducerApplication implements CommandLineRunner {
 
         SendResult sr = rocketMQTemplate.syncSend(springTopic, msgs, 60000);
 
-        System.out.println("--- Batch messages send result :" + sr);
-
-        //test custom batch messages send
-        List<GenericMessage<Notice>> customMessages = new ArrayList<GenericMessage<Notice>>();
-        for (int i = 0; i < 10; i++) {
-            customMessages.add(new GenericMessage<Notice>(new Notice(i, "This is notice-" + i)));
-        }
-
-        SendResult customSendResult = rocketMQTemplate.syncSend(noticeTopic, customMessages, 60000);
-
-        System.out.println("--- Custom batch messages send result :" + customSendResult);
+        System.out.printf("--- Batch messages send result :" + sr);
     }
+
 
     private void testTransaction() throws MessagingException {
         String[] tags = new String[]{"TagA", "TagB", "TagC", "TagD", "TagE"};

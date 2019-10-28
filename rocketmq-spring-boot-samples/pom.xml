@@ -31,7 +31,6 @@
     <url>https://github.com/apache/rocketmq-spring</url>
     
     <modules>
-        <module>rocketmq-domain-demo</module>
         <module>rocketmq-produce-demo</module>
         <module>rocketmq-consume-demo</module>
         <module>rocketmq-produce-acl-demo</module>
