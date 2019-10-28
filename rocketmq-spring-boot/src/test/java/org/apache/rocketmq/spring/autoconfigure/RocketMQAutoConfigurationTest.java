@@ -170,7 +170,7 @@ public class RocketMQAutoConfigurationTest {
                 "demo.rocketmq.transaction.producer.group=transaction-group1").
                 withUserConfiguration(TestTransactionListenerConfig.class).
                 run((context) -> {
-                    assertThat(context).hasSingleBean(MyRocketMQLocalTransactionListener.class);
+                    assertThat(context).hasSingleBean(TestRocketMQLocalTransactionListener.class);
 
                 });
 
@@ -259,13 +259,13 @@ public class RocketMQAutoConfigurationTest {
     static class TestTransactionListenerConfig {
         @Bean
         public Object rocketMQLocalTransactionListener() {
-            return new MyRocketMQLocalTransactionListener();
+            return new TestRocketMQLocalTransactionListener();
         }
 
     }
 
     @RocketMQTransactionListener(txProducerGroup = "${demo.rocketmq.transaction.producer.group}")
-    static class MyRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
+    static class TestRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
 
 
         @Override
