@@ -130,7 +130,7 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testExtRocketMQTemplate() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
                 run(new ContextConsumer<AssertableApplicationContext>() {
                     @Override
                     public void accept(AssertableApplicationContext context) throws Throwable {
@@ -141,7 +141,7 @@ public class RocketMQAutoConfigurationTest {
                 });
 
         runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
-                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
                 run((context) -> {
                     // No producer on consume side
                     assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("producer");
@@ -202,12 +202,12 @@ public class RocketMQAutoConfigurationTest {
 
         @Bean
         public Object consumeListener() {
-            return new MyMessageListener();
+            return new TestDefaultNameServerListener();
         }
 
         @Bean
         public Object consumeListener1() {
-            return new MyMessageListener1();
+            return new TestCustomNameServerListener();
         }
 
     }
@@ -238,7 +238,7 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @RocketMQMessageListener(consumerGroup = "abc", topic = "test")
-    static class MyMessageListener implements RocketMQListener {
+    static class TestDefaultNameServerListener implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
@@ -247,7 +247,7 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abc1", topic = "test")
-    static class MyMessageListener1 implements RocketMQListener {
+    static class TestCustomNameServerListener implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
@@ -280,17 +280,17 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Configuration
-    static class ExtRocketMQTemplateConfig {
+    static class TestExtRocketMQTemplateConfig {
 
         @Bean
         public RocketMQTemplate extRocketMQTemplate() {
-            return new MyExtRocketMQTemplate();
+            return new TestExtRocketMQTemplate();
         }
 
     }
 
     @ExtRocketMQTemplateConfiguration(group = "test", nameServer = "127.0.0.1:9876")
-    static class MyExtRocketMQTemplate extends RocketMQTemplate {
+    static class TestExtRocketMQTemplate extends RocketMQTemplate {
 
     }
 
