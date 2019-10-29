@@ -183,20 +183,24 @@ public class RocketMQAutoConfigurationTest {
 
     }
 
-    @Test(expected = MessagingException.class)
+    @Test
     public void testBatchSendMessage() {
-        // it will be throw MessagingException: No route info of this topic, test
-        // that means the rocketMQTemplate.syncSend is chosen the correct type method
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
                 "rocketmq.producer.group=spring_rocketmq").
                 run((context) -> {
                     RocketMQTemplate rocketMQTemplate = context.getBean(RocketMQTemplate.class);
                     List<GenericMessage<String>> batchMessages = new ArrayList<GenericMessage<String>>();
-                    for (int i = 0; i < 10; i++) {
-                        batchMessages.add(new GenericMessage<String>("this is generic message "+i));
+
+                    String errorMsg = null;
+                    try {
+                        SendResult customSendResult = rocketMQTemplate.syncSend("test", batchMessages, 60000);
+                    } catch (IllegalArgumentException e) {
+                        // it will be throw IllegalArgumentException: `messages` can not be empty
+                        errorMsg = e.getMessage();
                     }
 
-                    SendResult customSendResult = rocketMQTemplate.syncSend("test", batchMessages, 60000);
+                    // that means the rocketMQTemplate.syncSend is chosen the correct type method
+                    Assert.assertEquals("`messages` can not be empty", errorMsg);
                 });
 
     }
