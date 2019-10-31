@@ -660,6 +660,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         txProducer.setTransactionListener(RocketMQUtil.convert(transactionListener));
 
+        txProducer.setNamespace(producer.getNamespace());
         txProducer.setNamesrvAddr(producer.getNamesrvAddr());
         if (executorService != null) {
             txProducer.setExecutorService(executorService);
