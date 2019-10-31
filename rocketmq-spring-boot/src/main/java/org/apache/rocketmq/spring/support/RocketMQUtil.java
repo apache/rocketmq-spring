@@ -129,7 +129,7 @@ public class RocketMQUtil {
 
     public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
         ObjectMapper objectMapper, String charset,
-        String destination, org.springframework.messaging.Message<?> message) {
+        String destination, org.springframework.messaging.Message message) {
         Object payloadObj = message.getPayload();
         byte[] payloads;
 

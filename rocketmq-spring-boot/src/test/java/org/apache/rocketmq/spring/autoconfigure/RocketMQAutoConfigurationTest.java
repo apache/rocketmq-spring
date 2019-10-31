@@ -19,6 +19,8 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
@@ -38,6 +40,11 @@ import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.GenericMessage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -177,6 +184,27 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Test
+    public void testBatchSendMessage() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "rocketmq.producer.group=spring_rocketmq").
+                run((context) -> {
+                    RocketMQTemplate rocketMQTemplate = context.getBean(RocketMQTemplate.class);
+                    List<GenericMessage<String>> batchMessages = new ArrayList<GenericMessage<String>>();
+
+                    String errorMsg = null;
+                    try {
+                        SendResult customSendResult = rocketMQTemplate.syncSend("test", batchMessages, 60000);
+                    } catch (IllegalArgumentException e) {
+                        // it will be throw IllegalArgumentException: `messages` can not be empty
+                        errorMsg = e.getMessage();
+                    }
+
+                    // that means the rocketMQTemplate.syncSend is chosen the correct type method
+                    Assert.assertEquals("`messages` can not be empty", errorMsg);
+                });
+
+    }
+
     public void testPlaceholdersListenerContainer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
                 "demo.placeholders.consumer.group = abc3",
@@ -195,7 +223,6 @@ public class RocketMQAutoConfigurationTest {
                         hasFieldOrPropertyWithValue("selectorExpression", "tag1");
                 });
     }
-
 
     @Configuration
     static class TestConfig {
