@@ -27,6 +27,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
+import org.apache.rocketmq.common.utils.NameServerAddressUtils;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.config.RocketMQConfigUtils;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
@@ -660,11 +661,15 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         txProducer.setTransactionListener(RocketMQUtil.convert(transactionListener));
 
-        txProducer.setNamesrvAddr(producer.getNamesrvAddr());
+        // this.producer.getNamesrvAddr() will remove prefix "http://"
+        // lead to sendMessageInTransaction get null namespace
+        txProducer.setNamesrvAddr(NameServerAddressUtils.ENDPOINT_PREFIX + this.producer.getNamesrvAddr());
         if (executorService != null) {
             txProducer.setExecutorService(executorService);
         }
 
+        // support set accessChannel as CLOUD
+        txProducer.setAccessChannel(this.producer.getAccessChannel());
         txProducer.setSendMsgTimeout(producer.getSendMsgTimeout());
         txProducer.setRetryTimesWhenSendFailed(producer.getRetryTimesWhenSendFailed());
         txProducer.setRetryTimesWhenSendAsyncFailed(producer.getRetryTimesWhenSendAsyncFailed());
