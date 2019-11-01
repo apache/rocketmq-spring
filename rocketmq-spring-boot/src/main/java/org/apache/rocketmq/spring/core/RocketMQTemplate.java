@@ -661,9 +661,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         txProducer.setTransactionListener(RocketMQUtil.convert(transactionListener));
 
-        // this.producer.getNamesrvAddr() will remove prefix "http://"
-        // lead to sendMessageInTransaction get null namespace
-        // return error "org.apache.rocketmq.client.exception.MQClientException: No route info of this topic"
+        // this.producer.getNamesrvAddr() will remove prefix "http://" and sendMessageInTransaction will get null namespace
+        // error: "org.apache.rocketmq.client.exception.MQClientException: No route info of this topic" when use aliyun mq
         // add NameServerAddressUtils.ENDPOINT_PREFIX to fix
         txProducer.setNamesrvAddr(NameServerAddressUtils.ENDPOINT_PREFIX + this.producer.getNamesrvAddr());
         if (executorService != null) {
