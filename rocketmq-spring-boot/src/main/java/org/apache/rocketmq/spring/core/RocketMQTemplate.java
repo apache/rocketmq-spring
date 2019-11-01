@@ -663,6 +663,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
         // this.producer.getNamesrvAddr() will remove prefix "http://"
         // lead to sendMessageInTransaction get null namespace
+        // return error "org.apache.rocketmq.client.exception.MQClientException: No route info of this topic"
+        // add NameServerAddressUtils.ENDPOINT_PREFIX to fix
         txProducer.setNamesrvAddr(NameServerAddressUtils.ENDPOINT_PREFIX + this.producer.getNamesrvAddr());
         if (executorService != null) {
             txProducer.setExecutorService(executorService);
