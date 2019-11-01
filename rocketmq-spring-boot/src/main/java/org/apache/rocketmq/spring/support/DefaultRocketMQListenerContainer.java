@@ -204,6 +204,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         return selectorType;
     }
 
+    public void setSelectorExpression(String selectorExpression) {
+        this.selectorExpression = selectorExpression;
+    }
+
     public String getSelectorExpression() {
         return selectorExpression;
     }

@@ -135,7 +135,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param timeout     send timeout with millis
      * @return {@link SendResult}
      */
-    public SendResult syncSend(String destination, Collection<Message<?>> messages, long timeout) {
+    public <T extends Message> SendResult syncSend(String destination, Collection<T> messages, long timeout) {
         if (Objects.isNull(messages) || messages.size() == 0) {
             log.error("syncSend with batch failed. destination:{}, messages is empty ", destination);
             throw new IllegalArgumentException("`messages` can not be empty");
@@ -145,7 +145,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             long now = System.currentTimeMillis();
             Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
             org.apache.rocketmq.common.message.Message rocketMsg;
-            for (Message<?> msg:messages) {
+            for (Message msg:messages) {
                 if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
                     log.warn("Found a message empty in the batch, skip it");
                     continue;
@@ -665,6 +665,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         // error: "org.apache.rocketmq.client.exception.MQClientException: No route info of this topic" when use aliyun mq
         // add NameServerAddressUtils.ENDPOINT_PREFIX to fix
         txProducer.setNamesrvAddr(NameServerAddressUtils.ENDPOINT_PREFIX + this.producer.getNamesrvAddr());
+        txProducer.setNamespace(producer.getNamespace());
         if (executorService != null) {
             txProducer.setExecutorService(executorService);
         }
