@@ -19,6 +19,8 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
@@ -39,6 +41,11 @@ import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.GenericMessage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -131,7 +138,7 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testExtRocketMQTemplate() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
                 run(new ContextConsumer<AssertableApplicationContext>() {
                     @Override
                     public void accept(AssertableApplicationContext context) throws Throwable {
@@ -142,7 +149,7 @@ public class RocketMQAutoConfigurationTest {
                 });
 
         runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
-                withUserConfiguration(ExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
+                withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
                 run((context) -> {
                     // No producer on consume side
                     assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("producer");
@@ -171,10 +178,51 @@ public class RocketMQAutoConfigurationTest {
                 "demo.rocketmq.transaction.producer.group=transaction-group1").
                 withUserConfiguration(TestTransactionListenerConfig.class).
                 run((context) -> {
-                    assertThat(context).hasSingleBean(MyRocketMQLocalTransactionListener.class);
+                    assertThat(context).hasSingleBean(TestRocketMQLocalTransactionListener.class);
 
                 });
 
+    }
+
+    @Test
+    public void testBatchSendMessage() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "rocketmq.producer.group=spring_rocketmq").
+                run((context) -> {
+                    RocketMQTemplate rocketMQTemplate = context.getBean(RocketMQTemplate.class);
+                    List<GenericMessage<String>> batchMessages = new ArrayList<GenericMessage<String>>();
+
+                    String errorMsg = null;
+                    try {
+                        SendResult customSendResult = rocketMQTemplate.syncSend("test", batchMessages, 60000);
+                    } catch (IllegalArgumentException e) {
+                        // it will be throw IllegalArgumentException: `messages` can not be empty
+                        errorMsg = e.getMessage();
+                    }
+
+                    // that means the rocketMQTemplate.syncSend is chosen the correct type method
+                    Assert.assertEquals("`messages` can not be empty", errorMsg);
+                });
+
+    }
+
+    public void testPlaceholdersListenerContainer() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "demo.placeholders.consumer.group = abc3",
+                "demo.placeholders.consumer.topic = test",
+                "demo.placeholders.consumer.tags = tag1").
+                withUserConfiguration(TestPlaceholdersConfig.class).
+                run((context) -> {
+                    // No producer on consume side
+                    assertThat(context).doesNotHaveBean(DefaultMQProducer.class);
+                    // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+                    assertThat(context).hasBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1");
+                    assertThat(context).getBean("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer_1").
+                        hasFieldOrPropertyWithValue("nameServer", "127.0.0.1:9876").
+                        hasFieldOrPropertyWithValue("consumerGroup", "abc3").
+                        hasFieldOrPropertyWithValue("topic", "test").
+                        hasFieldOrPropertyWithValue("selectorExpression", "tag1");
+                });
     }
 
     @Configuration
@@ -182,12 +230,12 @@ public class RocketMQAutoConfigurationTest {
 
         @Bean
         public Object consumeListener() {
-            return new MyMessageListener();
+            return new TestDefaultNameServerListener();
         }
 
         @Bean
         public Object consumeListener1() {
-            return new MyMessageListener1();
+            return new TestCustomNameServerListener();
         }
 
     }
@@ -227,7 +275,7 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @RocketMQMessageListener(consumerGroup = "abc", topic = "test")
-    static class MyMessageListener implements RocketMQListener {
+    static class TestDefaultNameServerListener implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
@@ -236,7 +284,7 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abc1", topic = "test")
-    static class MyMessageListener1 implements RocketMQListener {
+    static class TestCustomNameServerListener implements RocketMQListener {
 
         @Override
         public void onMessage(Object message) {
@@ -248,13 +296,13 @@ public class RocketMQAutoConfigurationTest {
     static class TestTransactionListenerConfig {
         @Bean
         public Object rocketMQLocalTransactionListener() {
-            return new MyRocketMQLocalTransactionListener();
+            return new TestRocketMQLocalTransactionListener();
         }
 
     }
 
     @RocketMQTransactionListener(txProducerGroup = "${demo.rocketmq.transaction.producer.group}")
-    static class MyRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
+    static class TestRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
 
 
         @Override
@@ -269,18 +317,37 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Configuration
-    static class ExtRocketMQTemplateConfig {
+    static class TestExtRocketMQTemplateConfig {
 
         @Bean
         public RocketMQTemplate extRocketMQTemplate() {
-            return new MyExtRocketMQTemplate();
+            return new TestExtRocketMQTemplate();
         }
 
     }
 
     @ExtRocketMQTemplateConfiguration(group = "test", nameServer = "127.0.0.1:9876")
-    static class MyExtRocketMQTemplate extends RocketMQTemplate {
+    static class TestExtRocketMQTemplate extends RocketMQTemplate {
 
+    }
+
+    @Configuration
+    static class TestPlaceholdersConfig {
+
+        @Bean
+        public Object consumeListener() {
+            return new TestPlaceholdersListener();
+        }
+
+    }
+
+    @RocketMQMessageListener(consumerGroup = "${demo.placeholders.consumer.group}", topic = "${demo.placeholders.consumer.topic}", selectorExpression = "${demo.placeholders.consumer.tags}")
+    static class TestPlaceholdersListener implements RocketMQListener {
+
+        @Override
+        public void onMessage(Object message) {
+
+        }
     }
 }
 

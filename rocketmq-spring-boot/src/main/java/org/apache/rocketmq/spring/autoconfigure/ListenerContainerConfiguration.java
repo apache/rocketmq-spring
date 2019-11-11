@@ -130,7 +130,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
         RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
-
+        
+        container.setRocketMQMessageListener(annotation);
+        
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
         nameServer = StringUtils.isEmpty(nameServer) ? rocketMQProperties.getNameServer() : nameServer;
         String accessChannel = environment.resolvePlaceholders(annotation.accessChannel());
@@ -139,6 +141,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
+        String tags = environment.resolvePlaceholders(annotation.selectorExpression());
+        if (!StringUtils.isEmpty(tags)) {
+            container.setSelectorExpression(tags);
+        }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener)bean);
