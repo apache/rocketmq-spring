@@ -15,22 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.samples.springboot.consumer;
+package org.apache.rocketmq.spring.autoconfigure;
 
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.stereotype.Service;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * OrderPaidEventConsumer
+ * @see RocketMQMessageConverter
  */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
+@Configuration
+@ConditionalOnMissingBean(RocketMQMessageConverter.class)
+class MessageConverterConfiguration {
 
-    @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
+    @Bean
+    public RocketMQMessageConverter createRocketMQMessageConverter() {
+        return new RocketMQMessageConverter();
     }
+
 }

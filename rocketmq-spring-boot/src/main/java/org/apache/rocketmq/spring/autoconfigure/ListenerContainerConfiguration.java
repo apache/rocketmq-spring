@@ -17,13 +17,18 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
+import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -38,11 +43,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ListenerContainerConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
@@ -57,18 +58,20 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private RocketMQProperties rocketMQProperties;
 
     private ObjectMapper objectMapper;
+    private RocketMQMessageConverter rocketMQMessageConverter;
 
     public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        StandardEnvironment environment,
-        RocketMQProperties rocketMQProperties) {
+        RocketMQMessageConverter rocketMQMessageConverter,
+        StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.objectMapper = rocketMQMessageObjectMapper;
+        this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+        this.applicationContext = (ConfigurableApplicationContext)applicationContext;
     }
 
     @Override
@@ -106,7 +109,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
         String containerBeanName = String.format("%s_%s", DefaultRocketMQListenerContainer.class.getName(),
             counter.incrementAndGet());
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
+        GenericApplicationContext genericApplicationContext = (GenericApplicationContext)applicationContext;
 
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
             () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
@@ -124,7 +127,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
     }
 
-    private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean, RocketMQMessageListener annotation) {
+    private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
+        RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
         
         container.setRocketMQMessageListener(annotation);
@@ -142,8 +146,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
-        container.setRocketMQListener((RocketMQListener) bean);
+        container.setRocketMQMessageListener(annotation);
+        container.setRocketMQListener((RocketMQListener)bean);
         container.setObjectMapper(objectMapper);
+        container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 
         return container;

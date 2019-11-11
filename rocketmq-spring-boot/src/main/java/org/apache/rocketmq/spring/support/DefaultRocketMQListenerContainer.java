@@ -17,7 +17,12 @@
 
 package org.apache.rocketmq.spring.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
@@ -45,13 +50,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Objects;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
@@ -85,7 +88,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private String charset = "UTF-8";
 
+    @Deprecated
     private ObjectMapper objectMapper;
+
+    private MessageConverter messageConverter;
 
     private RocketMQListener rocketMQListener;
 
@@ -164,14 +170,24 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.charset = charset;
     }
 
+    @Deprecated
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
 
+    @Deprecated
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    public MessageConverter getMessageConverter() {
+        return messageConverter;
+    }
+
+    public DefaultRocketMQListenerContainer setMessageConverter(MessageConverter messageConverter) {
+        this.messageConverter = messageConverter;
+        return this;
+    }
 
     public RocketMQListener getRocketMQListener() {
         return rocketMQListener;
@@ -380,7 +396,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             } else {
                 // If msgType not string, use objectMapper change it.
                 try {
-                    return objectMapper.readValue(str, messageType);
+                    return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
                     throw new RuntimeException("cannot convert message to " + messageType, e);

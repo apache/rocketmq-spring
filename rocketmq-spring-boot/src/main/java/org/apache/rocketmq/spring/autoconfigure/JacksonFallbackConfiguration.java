@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnMissingBean(ObjectMapper.class)
+@Deprecated
 class JacksonFallbackConfiguration {
 
     @Bean

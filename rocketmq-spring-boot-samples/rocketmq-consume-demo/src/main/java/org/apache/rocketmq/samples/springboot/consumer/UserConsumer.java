@@ -17,20 +17,20 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Service;
 
 /**
- * OrderPaidEventConsumer
+ * RocketMQMessageListener
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
-
+@RocketMQMessageListener(nameServer = "${demo.rocketmq.myNameServer}", topic = "${demo.rocketmq.topic.user}", consumerGroup = "user_consumer")
+public class UserConsumer implements RocketMQListener<User> {
     @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
+    public void onMessage(User message) {
+
+        System.out.printf("######## user_consumer received: %s ; age: %s ; name: %s \n", message, message.getUserAge(), message.getUserName());
     }
 }
