@@ -17,6 +17,7 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -123,6 +124,7 @@ public class RocketMQUtil {
                 setHeader(toRocketHeaderKey(RocketMQHeaders.TAGS), message.getTags()).
                 setHeader(toRocketHeaderKey(RocketMQHeaders.TOPIC), message.getTopic()).
                 setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.DELAY_TIME_LEVEL), message.getDelayTimeLevel()).
                 setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
         addUserProperties(message.getProperties(), messageBuilder);
         return messageBuilder.build();
@@ -195,7 +197,11 @@ public class RocketMQUtil {
                         rocketMsg.putUserProperty(entry.getKey(), String.valueOf(entry.getValue()));
                     }
                 });
-
+            // Support Scheduled Message
+            int delayTimeLevel = NumberUtils.toInt(headers.getOrDefault(RocketMQHeaders.DELAY_TIME_LEVEL, "").toString(), -1);
+            if (delayTimeLevel > 0) {
+                rocketMsg.setDelayTimeLevel(delayTimeLevel);
+            }
         }
         return rocketMsg;
     }

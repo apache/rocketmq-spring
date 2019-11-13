@@ -62,12 +62,14 @@ public class RocketMQUtilTest {
             .setHeader("test", 1)
             .setHeader(RocketMQHeaders.TAGS, "tags")
             .setHeader(RocketMQHeaders.KEYS, "my_keys")
+            .setHeader(RocketMQHeaders.DELAY_TIME_LEVEL, 1)
             .build();
         org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
             "UTF-8", "test-topic", msgWithStringPayload);
         assertEquals(String.valueOf("1"), rocketMsg.getProperty("test"));
         assertNull(rocketMsg.getProperty(RocketMQHeaders.TAGS));
         assertEquals("my_keys", rocketMsg.getProperty(RocketMQHeaders.KEYS));
+        assertEquals(1, rocketMsg.getDelayTimeLevel());
     }
 
     @Test
@@ -77,19 +79,23 @@ public class RocketMQUtilTest {
         rmqMsg.setTopic("test-topic");
         rmqMsg.putUserProperty("test", "1");
         rmqMsg.setTags("tags");
+        rmqMsg.setDelayTimeLevel(1);
         Message springMsg = RocketMQUtil.convertToSpringMessage(rmqMsg);
         assertEquals(String.valueOf("1"), springMsg.getHeaders().get("test"));
         assertEquals("tags", springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
+        assertEquals(1, springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.DELAY_TIME_LEVEL));
 
         org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(objectMapper,
             "UTF-8", "test-topic", springMsg);
         assertEquals(String.valueOf("1"), rocketMsg.getProperty("test"));
         assertEquals(String.valueOf("tags"), rocketMsg.getProperty(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
         assertNull(rocketMsg.getTags());
+        assertEquals(1, springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.DELAY_TIME_LEVEL));
 
         rmqMsg.putUserProperty(RocketMQUtil.toRocketHeaderKey(RocketMQHeaders.TAGS), "tags2");
         springMsg = RocketMQUtil.convertToSpringMessage(rmqMsg);
         assertEquals("tags", springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
+        assertEquals(1, springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.DELAY_TIME_LEVEL));
     }
 
 }

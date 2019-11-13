@@ -31,4 +31,6 @@ public class RocketMQHeaders {
     public static final String QUEUE_ID = "QUEUE_ID";
     public static final String SYS_FLAG = "SYS_FLAG";
     public static final String TRANSACTION_ID = "TRANSACTION_ID";
+    // Support Scheduled Message
+    public static final String DELAY_TIME_LEVEL = "DELAY_TIME_LEVEL";
 }
