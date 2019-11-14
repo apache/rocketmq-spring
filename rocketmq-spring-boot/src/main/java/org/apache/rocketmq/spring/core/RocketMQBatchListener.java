@@ -18,13 +18,7 @@ package org.apache.rocketmq.spring.core;
 
 import java.util.List;
 
-public interface RocketMQBatchListener<T> extends RocketMQListener<T> {
-
-    @Override
-    @Deprecated
-    default void onMessage(T message) {
-        throw new UnsupportedOperationException("It's a Unsupported API, please use onMessages method instead.");
-    }
+public interface RocketMQBatchListener<T> {
 
     /**
      * Batch consume bulk Java Objects once.

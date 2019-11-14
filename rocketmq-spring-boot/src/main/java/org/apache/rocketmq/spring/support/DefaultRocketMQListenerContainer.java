@@ -23,6 +23,9 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
+
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
@@ -40,6 +43,7 @@ import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
+import org.apache.rocketmq.spring.core.RocketMQBatchListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.slf4j.Logger;
@@ -91,6 +95,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private MessageConverter messageConverter;
 
     private RocketMQListener rocketMQListener;
+
+    private RocketMQBatchListener rocketMQBatchListener;
 
     private RocketMQMessageListener rocketMQMessageListener;
 
@@ -186,6 +192,18 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.rocketMQListener = rocketMQListener;
     }
 
+    public RocketMQBatchListener getRocketMQBatchListener() {
+        return rocketMQBatchListener;
+    }
+
+    public void setRocketMQBatchListener(RocketMQBatchListener rocketMQBatchListener) {
+        this.rocketMQBatchListener = rocketMQBatchListener;
+    }
+
+    private Object getCandidateRocketMQListener() {
+        return ObjectUtils.defaultIfNull(rocketMQBatchListener, rocketMQListener);
+    }
+
     public RocketMQMessageListener getRocketMQMessageListener() {
         return rocketMQMessageListener;
     }
@@ -231,7 +249,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @Override
     public void setupMessageListener(RocketMQListener rocketMQListener) {
+        this.rocketMQBatchListener = null;
         this.rocketMQListener = rocketMQListener;
+    }
+
+    @Override
+    public void setupMessageBatchListener(RocketMQBatchListener<?> rocketMQBatchListener) {
+        this.rocketMQListener = null;
+        this.rocketMQBatchListener = rocketMQBatchListener;
     }
 
     @Override
@@ -372,8 +397,58 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
             return ConsumeOrderlyStatus.SUCCESS;
         }
+
     }
 
+    private class BatchMessageListenerConcurrently implements MessageListenerConcurrently {
+
+        @Override
+        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+            try {
+                batchConsumeMessages(msgs);
+            } catch (Exception e) {
+                log.warn("consume message failed. messageExt:{}", msgs, e);
+                context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
+                return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+            }
+
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        }
+    }
+
+    private class BatchMessageListenerOrderly implements MessageListenerOrderly {
+
+        @Override
+        public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
+            try {
+                batchConsumeMessages(msgs);
+            }
+            catch (Exception e) {
+                log.warn("consume message failed. messageExt:{}", msgs, e);
+                context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
+                return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
+            }
+
+            return ConsumeOrderlyStatus.SUCCESS;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean batchConsumeMessages(List<MessageExt> msgs) {
+        log.debug("received msgs, size: {}", msgs.size());
+        long now = System.currentTimeMillis();
+        try {
+            List messages = msgs.stream().map(DefaultRocketMQListenerContainer.this::doConvertMessage).collect(Collectors.toList());
+            rocketMQBatchListener.onMessages(messages);
+        }
+        finally {
+            if (log.isDebugEnabled()) {
+                long costTime = System.currentTimeMillis() - now;
+                log.debug("batch consume {} cost: {} ms", msgs.stream().map(MessageExt::getMsgId).collect(Collectors.toList()), costTime);
+            }
+        }
+        return true;
+    }
 
     @SuppressWarnings("unchecked")
     private Object doConvertMessage(MessageExt messageExt) {
@@ -401,7 +476,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             }
         }
     }
-
 
     private MethodParameter getMethodParameter() {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
@@ -453,7 +527,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     }
 
     private void initRocketMQPushConsumer() throws MQClientException {
-        Assert.notNull(rocketMQListener, "Property 'rocketMQListener' is required");
+        Assert.notNull(getCandidateRocketMQListener(), "Property 'rocketMQBatchListener' or 'rocketMQListener' is required");
         Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
         Assert.notNull(nameServer, "Property 'nameServer' is required");
         Assert.notNull(topic, "Property 'topic' is required");
@@ -500,6 +574,18 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
         }
 
+        initSelectorType();
+
+        initConsumeMode();
+
+        Object candidateRocketMQListener = getCandidateRocketMQListener();
+        if (candidateRocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
+            ((RocketMQPushConsumerLifecycleListener)candidateRocketMQListener).prepareStart(consumer);
+        }
+
+    }
+
+    private void initSelectorType() throws MQClientException {
         switch (selectorType) {
             case TAG:
                 consumer.subscribe(topic, selectorExpression);
@@ -510,22 +596,19 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             default:
                 throw new IllegalArgumentException("Property 'selectorType' was wrong.");
         }
+    }
 
+    private void initConsumeMode() {
         switch (consumeMode) {
             case ORDERLY:
-                consumer.setMessageListener(new DefaultMessageListenerOrderly());
+                consumer.setMessageListener((rocketMQBatchListener != null) ? (new BatchMessageListenerOrderly()) : (new DefaultMessageListenerOrderly()));
                 break;
             case CONCURRENTLY:
-                consumer.setMessageListener(new DefaultMessageListenerConcurrently());
+                consumer.setMessageListener((rocketMQBatchListener != null) ? (new BatchMessageListenerConcurrently()) : (new DefaultMessageListenerConcurrently()));
                 break;
             default:
                 throw new IllegalArgumentException("Property 'consumeMode' was wrong.");
         }
-
-        if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
-            ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(consumer);
-        }
-
     }
 
 }

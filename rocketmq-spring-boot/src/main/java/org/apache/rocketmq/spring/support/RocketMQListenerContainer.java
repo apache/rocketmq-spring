@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.support;
 
+import org.apache.rocketmq.spring.core.RocketMQBatchListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.DisposableBean;
 
@@ -27,4 +28,10 @@ public interface RocketMQListenerContainer extends DisposableBean {
      * not supported.
      */
     void setupMessageListener(RocketMQListener<?> messageListener);
+
+   /**
+     * Setup the message batch listener to use. Throws an {@link IllegalArgumentException} if that message listener type is
+     * not supported.
+     */
+    void setupMessageBatchListener(RocketMQBatchListener<?> messageListener);
 }
