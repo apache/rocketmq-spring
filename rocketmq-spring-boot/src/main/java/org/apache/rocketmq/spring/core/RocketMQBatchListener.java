@@ -14,24 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.spring.core;
 
-package org.apache.rocketmq.spring.support;
+import java.util.List;
 
-import org.apache.rocketmq.spring.core.RocketMQBatchListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.beans.factory.DisposableBean;
-
-public interface RocketMQListenerContainer extends DisposableBean {
+public interface RocketMQBatchListener<T> {
 
     /**
-     * Setup the message listener to use. Throws an {@link IllegalArgumentException} if that message listener type is
-     * not supported.
+     * Batch consume bulk Java Objects once.
+     *
+     * @param messages bulk Java Objects.
      */
-    void setupMessageListener(RocketMQListener<?> messageListener);
-
-   /**
-     * Setup the message batch listener to use. Throws an {@link IllegalArgumentException} if that message listener type is
-     * not supported.
-     */
-    void setupMessageBatchListener(RocketMQBatchListener<?> messageListener);
+    void onMessages(List<T> messages);
 }
