@@ -17,13 +17,16 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class RocketMQUtilTest {
 
@@ -90,6 +93,14 @@ public class RocketMQUtilTest {
         rmqMsg.putUserProperty(RocketMQUtil.toRocketHeaderKey(RocketMQHeaders.TAGS), "tags2");
         springMsg = RocketMQUtil.convertToSpringMessage(rmqMsg);
         assertEquals("tags", springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
+    }
+
+    @Test
+    public void testGetNameServerString() {
+        List<String> nameServer = new ArrayList<>();
+        nameServer.add("localhost:9876");
+        nameServer.add("10.0.0.1:9876");
+        assertEquals(RocketMQUtil.getNameServerString(nameServer), "localhost:9876;10.0.0.1:9876");
     }
 
 }

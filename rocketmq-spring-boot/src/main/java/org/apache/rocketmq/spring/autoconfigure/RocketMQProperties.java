@@ -17,20 +17,20 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.rocketmq.common.MixAll;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 @ConfigurationProperties(prefix = "rocketmq")
 public class RocketMQProperties {
 
     /**
-     * The name server for rocketMQ, formats: `host:port;host:port`.
+     * The name servers for rocketMQ, formats: `host:port,host:port`.
      */
-    private String nameServer;
+    private List<String> nameServer;
 
     /**
      * Enum type for accesChannel, values: LOCAL, CLOUD
@@ -49,11 +49,11 @@ public class RocketMQProperties {
      */
     private Consumer consumer = new Consumer();
 
-    public String getNameServer() {
+    public List<String> getNameServer() {
         return nameServer;
     }
 
-    public void setNameServer(String nameServer) {
+    public void setNameServer(List<String> nameServer) {
         this.nameServer = nameServer;
     }
 

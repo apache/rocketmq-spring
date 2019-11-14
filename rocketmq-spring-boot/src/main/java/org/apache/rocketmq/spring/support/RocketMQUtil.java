@@ -17,6 +17,10 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -38,10 +42,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Objects;
 
 public class RocketMQUtil {
     private final static Logger log = LoggerFactory.getLogger(RocketMQUtil.class);
@@ -253,5 +253,21 @@ public class RocketMQUtil {
             .append(separator).append(identify)
             .append(separator).append(UtilAll.getPid());
         return instanceName.toString();
+    }
+
+    public static String getNameServerString(List<String> nameServer) {
+        if (nameServer == null || nameServer.isEmpty()) {
+            throw new IllegalArgumentException("nameServer is empty");
+        }
+        String nameServerToString;
+        if (nameServer.size() > 1) {
+            nameServerToString = String.join(";", nameServer);
+        } else {
+            nameServerToString = nameServer.get(0);
+            if (nameServerToString.contains(";")) {
+                log.warn("name-server format `host:port;host:port` is deprecated.");
+            }
+        }
+        return nameServerToString;
     }
 }

@@ -17,9 +17,9 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Objects;
-
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -27,6 +27,7 @@ import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -40,8 +41,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ExtProducerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
@@ -152,7 +151,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         }
 
         if (rocketMQProperties.getNameServer() == null ||
-            rocketMQProperties.getNameServer().equals(environment.resolvePlaceholders(annotation.nameServer()))) {
+            RocketMQUtil.getNameServerString(rocketMQProperties.getNameServer()).equals(environment.resolvePlaceholders(annotation.nameServer()))) {
             throw new BeanDefinitionValidationException(
                 "Bad annotation definition in @ExtRocketMQTemplateConfiguration, nameServer property is same with " +
                     "global property, please use the default RocketMQTemplate!");

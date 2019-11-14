@@ -17,8 +17,9 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import javax.annotation.PostConstruct;
-
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.AccessChannel;
@@ -29,6 +30,7 @@ import org.apache.rocketmq.spring.config.RocketMQTransactionAnnotationProcessor;
 import org.apache.rocketmq.spring.config.TransactionHandlerRegistry;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +49,6 @@ import org.springframework.context.annotation.Role;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
@@ -76,9 +76,9 @@ public class RocketMQAutoConfiguration {
     @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "producer.group"})
     public DefaultMQProducer defaultMQProducer(RocketMQProperties rocketMQProperties) {
         RocketMQProperties.Producer producerConfig = rocketMQProperties.getProducer();
-        String nameServer = rocketMQProperties.getNameServer();
+        List<String> nameServer = rocketMQProperties.getNameServer();
         String groupName = producerConfig.getGroup();
-        Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
+        Assert.notEmpty(nameServer, "[rocketmq.name-server] must not be null");
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
 
         String accessChannel = rocketMQProperties.getAccessChannel();
@@ -95,8 +95,7 @@ public class RocketMQAutoConfiguration {
             producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
         }
-
-        producer.setNamesrvAddr(nameServer);
+        producer.setNamesrvAddr(RocketMQUtil.getNameServerString(nameServer));
         if (!StringUtils.isEmpty(accessChannel)) {
             producer.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
