@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQBatchListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
@@ -86,8 +86,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private void registerContainer(String beanName, Object bean) {
         Class<?> clazz = AopProxyUtils.ultimateTargetClass(bean);
 
-        if (!RocketMQListener.class.isAssignableFrom(bean.getClass())) {
-            throw new IllegalStateException(clazz + " is not instance of " + RocketMQListener.class.getName());
+        if (!RocketMQListener.class.isAssignableFrom(bean.getClass()) && !RocketMQBatchListener.class.isAssignableFrom(bean.getClass())) {
+            throw new IllegalStateException(clazz + " is not instance of " + RocketMQListener.class.getName() + " or " + RocketMQBatchListener.class.getName());
         }
 
         RocketMQMessageListener annotation = clazz.getAnnotation(RocketMQMessageListener.class);
