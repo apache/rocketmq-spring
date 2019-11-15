@@ -35,7 +35,7 @@
 
 下面列出来了一些关键点，完整的示例请参考： [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-注意:当前的RELEASE.VERSION=2.0.3 
+注意:当前的RELEASE.VERSION=2.0.4 
 
 ```xml
 <!--在pom.xml中添加依赖-->
