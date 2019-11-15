@@ -257,7 +257,7 @@ public class RocketMQUtil {
 
     public static String getNameServerString(List<String> nameServer) {
         if (nameServer == null || nameServer.isEmpty()) {
-            throw new IllegalArgumentException("nameServer is empty");
+            throw new IllegalArgumentException("property nameServer is empty");
         }
         String nameServerToString;
         if (nameServer.size() > 1) {

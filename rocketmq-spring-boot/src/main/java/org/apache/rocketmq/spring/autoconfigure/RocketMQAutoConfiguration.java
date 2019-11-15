@@ -95,8 +95,6 @@ public class RocketMQAutoConfiguration {
             producer = new DefaultMQProducer(groupName, rocketMQProperties.getProducer().isEnableMsgTrace(),
                 rocketMQProperties.getProducer().getCustomizedTraceTopic());
         }
-        nameServer.stream().forEach(System.out::println);
-        System.out.printf("%s%n",RocketMQUtil.getNameServerString(nameServer));
         producer.setNamesrvAddr(RocketMQUtil.getNameServerString(nameServer));
         if (!StringUtils.isEmpty(accessChannel)) {
             producer.setAccessChannel(AccessChannel.valueOf(accessChannel));
