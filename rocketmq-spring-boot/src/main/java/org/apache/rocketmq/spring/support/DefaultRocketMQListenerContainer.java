@@ -17,12 +17,12 @@
 
 package org.apache.rocketmq.spring.support;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
-
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
@@ -53,8 +53,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
@@ -208,6 +206,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumeThreadMax = anno.consumeThreadMax();
         this.messageModel = anno.messageModel();
         this.selectorType = anno.selectorType();
+        this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
     }
 
