@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import javax.annotation.PostConstruct;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
@@ -53,10 +52,10 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
-@ConditionalOnClass({MQAdmin.class, ObjectMapper.class})
+@ConditionalOnClass({MQAdmin.class})
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
-@Import({JacksonFallbackConfiguration.class, MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class})
-@AutoConfigureAfter({JacksonFallbackConfiguration.class, MessageConverterConfiguration.class})
+@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class})
+@AutoConfigureAfter({MessageConverterConfiguration.class})
 public class RocketMQAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
 
@@ -127,11 +126,9 @@ public class RocketMQAutoConfiguration {
     @ConditionalOnBean(DefaultMQProducer.class)
     @ConditionalOnMissingBean(name = RocketMQConfigUtils.ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
     public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer,
-        ObjectMapper rocketMQMessageObjectMapper,
         RocketMQMessageConverter rocketMQMessageConverter) {
         RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
         rocketMQTemplate.setProducer(mqProducer);
-        rocketMQTemplate.setObjectMapper(rocketMQMessageObjectMapper);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         return rocketMQTemplate;
     }

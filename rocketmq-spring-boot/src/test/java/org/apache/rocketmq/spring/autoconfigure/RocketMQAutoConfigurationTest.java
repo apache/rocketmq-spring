@@ -91,7 +91,6 @@ public class RocketMQAutoConfigurationTest {
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultMQProducer.class);
                 });
-
     }
 
     @Test
@@ -140,7 +139,6 @@ public class RocketMQAutoConfigurationTest {
                     assertThat(context).hasSingleBean(TestRocketMQLocalTransactionListener.class);
 
                 });
-
     }
 
     @Test

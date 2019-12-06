@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -85,9 +84,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private int consumeThreadMax = 64;
 
     private String charset = "UTF-8";
-
-    @Deprecated
-    private ObjectMapper objectMapper;
 
     private MessageConverter messageConverter;
 
@@ -166,16 +162,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setCharset(String charset) {
         this.charset = charset;
-    }
-
-    @Deprecated
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    @Deprecated
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
     }
 
     public MessageConverter getMessageConverter() {

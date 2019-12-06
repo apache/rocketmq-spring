@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -55,13 +54,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private RocketMQProperties rocketMQProperties;
 
-    private ObjectMapper objectMapper;
     private RocketMQMessageConverter rocketMQMessageConverter;
 
-    public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        RocketMQMessageConverter rocketMQMessageConverter,
+    public ListenerContainerConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
         StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
-        this.objectMapper = rocketMQMessageObjectMapper;
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -145,7 +141,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQListener((RocketMQListener)bean);
-        container.setObjectMapper(objectMapper);
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 

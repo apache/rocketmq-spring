@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -48,9 +47,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     private DefaultMQProducer producer;
 
-    @Deprecated
-    private ObjectMapper objectMapper;
-
     private String charset = "UTF-8";
 
     private MessageQueueSelector messageQueueSelector = new SelectMessageQueueByHash();
@@ -61,16 +57,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     public void setProducer(DefaultMQProducer producer) {
         this.producer = producer;
-    }
-
-    @Deprecated
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    @Deprecated
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
     }
 
     public String getCharset() {
