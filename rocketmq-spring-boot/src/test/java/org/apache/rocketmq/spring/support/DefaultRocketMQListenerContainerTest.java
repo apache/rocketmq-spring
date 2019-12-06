@@ -16,11 +16,10 @@
  */
 package org.apache.rocketmq.spring.support;
 
+import java.lang.reflect.Method;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.junit.Test;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +35,7 @@ public class DefaultRocketMQListenerContainerTest {
             public void onMessage(String message) {
             }
         });
-        Class result = (Class)getMessageType.invoke(listenerContainer);
+        Class result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(String.class.getName()));
 
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
@@ -44,7 +43,7 @@ public class DefaultRocketMQListenerContainerTest {
             public void onMessage(MessageExt message) {
             }
         });
-        result = (Class)getMessageType.invoke(listenerContainer);
+        result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(MessageExt.class.getName()));
     }
 }
