@@ -75,20 +75,4 @@ public class RocketMQMessageConverter {
         return messageConverter;
     }
 
-    public MessageConverter resetMessageConverter(
-        Collection<MessageConverter> converters) {
-        if (messageConverter.getConverters() != null) {
-            messageConverter.getConverters().clear();
-        }
-        Objects.requireNonNull(messageConverter.getConverters()).addAll(converters);
-        return messageConverter;
-    }
-
-    public MessageConverter addMessageConverter(MessageConverter converter) {
-        if (messageConverter.getConverters() != null && converter != null) {
-            messageConverter.getConverters().add(converter);
-        }
-        return messageConverter;
-    }
-
 }
