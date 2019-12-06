@@ -22,13 +22,13 @@ public class RocketMQTemplateTest {
     @Test
     public void testSendMessage() {
         try {
-            rocketMQTemplate.syncSend("test", "123");
+            rocketMQTemplate.syncSend("test", "payload");
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
 
         try {
-            rocketMQTemplate.asyncSend("test", "123", new SendCallback() {
+            rocketMQTemplate.asyncSend("test", "payload", new SendCallback() {
                 @Override public void onSuccess(SendResult sendResult) {
 
                 }
@@ -42,7 +42,7 @@ public class RocketMQTemplateTest {
         }
 
         try {
-            rocketMQTemplate.syncSendOrderly("test", "123", "123");
+            rocketMQTemplate.syncSendOrderly("test", "payload", "hashkey");
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }

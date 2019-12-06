@@ -122,7 +122,7 @@ public class RocketMQUtilTest {
     public void testConvertToSpringMessage() {
         org.apache.rocketmq.common.message.MessageExt rocketMsg = new org.apache.rocketmq.common.message.MessageExt();
         rocketMsg.setTopic("test");
-        rocketMsg.setBody("123".getBytes());
+        rocketMsg.setBody("test".getBytes());
         rocketMsg.setTags("tagA");
         rocketMsg.setKeys("key1");
         Message message = RocketMQUtil.convertToSpringMessage(rocketMsg);
@@ -133,11 +133,11 @@ public class RocketMQUtilTest {
 
     @Test
     public void testGetInstanceName() {
-        String ak = "123";
-        String sk = "456";
+        String ak = "ak";
+        String sk = "sk";
         String consumerGroup = "consumerGroup";
         RPCHook rpcHook = new AclClientRPCHook(new SessionCredentials(ak, sk));
-        String expected = "123|456|consumerGroup|";
+        String expected = "ak|sk|consumerGroup|";
         assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
     }
 }
