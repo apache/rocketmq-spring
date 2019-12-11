@@ -17,20 +17,11 @@
 
 package org.apache.rocketmq.spring.support;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Objects;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyContext;
-import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
+import org.apache.rocketmq.client.consumer.listener.*;
 import org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -49,13 +40,22 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Objects;
+
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
-    RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
+        RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(DefaultRocketMQListenerContainer.class);
 
     private ApplicationContext applicationContext;
@@ -93,7 +93,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private DefaultMQPushConsumer consumer;
 
-    private Class messageType;
+    private Type messageType;
+
+    private MethodParameter methodParameter;
 
     private boolean running;
 
@@ -297,7 +299,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         initRocketMQPushConsumer();
 
         this.messageType = getMessageType();
-        log.debug("RocketMQ messageType: {}", messageType.getName());
+        this.methodParameter = getMethodParameter();
+        log.debug("RocketMQ messageType: {}", messageType);
     }
 
     @Override
@@ -308,14 +311,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     @Override
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
-            "consumerGroup='" + consumerGroup + '\'' +
-            ", nameServer='" + nameServer + '\'' +
-            ", topic='" + topic + '\'' +
-            ", consumeMode=" + consumeMode +
-            ", selectorType=" + selectorType +
-            ", selectorExpression='" + selectorExpression + '\'' +
-            ", messageModel=" + messageModel +
-            '}';
+                "consumerGroup='" + consumerGroup + '\'' +
+                ", nameServer='" + nameServer + '\'' +
+                ", topic='" + topic + '\'' +
+                ", consumeMode=" + consumeMode +
+                ", selectorType=" + selectorType +
+                ", selectorExpression='" + selectorExpression + '\'' +
+                ", messageModel=" + messageModel +
+                '}';
     }
 
     public void setName(String name) {
@@ -380,7 +383,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             } else {
                 // If msgType not string, use objectMapper change it.
                 try {
-                    return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
+                    if (messageType instanceof Class) {
+                        //if the messageType is has not Generic Parameter
+                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
+                    } else {
+                        //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
+                        //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
+                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
+                    }
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
                     throw new RuntimeException("cannot convert message to " + messageType, e);
@@ -389,7 +399,28 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private Class getMessageType() {
+
+    private MethodParameter getMethodParameter() {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
+        Type messageType = this.messageType;
+        Class clazz = null;
+        if (messageType instanceof ParameterizedType && messageConverter instanceof SmartMessageConverter) {
+            clazz = (Class) ((ParameterizedType) messageType).getRawType();
+        } else if (messageType instanceof Class) {
+            clazz = (Class) messageType;
+        } else {
+            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
+        }
+        try {
+            final Method method = targetClass.getMethod("onMessage", clazz);
+            return new MethodParameter(method, 0);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
+        }
+    }
+
+    private Type getMessageType() {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
         Type[] interfaces = targetClass.getGenericInterfaces();
         Class<?> superclass = targetClass.getSuperclass();
@@ -404,7 +435,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     if (Objects.equals(parameterizedType.getRawType(), RocketMQListener.class)) {
                         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
                         if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-                            return (Class) actualTypeArguments[0];
+                            return actualTypeArguments[0];
                         } else {
                             return Object.class;
                         }
@@ -425,19 +456,19 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         Assert.notNull(topic, "Property 'topic' is required");
 
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
-            this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
+                this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
         boolean enableMsgTrace = rocketMQMessageListener.enableMsgTrace();
         if (Objects.nonNull(rpcHook)) {
             consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely(),
-                enableMsgTrace, this.applicationContext.getEnvironment().
-                resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+                    enableMsgTrace, this.applicationContext.getEnvironment().
+                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
             consumer.setVipChannelEnabled(false);
             consumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
             consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
                     this.applicationContext.getEnvironment().
-                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+                            resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
