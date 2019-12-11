@@ -405,7 +405,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private MethodParameter getMethodParameter() {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
-        Type messageType = this.messageType;
+        Type messageType = this.getMessageType();
         Class clazz = null;
         if (messageType instanceof ParameterizedType && messageConverter instanceof SmartMessageConverter) {
             clazz = (Class) ((ParameterizedType) messageType).getRawType();
