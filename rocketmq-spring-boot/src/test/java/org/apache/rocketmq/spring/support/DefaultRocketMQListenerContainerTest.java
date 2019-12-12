@@ -16,6 +16,8 @@
  */
 package org.apache.rocketmq.spring.support;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.junit.Test;
@@ -24,8 +26,6 @@ import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -75,7 +75,7 @@ public class DefaultRocketMQListenerContainerTest {
         ParameterizedType type = (ParameterizedType) getMessageType.invoke(listenerContainer);
         assertThat(type.getRawType() == ArrayList.class);
         MethodParameter methodParameter = ((MethodParameter) getMethodParameter.invoke(listenerContainer));
-        System.out.println(methodParameter);
+        assertThat(methodParameter.getParameterType() == ArrayList.class);
     }
 }
 
