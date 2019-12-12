@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
 
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
-        RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
+    RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(DefaultRocketMQListenerContainer.class);
 
     private ApplicationContext applicationContext;
@@ -314,14 +314,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     @Override
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
-                "consumerGroup='" + consumerGroup + '\'' +
-                ", nameServer='" + nameServer + '\'' +
-                ", topic='" + topic + '\'' +
-                ", consumeMode=" + consumeMode +
-                ", selectorType=" + selectorType +
-                ", selectorExpression='" + selectorExpression + '\'' +
-                ", messageModel=" + messageModel +
-                '}';
+            "consumerGroup='" + consumerGroup + '\'' +
+            ", nameServer='" + nameServer + '\'' +
+            ", topic='" + topic + '\'' +
+            ", consumeMode=" + consumeMode +
+            ", selectorType=" + selectorType +
+            ", selectorExpression='" + selectorExpression + '\'' +
+            ", messageModel=" + messageModel +
+            '}';
     }
 
     public void setName(String name) {
@@ -387,7 +387,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 // If msgType not string, use objectMapper change it.
                 try {
                     if (messageType instanceof Class) {
-                        //if the messageType is has not Generic Parameter
+                        //if the messageType has not Generic Parameter
                         return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
                     } else {
                         //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
@@ -459,19 +459,19 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         Assert.notNull(topic, "Property 'topic' is required");
 
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
-                this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
+            this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
         boolean enableMsgTrace = rocketMQMessageListener.enableMsgTrace();
         if (Objects.nonNull(rpcHook)) {
             consumer = new DefaultMQPushConsumer(consumerGroup, rpcHook, new AllocateMessageQueueAveragely(),
-                    enableMsgTrace, this.applicationContext.getEnvironment().
-                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+                enableMsgTrace, this.applicationContext.getEnvironment().
+                resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
             consumer.setVipChannelEnabled(false);
             consumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
             consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
                     this.applicationContext.getEnvironment().
-                            resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+                    resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
