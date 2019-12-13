@@ -17,34 +17,47 @@
 package org.apache.rocketmq.spring.core;
 
 import javax.annotation.Resource;
+import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(properties = {"rocketmq.nameServer=127.0.0.1:9876", "rocketmq.producer.group=producer_group"}, classes = RocketMQAutoConfiguration.class)
+@SpringBootTest(properties = {
+    "rocketmq.nameServer=127.0.0.1:9876", "rocketmq.producer.group=rocketMQTemplate-test-producer_group",
+    "test.rocketmq.topic=test", "rocketmq.producer.access-key=test-ak",
+    "rocketmq.producer.secret-key=test-sk", "rocketmq.accessChannel=LOCAL",
+    "rocketmq.producer.sendMessageTimeout= 3500", "rocketmq.producer.retryTimesWhenSendFailed=3",
+    "rocketmq.producer.retryTimesWhenSendAsyncFailed=3"}, classes = {RocketMQAutoConfiguration.class, TransactionListenerImpl.class})
 
 public class RocketMQTemplateTest {
     @Resource
     RocketMQTemplate rocketMQTemplate;
 
+    @Value("${test.rocketmq.topic}")
+    String topic;
+
     @Test
     public void testSendMessage() {
         try {
-            rocketMQTemplate.syncSend("test", "payload");
+            rocketMQTemplate.syncSend(topic, "payload");
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
 
         try {
-            rocketMQTemplate.asyncSend("test", "payload", new SendCallback() {
+            rocketMQTemplate.asyncSend(topic, "payload", new SendCallback() {
                 @Override public void onSuccess(SendResult sendResult) {
 
                 }
@@ -58,9 +71,39 @@ public class RocketMQTemplateTest {
         }
 
         try {
-            rocketMQTemplate.syncSendOrderly("test", "payload", "hashkey");
+            rocketMQTemplate.syncSendOrderly(topic, "payload", "hashkey");
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
+    }
+
+    @Test
+    public void testProperties() {
+        assertThat(rocketMQTemplate.getProducer().getNamesrvAddr()).isEqualTo("127.0.0.1:9876");
+        assertThat(rocketMQTemplate.getProducer().getProducerGroup()).isEqualTo("rocketMQTemplate-test-producer_group");
+        assertThat(rocketMQTemplate.getProducer().getAccessChannel()).isEqualTo(AccessChannel.LOCAL);
+        assertThat(rocketMQTemplate.getProducer().getSendMsgTimeout()).isEqualTo(3500);
+        assertThat(rocketMQTemplate.getProducer().getMaxMessageSize()).isEqualTo(4 * 1024 * 1024);
+        assertThat(rocketMQTemplate.getProducer().getRetryTimesWhenSendAsyncFailed()).isEqualTo(3);
+        assertThat(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed()).isEqualTo(3);
+        assertThat(rocketMQTemplate.getProducer().getCompressMsgBodyOverHowmuch()).isEqualTo(1024 * 4);
+    }
+
+    @Test
+    public void testTransactionListener() {
+        assertThat(((TransactionMQProducer) rocketMQTemplate.getProducer()).getTransactionListener()).isNotNull();
+    }
+}
+
+@RocketMQTransactionListener
+class TransactionListenerImpl implements RocketMQLocalTransactionListener {
+    @Override
+    public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
+        return RocketMQLocalTransactionState.UNKNOWN;
+    }
+
+    @Override
+    public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
+        return RocketMQLocalTransactionState.COMMIT;
     }
 }
