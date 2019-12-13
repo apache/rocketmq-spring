@@ -57,4 +57,10 @@ public @interface RocketMQTransactionListener {
      */
     int blockingQueueSize() default 2000;
 
+    /**
+     * Set rocketMQTemplate bean name, the default is rocketMQTemplate.
+     * if use ExtRocketMQTemplate, can set ExtRocketMQTemplate bean name.
+     */
+    String rocketMQTemplateBeanName() default "rocketMQTemplate";
+
 }

@@ -26,6 +26,7 @@ import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MessageQueueSelector;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
@@ -519,6 +520,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public TransactionSendResult sendMessageInTransaction(final String destination,
         final Message<?> message, final Object arg) throws MessagingException {
         try {
+            if (((TransactionMQProducer) producer).getTransactionListener() == null) {
+                throw new IllegalStateException("The rocketMQTemplate does not exist TransactionListener");
+            }
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
             return producer.sendMessageInTransaction(rocketMsg, arg);
         } catch (MQClientException e) {
