@@ -17,11 +17,20 @@
 
 package org.apache.rocketmq.spring.config;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.remoting.RPCHook;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -31,13 +40,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class RocketMQTransactionAnnotationProcessor
     implements BeanPostProcessor, Ordered, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(RocketMQTransactionAnnotationProcessor.class);
@@ -46,10 +48,10 @@ public class RocketMQTransactionAnnotationProcessor
     private final Set<Class<?>> nonProcessedClasses =
         Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
-    private TransactionHandlerRegistry transactionHandlerRegistry;
+    private RocketMQTemplate rocketMQTemplate;
 
-    public RocketMQTransactionAnnotationProcessor(TransactionHandlerRegistry transactionHandlerRegistry) {
-        this.transactionHandlerRegistry = transactionHandlerRegistry;
+    public RocketMQTransactionAnnotationProcessor(RocketMQTemplate rocketMQTemplate) {
+        this.rocketMQTemplate = rocketMQTemplate;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class RocketMQTransactionAnnotationProcessor
 
     private void processTransactionListenerAnnotation(RocketMQTransactionListener listener, Object bean)
         throws MQClientException {
-        if (transactionHandlerRegistry == null) {
+        if (rocketMQTemplate == null) {
             throw new MQClientException("Bad usage of @RocketMQTransactionListener, " +
                 "the class must work with RocketMQTemplate", null);
         }
@@ -94,24 +96,11 @@ public class RocketMQTransactionAnnotationProcessor
                 "the class must implement interface RocketMQLocalTransactionListener",
                 null);
         }
-        TransactionHandler transactionHandler = new TransactionHandler();
-        transactionHandler.setBeanFactory(this.applicationContext.getAutowireCapableBeanFactory());
-        transactionHandler.setName(applicationContext.getEnvironment().resolvePlaceholders(listener.txProducerGroup()));
-        transactionHandler.setBeanName(bean.getClass().getName());
-        transactionHandler.setListener((RocketMQLocalTransactionListener) bean);
-        transactionHandler.setCheckExecutor(listener.corePoolSize(), listener.maximumPoolSize(),
-                listener.keepAliveTime(), listener.blockingQueueSize());
 
-        RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
-            listener.accessKey(), listener.secretKey());
+        ((TransactionMQProducer) rocketMQTemplate.getProducer()).setExecutorService(new ThreadPoolExecutor(listener.corePoolSize(), listener.maximumPoolSize(),
+            listener.keepAliveTime(), TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(listener.blockingQueueSize())));
+        ((TransactionMQProducer) rocketMQTemplate.getProducer()).setTransactionListener(RocketMQUtil.convert((RocketMQLocalTransactionListener) bean));
 
-        if (Objects.nonNull(rpcHook)) {
-            transactionHandler.setRpcHook(rpcHook);
-        } else {
-            log.debug("Access-key or secret-key not configure in " + listener + ".");
-        }
-
-        transactionHandlerRegistry.registerTransactionHandler(transactionHandler);
     }
 
     @Override

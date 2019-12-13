@@ -43,8 +43,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Configuration
 public class ListenerContainerConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private final static Logger log = LoggerFactory.getLogger(ListenerContainerConfiguration.class);
@@ -57,13 +55,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     private RocketMQProperties rocketMQProperties;
 
-    private ObjectMapper objectMapper;
     private RocketMQMessageConverter rocketMQMessageConverter;
 
-    public ListenerContainerConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        RocketMQMessageConverter rocketMQMessageConverter,
+    public ListenerContainerConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
         StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
-        this.objectMapper = rocketMQMessageObjectMapper;
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -146,9 +141,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
-        container.setRocketMQMessageListener(annotation);
         container.setRocketMQListener((RocketMQListener)bean);
-        container.setObjectMapper(objectMapper);
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 

@@ -33,6 +33,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyContext;
 import org.apache.rocketmq.client.consumer.listener.MessageListener;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
+
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
@@ -57,7 +58,7 @@ public class DefaultRocketMQListenerContainerTest {
             public void onMessage(String message) {
             }
         });
-        Class result = (Class)getMessageType.invoke(listenerContainer);
+        Class result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(String.class.getName()));
 
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
@@ -65,7 +66,7 @@ public class DefaultRocketMQListenerContainerTest {
             public void onMessage(MessageExt message) {
             }
         });
-        result = (Class)getMessageType.invoke(listenerContainer);
+        result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(MessageExt.class.getName()));
     }
 

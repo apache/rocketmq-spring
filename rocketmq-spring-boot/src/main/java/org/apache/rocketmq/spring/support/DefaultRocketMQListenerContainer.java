@@ -22,8 +22,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
-
 import java.util.stream.Collectors;
+
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
@@ -56,8 +56,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
     RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
@@ -89,9 +87,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private int consumeThreadMax = 64;
 
     private String charset = "UTF-8";
-
-    @Deprecated
-    private ObjectMapper objectMapper;
 
     private MessageConverter messageConverter;
 
@@ -172,16 +167,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.charset = charset;
     }
 
-    @Deprecated
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    @Deprecated
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     public MessageConverter getMessageConverter() {
         return messageConverter;
     }
@@ -209,8 +194,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumeMode = anno.consumeMode();
         this.consumeThreadMax = anno.consumeThreadMax();
         this.messageModel = anno.messageModel();
-        this.selectorExpression = anno.selectorExpression();
         this.selectorType = anno.selectorType();
+        this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
     }
 

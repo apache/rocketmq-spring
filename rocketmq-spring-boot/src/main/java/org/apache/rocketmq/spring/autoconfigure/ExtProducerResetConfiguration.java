@@ -19,7 +19,6 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Map;
 import java.util.Objects;
-
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -41,8 +40,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Configuration
 public class ExtProducerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private final static Logger log = LoggerFactory.getLogger(ExtProducerResetConfiguration.class);
@@ -53,14 +50,11 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
 
     private RocketMQProperties rocketMQProperties;
 
-    private ObjectMapper objectMapper;
     private RocketMQMessageConverter rocketMQMessageConverter;
 
-    public ExtProducerResetConfiguration(ObjectMapper rocketMQMessageObjectMapper,
-        RocketMQMessageConverter rocketMQMessageConverter,
+    public ExtProducerResetConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
         StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
-        this.objectMapper = rocketMQMessageObjectMapper;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
     }
@@ -102,7 +96,6 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         RocketMQTemplate rocketMQTemplate = (RocketMQTemplate)bean;
         rocketMQTemplate.setProducer(mqProducer);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-        rocketMQTemplate.setObjectMapper(objectMapper);
         log.info("Set real producer to :{} {}", beanName, annotation.value());
     }
 

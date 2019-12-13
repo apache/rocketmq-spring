@@ -41,7 +41,6 @@ import org.springframework.messaging.support.MessageBuilder;
  */
 @SpringBootApplication
 public class ProducerACLApplication implements CommandLineRunner {
-    private static final String TX_PGROUP_NAME = "myTxProducerGroup";
     @Resource
     private RocketMQTemplate rocketMQTemplate;
     @Value("${demo.rocketmq.transTopic}")
@@ -75,7 +74,7 @@ public class ProducerACLApplication implements CommandLineRunner {
 
                 Message msg = MessageBuilder.withPayload("Hello RocketMQ " + i).
                     setHeader(RocketMQHeaders.TRANSACTION_ID, "KEY_" + i).build();
-                SendResult sendResult = rocketMQTemplate.sendMessageInTransaction(TX_PGROUP_NAME,
+                SendResult sendResult = rocketMQTemplate.sendMessageInTransaction(
                     springTransTopic + ":" + tags[i % tags.length], msg, null);
                 System.out.printf("------ send Transactional msg body = %s , sendResult=%s %n",
                     msg.getPayload(), sendResult.getSendStatus());
@@ -87,11 +86,7 @@ public class ProducerACLApplication implements CommandLineRunner {
         }
     }
 
-    @RocketMQTransactionListener(
-        txProducerGroup = TX_PGROUP_NAME,
-        accessKey = "AK", // if not setting, it will read by `rocketmq.producer.access-key` key
-        secretKey = "SK"  // if not setting, it will read by `rocketmq.producer.secret-key` key
-        )
+    @RocketMQTransactionListener
     class TransactionListenerImpl implements RocketMQLocalTransactionListener {
         private AtomicInteger transactionIndex = new AtomicInteger(0);
 

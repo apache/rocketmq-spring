@@ -44,7 +44,7 @@ We are always very happy to have contributions, whether for trivial cleanups or 
 
 Please see the complete sample [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-Note: Current RELEASE.VERSION=2.0.3 
+Note: Current RELEASE.VERSION=2.0.4 
 
 ```xml
 <!--add dependency in pom.xml-->

@@ -18,10 +18,7 @@
 package org.apache.rocketmq.spring.support;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -72,22 +69,6 @@ public class RocketMQMessageConverter {
     }
 
     public MessageConverter getMessageConverter() {
-        return messageConverter;
-    }
-
-    public MessageConverter resetMessageConverter(
-        Collection<MessageConverter> converters) {
-        if (messageConverter.getConverters() != null) {
-            messageConverter.getConverters().clear();
-        }
-        Objects.requireNonNull(messageConverter.getConverters()).addAll(converters);
-        return messageConverter;
-    }
-
-    public MessageConverter addMessageConverter(MessageConverter converter) {
-        if (messageConverter.getConverters() != null && converter != null) {
-            messageConverter.getConverters().add(converter);
-        }
         return messageConverter;
     }
 
