@@ -17,6 +17,12 @@
 
 package org.apache.rocketmq.samples.springboot;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Resource;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
@@ -35,13 +41,6 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeTypeUtils;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Producer, using RocketMQTemplate sends a variety of messages
@@ -74,11 +73,11 @@ public class ProducerApplication implements CommandLineRunner {
         SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
-        sendResult = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte)18).setUserName("Kitty"));
+        sendResult = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte) 18).setUserName("Kitty"));
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult);
 
         sendResult = rocketMQTemplate.syncSend(userTopic, MessageBuilder.withPayload(
-            new User().setUserAge((byte)21).setUserName("Lester")).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE).build());
+            new User().setUserAge((byte) 21).setUserName("Lester")).setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE).build());
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", userTopic, sendResult);
 
         // Use the extRocketMQTemplate
@@ -112,8 +111,11 @@ public class ProducerApplication implements CommandLineRunner {
         // Send a batch of strings
         testBatchMessages();
 
-        // Send transactional messages
-        testTransaction();
+        // Send transactional messages using rocketMQTemplate
+        testRocketMQTemplateTransaction();
+
+        // Send transactional messages using extRocketMQTemplate
+        testExtRocketMQTemplateTransaction();
     }
 
     private void testBatchMessages() {
@@ -128,16 +130,33 @@ public class ProducerApplication implements CommandLineRunner {
         System.out.printf("--- Batch messages send result :" + sr);
     }
 
-    private void testTransaction() throws MessagingException {
+    private void testRocketMQTemplateTransaction() throws MessagingException {
         String[] tags = new String[] {"TagA", "TagB", "TagC", "TagD", "TagE"};
         for (int i = 0; i < 10; i++) {
             try {
 
-                Message msg = MessageBuilder.withPayload("Hello RocketMQ " + i).
+                Message msg = MessageBuilder.withPayload("rocketMQTemplate transactional message " + i).
                     setHeader(RocketMQHeaders.TRANSACTION_ID, "KEY_" + i).build();
                 SendResult sendResult = rocketMQTemplate.sendMessageInTransaction(
                     springTransTopic + ":" + tags[i % tags.length], msg, null);
-                System.out.printf("------ send Transactional msg body = %s , sendResult=%s %n",
+                System.out.printf("------rocketMQTemplate send Transactional msg body = %s , sendResult=%s %n",
+                    msg.getPayload(), sendResult.getSendStatus());
+
+                Thread.sleep(10);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void testExtRocketMQTemplateTransaction() throws MessagingException {
+        for (int i = 0; i < 10; i++) {
+            try {
+                Message msg = MessageBuilder.withPayload("extRocketMQTemplate transactional message " + i).
+                    setHeader(RocketMQHeaders.TRANSACTION_ID, "KEY_" + i).build();
+                SendResult sendResult = extRocketMQTemplate.sendMessageInTransaction(
+                    springTransTopic, msg, null);
+                System.out.printf("------ExtRocketMQTemplate send Transactional msg body = %s , sendResult=%s %n",
                     msg.getPayload(), sendResult.getSendStatus());
 
                 Thread.sleep(10);
@@ -155,7 +174,7 @@ public class ProducerApplication implements CommandLineRunner {
 
         @Override
         public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
-            String transId = (String)msg.getHeaders().get(RocketMQHeaders.TRANSACTION_ID);
+            String transId = (String) msg.getHeaders().get(RocketMQHeaders.TRANSACTION_ID);
             System.out.printf("#### executeLocalTransaction is executed, msgTransactionId=%s %n",
                 transId);
             int value = transactionIndex.getAndIncrement();
@@ -181,7 +200,7 @@ public class ProducerApplication implements CommandLineRunner {
 
         @Override
         public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
-            String transId = (String)msg.getHeaders().get(RocketMQHeaders.TRANSACTION_ID);
+            String transId = (String) msg.getHeaders().get(RocketMQHeaders.TRANSACTION_ID);
             RocketMQLocalTransactionState retState = RocketMQLocalTransactionState.COMMIT;
             Integer status = localTrans.get(transId);
             if (null != status) {
@@ -201,6 +220,21 @@ public class ProducerApplication implements CommandLineRunner {
                     " msgTransactionId=%s, TransactionState=%s status=%s %n",
                 transId, retState, status);
             return retState;
+        }
+    }
+
+    @RocketMQTransactionListener(rocketMQTemplateBeanName = "extRocketMQTemplate")
+    class ExtTransactionListenerImpl implements RocketMQLocalTransactionListener {
+        @Override
+        public RocketMQLocalTransactionState executeLocalTransaction(Message msg, Object arg) {
+            System.out.printf("ExtTransactionListenerImpl executeLocalTransaction and return UNKNOWN. \n");
+            return RocketMQLocalTransactionState.UNKNOWN;
+        }
+
+        @Override
+        public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
+            System.out.printf("ExtTransactionListenerImpl checkLocalTransaction and return COMMIT. \n");
+            return RocketMQLocalTransactionState.COMMIT;
         }
     }
 

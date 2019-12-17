@@ -17,12 +17,16 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
+import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
@@ -117,12 +121,27 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
         customizedTraceTopic = StringUtils.isEmpty(customizedTraceTopic) ? producerConfig.getCustomizedTraceTopic() : customizedTraceTopic;
 
-        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
-            producer = new DefaultMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)),
-                annotation.enableMsgTrace(), customizedTraceTopic);
+        boolean isEnableAcl = !StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk);
+
+        if (isEnableAcl) {
+            producer = new TransactionMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
             producer.setVipChannelEnabled(false);
         } else {
-            producer = new DefaultMQProducer(groupName, annotation.enableMsgTrace(), customizedTraceTopic);
+            producer = new TransactionMQProducer(groupName);
+        }
+
+        if (annotation.enableMsgTrace()) {
+            try {
+                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
+                dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
+                Field field = DefaultMQProducer.class.getDeclaredField("traceDispatcher");
+                field.setAccessible(true);
+                field.set(producer, dispatcher);
+                producer.getDefaultMQProducerImpl().registerSendMessageHook(
+                    new SendMessageTraceHookImpl(dispatcher));
+            } catch (Throwable e) {
+                log.error("system mqtrace hook init failed ,maybe can't send msg trace data");
+            }
         }
 
         producer.setNamesrvAddr(nameServer);
