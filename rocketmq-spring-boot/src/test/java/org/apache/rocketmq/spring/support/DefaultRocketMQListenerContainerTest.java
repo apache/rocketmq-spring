@@ -17,9 +17,18 @@
 package org.apache.rocketmq.spring.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.junit.Test;
+import org.springframework.core.MethodParameter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,6 +54,28 @@ public class DefaultRocketMQListenerContainerTest {
         });
         result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(MessageExt.class.getName()));
+    }
+
+    @Test
+    public void testGenericMessageType() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        listenerContainer.setMessageConverter(new CompositeMessageConverter(Arrays.asList(new StringMessageConverter(), new MappingJackson2MessageConverter())));
+
+        Method getMessageType = DefaultRocketMQListenerContainer.class.getDeclaredMethod("getMessageType");
+        Method getMethodParameter = DefaultRocketMQListenerContainer.class.getDeclaredMethod("getMethodParameter");
+        getMessageType.setAccessible(true);
+        getMethodParameter.setAccessible(true);
+        listenerContainer.setRocketMQListener(new RocketMQListener<ArrayList<Date>>() {
+            @Override
+            public void onMessage(ArrayList<Date> message) {
+
+            }
+        });
+
+        ParameterizedType type = (ParameterizedType) getMessageType.invoke(listenerContainer);
+        assertThat(type.getRawType() == ArrayList.class);
+        MethodParameter methodParameter = ((MethodParameter) getMethodParameter.invoke(listenerContainer));
+        assertThat(methodParameter.getParameterType() == ArrayList.class);
     }
 }
 

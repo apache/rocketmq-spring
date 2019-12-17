@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.support;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -49,7 +50,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
@@ -93,7 +96,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private DefaultMQPushConsumer consumer;
 
-    private Class messageType;
+    private Type messageType;
+
+    private MethodParameter methodParameter;
 
     private boolean running;
 
@@ -297,7 +302,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         initRocketMQPushConsumer();
 
         this.messageType = getMessageType();
-        log.debug("RocketMQ messageType: {}", messageType.getName());
+        this.methodParameter = getMethodParameter();
+        log.debug("RocketMQ messageType: {}", messageType);
     }
 
     @Override
@@ -380,7 +386,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             } else {
                 // If msgType not string, use objectMapper change it.
                 try {
-                    return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
+                    if (messageType instanceof Class) {
+                        //if the messageType has not Generic Parameter
+                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
+                    } else {
+                        //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
+                        //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
+                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
+                    }
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
                     throw new RuntimeException("cannot convert message to " + messageType, e);
@@ -389,7 +402,28 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private Class getMessageType() {
+
+    private MethodParameter getMethodParameter() {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
+        Type messageType = this.getMessageType();
+        Class clazz = null;
+        if (messageType instanceof ParameterizedType && messageConverter instanceof SmartMessageConverter) {
+            clazz = (Class) ((ParameterizedType) messageType).getRawType();
+        } else if (messageType instanceof Class) {
+            clazz = (Class) messageType;
+        } else {
+            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
+        }
+        try {
+            final Method method = targetClass.getMethod("onMessage", clazz);
+            return new MethodParameter(method, 0);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
+        }
+    }
+
+    private Type getMessageType() {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
         Type[] interfaces = targetClass.getGenericInterfaces();
         Class<?> superclass = targetClass.getSuperclass();
@@ -404,7 +438,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     if (Objects.equals(parameterizedType.getRawType(), RocketMQListener.class)) {
                         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
                         if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-                            return (Class) actualTypeArguments[0];
+                            return actualTypeArguments[0];
                         } else {
                             return Object.class;
                         }
