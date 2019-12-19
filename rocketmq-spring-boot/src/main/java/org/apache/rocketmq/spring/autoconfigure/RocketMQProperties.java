@@ -84,11 +84,11 @@ public class RocketMQProperties {
         this.clientInstanceName = clientInstanceName;
     }
 
-    private String defaultClientInstanceName(){
+    private String defaultClientInstanceName() {
         String defaultName = null;
-        try{
+        try {
             defaultName = InetAddress.getLocalHost().getHostName();
-        }catch (Exception e){
+        } catch (Exception e) {
             defaultName = "INSTANCE";
         }
 
