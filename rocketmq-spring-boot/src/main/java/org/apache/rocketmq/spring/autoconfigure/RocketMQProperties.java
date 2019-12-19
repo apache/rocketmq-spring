@@ -20,6 +20,7 @@ package org.apache.rocketmq.spring.autoconfigure;
 import org.apache.rocketmq.common.MixAll;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class RocketMQProperties {
      * Enum type for accesChannel, values: LOCAL, CLOUD
      */
     private String accessChannel;
+
+    private String clientInstanceName = defaultClientInstanceName();
 
     private Producer producer;
 
@@ -71,6 +74,25 @@ public class RocketMQProperties {
 
     public void setProducer(RocketMQProperties.Producer producer) {
         this.producer = producer;
+    }
+
+    public String getClientInstanceName() {
+        return clientInstanceName;
+    }
+
+    public void setClientInstanceName(String clientInstanceName) {
+        this.clientInstanceName = clientInstanceName;
+    }
+
+    private String defaultClientInstanceName(){
+        String defaultName = null;
+        try{
+            defaultName = InetAddress.getLocalHost().getHostName();
+        }catch (Exception e){
+            defaultName = "INSTANCE";
+        }
+
+        return defaultName;
     }
 
     public static class Producer {

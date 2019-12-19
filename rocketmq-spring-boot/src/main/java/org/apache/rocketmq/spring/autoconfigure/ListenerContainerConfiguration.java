@@ -142,7 +142,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQListener((RocketMQListener)bean);
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-        container.setName(name);  // REVIEW ME, use the same clientId or multiple?
+        container.setName(rocketMQProperties.getClientInstanceName().concat("_").concat(name));
+//        container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 
         return container;
     }
