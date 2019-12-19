@@ -425,32 +425,32 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private Type getMessageType() {
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
-        Type[] interfaces = targetClass.getGenericInterfaces();
-        Class<?> superclass = targetClass.getSuperclass();
-        while ((Objects.isNull(interfaces) || 0 == interfaces.length) && Objects.nonNull(superclass)) {
-            interfaces = superclass.getGenericInterfaces();
-            superclass = targetClass.getSuperclass();
-        }
-        if (Objects.nonNull(interfaces)) {
-            for (Type type : interfaces) {
-                if (type instanceof ParameterizedType) {
-                    ParameterizedType parameterizedType = (ParameterizedType) type;
-                    if (Objects.equals(parameterizedType.getRawType(), RocketMQListener.class)) {
-                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-                            return actualTypeArguments[0];
-                        } else {
-                            return Object.class;
-                        }
+        Type matchedGenericInterface = null;
+        while (Objects.nonNull(targetClass)) {
+            Type[] interfaces = targetClass.getGenericInterfaces();
+            if (Objects.nonNull(interfaces)) {
+                for (Type type : interfaces) {
+                    if (type instanceof ParameterizedType
+                            && Objects.equals(((ParameterizedType) type).getRawType(), RocketMQListener.class)) {
+                        matchedGenericInterface = type;
+                        break;
                     }
                 }
             }
-
-            return Object.class;
-        } else {
+            targetClass = targetClass.getSuperclass();
+        }
+        if (Objects.isNull(matchedGenericInterface)) {
             return Object.class;
         }
+
+        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
+        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
+            return actualTypeArguments[0];
+        }
+        return Object.class;
     }
+
+
 
     private void initRocketMQPushConsumer() throws MQClientException {
         Assert.notNull(rocketMQListener, "Property 'rocketMQListener' is required");
