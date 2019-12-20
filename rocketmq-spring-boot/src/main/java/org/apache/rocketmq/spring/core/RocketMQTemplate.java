@@ -30,7 +30,6 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
-import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
@@ -152,9 +151,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
             org.apache.rocketmq.common.message.Message replyMessage;
-            if(Objects.isNull(hashKey) || hashKey.isEmpty()) {
+            if (Objects.isNull(hashKey) || hashKey.isEmpty()) {
                 replyMessage = producer.request(rocketMsg, timeout);
-            }else{
+            } else {
                 replyMessage = producer.request(rocketMsg, messageQueueSelector, hashKey, timeout);
             }
             return replyMessage;
@@ -238,9 +237,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
-            if(Objects.isNull(hashKey) || hashKey.isEmpty()) {
+            if (Objects.isNull(hashKey) || hashKey.isEmpty()) {
                 producer.request(rocketMsg, requestCallback, timeout);
-            }else {
+            } else {
                 producer.request(rocketMsg, messageQueueSelector, hashKey, requestCallback, timeout);
             }
         } catch (Exception e) {
