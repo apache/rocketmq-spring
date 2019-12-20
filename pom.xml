@@ -34,7 +34,8 @@
         <repository>
             <id>70yi-nexus-releases</id>
             <name>Nexus Release Repository</name>
-            <url>http://14.29.228.199:8081/repository/maven-releases/</url>
+            <url>http://mvn.7billion.cn/repository/maven-releases/</url>
+<!--            <url>http://14.29.228.199:8081/repository/maven-releases/</url>-->
         </repository>
 <!--        <snapshotRepository>-->
 <!--            <id>bolingcavalry-nexus-snapshots</id>-->
