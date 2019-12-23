@@ -42,16 +42,16 @@ public class SpringBeanUtil {
      */
     public static Map<String, Object> getBeansWithAnnotation(@NonNull ConfigurableApplicationContext applicationContext, Class<? extends Annotation> clazz) {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(clazz);
-        Map<String, Object> filterBeas = new HashMap<>(beans.size());
+        Map<String, Object> filterBeans = new HashMap<>(beans.size());
         // remove proxy target
         Set<Map.Entry<String, Object>> entrySet = beans.entrySet();
         entrySet.forEach((entry) -> {
             final String beanName = entry.getKey();
             if (!ScopedProxyUtils.isScopedTarget(beanName)) {
-                filterBeas.put(beanName, entry.getValue());
+                filterBeans.put(beanName, entry.getValue());
             }
         });
-        return filterBeas;
+        return filterBeans;
     }
 
 }
