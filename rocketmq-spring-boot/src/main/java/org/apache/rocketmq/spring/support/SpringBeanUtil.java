@@ -26,15 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * override applicationContext.getBeansWithAnnotation method to make sure without same ProxyTarget bean
- *
- * author element
- */
 public class SpringBeanUtil {
 
     /**
-     * get beans with annotation
+     * Override applicationContext.getBeansWithAnnotation method to make sure without same ProxyTarget beans
      *
      * @param applicationContext spring Application Context
      * @param clazz              annotation class
@@ -42,16 +37,16 @@ public class SpringBeanUtil {
      */
     public static Map<String, Object> getBeansWithAnnotation(@NonNull ConfigurableApplicationContext applicationContext, Class<? extends Annotation> clazz) {
         Map<String, Object> beans = applicationContext.getBeansWithAnnotation(clazz);
-        Map<String, Object> filterBeas = new HashMap<>(beans.size());
+        Map<String, Object> filterBeans = new HashMap<>(beans.size());
         // remove proxy target
         Set<Map.Entry<String, Object>> entrySet = beans.entrySet();
         entrySet.forEach((entry) -> {
             final String beanName = entry.getKey();
             if (!ScopedProxyUtils.isScopedTarget(beanName)) {
-                filterBeas.put(beanName, entry.getValue());
+                filterBeans.put(beanName, entry.getValue());
             }
         });
-        return filterBeas;
+        return filterBeans;
     }
 
 }
