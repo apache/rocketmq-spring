@@ -74,17 +74,6 @@ public class RocketMQProperties {
         this.producer = producer;
     }
 
-    private String defaultClientInstanceName() {
-        String defaultName = null;
-        try {
-            defaultName = InetAddress.getLocalHost().getHostName();
-        } catch (Exception e) {
-            defaultName = "INSTANCE";
-        }
-
-        return defaultName;
-    }
-
     public static class Producer {
 
         /**
