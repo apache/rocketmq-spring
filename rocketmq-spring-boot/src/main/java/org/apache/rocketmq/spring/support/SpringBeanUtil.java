@@ -26,15 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * override applicationContext.getBeansWithAnnotation method to make sure without same ProxyTarget bean
- *
- * author element
- */
 public class SpringBeanUtil {
 
     /**
-     * get beans with annotation
+     * Override applicationContext.getBeansWithAnnotation method to make sure without same ProxyTarget beans
      *
      * @param applicationContext spring Application Context
      * @param clazz              annotation class
