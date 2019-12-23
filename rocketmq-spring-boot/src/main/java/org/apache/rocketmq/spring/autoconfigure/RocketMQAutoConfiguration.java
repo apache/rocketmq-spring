@@ -119,7 +119,6 @@ public class RocketMQAutoConfiguration {
         producer.setMaxMessageSize(producerConfig.getMaxMessageSize());
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
-        producer.setInstanceName(rocketMQProperties.getClientInstanceName());
 
         return producer;
     }
