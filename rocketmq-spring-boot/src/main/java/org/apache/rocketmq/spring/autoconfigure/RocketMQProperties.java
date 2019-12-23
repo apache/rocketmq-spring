@@ -38,8 +38,6 @@ public class RocketMQProperties {
      */
     private String accessChannel;
 
-    private String clientInstanceName = defaultClientInstanceName();
-
     private Producer producer;
 
     /**
@@ -74,14 +72,6 @@ public class RocketMQProperties {
 
     public void setProducer(RocketMQProperties.Producer producer) {
         this.producer = producer;
-    }
-
-    public String getClientInstanceName() {
-        return clientInstanceName;
-    }
-
-    public void setClientInstanceName(String clientInstanceName) {
-        this.clientInstanceName = clientInstanceName;
     }
 
     private String defaultClientInstanceName() {
