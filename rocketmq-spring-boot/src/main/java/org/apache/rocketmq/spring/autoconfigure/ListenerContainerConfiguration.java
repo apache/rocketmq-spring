@@ -145,15 +145,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         container.setRocketMQListener((RocketMQListener) bean);
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-
-        /**
-         * REVIEW ME, use the same clientId or multiple?
-         *
-         * - this setting method is not work because on rocketmq-client( >= 4.6.0 ) will reset instanceName to pid
-         * - @see {org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl#start}
-         * - @see {org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl#start}
-         * - @EinsiTang my-tangjianbin@163.com
-         */
         container.setName(name);
 
         return container;
