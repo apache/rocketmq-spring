@@ -17,13 +17,12 @@
 
 package org.apache.rocketmq.spring.annotation;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.stereotype.Component;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,7 +37,7 @@ public @interface ExtRocketMQTemplateConfiguration {
     /**
      * The property of "name-server".
      */
-    String nameServer();
+    String nameServer() default "${rocketmq.name-server:}";
 
     /**
      * Name of producer.

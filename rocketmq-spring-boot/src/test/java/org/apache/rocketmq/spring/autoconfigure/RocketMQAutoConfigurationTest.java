@@ -32,11 +32,8 @@ import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -88,17 +85,6 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testExtRocketMQTemplate() {
-        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-            withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
-            run(new ContextConsumer<AssertableApplicationContext>() {
-                @Override
-                public void accept(AssertableApplicationContext context) throws Throwable {
-                    Throwable th = context.getStartupFailure();
-                    System.out.printf("th==" + th + "\n");
-                    Assert.assertTrue(th instanceof BeanDefinitionValidationException);
-                }
-            });
-
         runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
             withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
             run((context) -> {
