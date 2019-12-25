@@ -44,9 +44,9 @@ Add a dependency using maven:
 
 Please see the [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
 
-## Document
+## User Guide
 
-Please see the [wiki]() page
+Please see the [wiki](https://github.com/apache/rocketmq-spring/wiki) page
 
 
 ## Contributing
