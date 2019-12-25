@@ -11,16 +11,16 @@ This project aims to help developers quickly integrate [RocketMQ](http://rocketm
 - [x] Send messages synchronously
 - [x] Send messages asynchronously
 - [x] Send messages in one-way mode
-- [x] Send messages orderly
-- [x] Send messages in batch
+- [x] Send ordered messages
+- [x] Send batched messages
 - [x] Send transactional messages
 - [x] Send scheduled messages with delay level
 - [x] Consume messages with concurrently mode (broadcasting/clustering)
-- [x] Consume messages with orderly mode
-- [x] Support message filter with tag and sql
-- [x] Support message tracing capability
-- [x] Authentication and authorisation
-- [ ] Request-reply mode
+- [x] Consume ordered messages
+- [x] Filter messages using the tag or sql92 expression
+- [x] Suport message tracing
+- [x] Support Authentication and authorisation
+- [ ] Support Request-reply message exchange pattern
 
 ## Prerequisites
 - JDK 1.8 and above
@@ -42,16 +42,16 @@ Add a dependency using maven:
 
 ## Samples
 
-Please see the [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples)
+Please see the [rocketmq-spring-boot-samples](rocketmq-spring-boot-samples).
 
 ## User Guide
 
-Please see the [wiki](https://github.com/apache/rocketmq-spring/wiki) page
+Please see the [wiki](https://github.com/apache/rocketmq-spring/wiki) page.
 
 
 ## Contributing
 
-We are always very happy to have contributions, whether for trivial cleanups or big new features. Please see the RocketMQ main website to read [details](http://rocketmq.apache.org/docs/how-to-contribute/)
+We are always very happy to have contributions, whether for trivial cleanups or big new features. Please see the RocketMQ main website to read [details](http://rocketmq.apache.org/docs/how-to-contribute/).
 
 ## License
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) Copyright (C) Apache Software Foundation 
