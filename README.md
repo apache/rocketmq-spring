@@ -19,8 +19,8 @@ This project aims to help developers quickly integrate [RocketMQ](http://rocketm
 - [x] Consume ordered messages
 - [x] Filter messages using the tag or sql92 expression
 - [x] Suport message tracing
-- [x] Support Authentication and authorisation
-- [ ] Support Request-reply message exchange pattern
+- [x] Support authentication and authorisation
+- [ ] Support request-reply message exchange pattern
 
 ## Prerequisites
 - JDK 1.8 and above
