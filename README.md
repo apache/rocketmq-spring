@@ -19,7 +19,7 @@ This project aims to help developers quickly integrate [RocketMQ](http://rocketm
 - [x] Consume ordered messages
 - [x] Filter messages using the tag or sql92 expression
 - [x] Suport message tracing
-- [x] Support authentication and authorisation
+- [x] Support authentication and authorization
 - [ ] Support request-reply message exchange pattern
 
 ## Prerequisites
