@@ -17,11 +17,19 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
+import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageConst;
@@ -38,10 +46,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Objects;
 
 public class RocketMQUtil {
     private final static Logger log = LoggerFactory.getLogger(RocketMQUtil.class);
@@ -73,7 +77,7 @@ public class RocketMQUtil {
         }
 
         // Never happen
-        log.warn("Failed to covert enum type RocketMQLocalTransactionState.%s", state);
+        log.warn("Failed to covert enum type RocketMQLocalTransactionState {}.", state);
         return LocalTransactionState.UNKNOW;
     }
 
@@ -136,9 +140,9 @@ public class RocketMQUtil {
         byte[] payloads;
 
         if (payloadObj instanceof String) {
-            payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
+            payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
         } else if (payloadObj instanceof byte[]) {
-            payloads = (byte[])message.getPayload();
+            payloads = (byte[]) message.getPayload();
         } else {
             try {
                 String jsonObj = objectMapper.writeValueAsString(payloadObj);
@@ -148,11 +152,6 @@ public class RocketMQUtil {
             }
         }
         return getAndWrapMessage(destination, message.getHeaders(), payloads);
-    }
-
-    public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
-        String destination, org.springframework.messaging.Message<byte[]> message) {
-        return getAndWrapMessage(destination, message.getHeaders(), message.getPayload());
     }
 
     private static Message getAndWrapMessage(String destination, MessageHeaders headers, byte[] payloads) {
@@ -210,11 +209,11 @@ public class RocketMQUtil {
                 throw new RuntimeException("the message cannot be empty");
             }
             if (payloadObj instanceof String) {
-                payloads = ((String)payloadObj).getBytes(Charset.forName(charset));
+                payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
             } else if (payloadObj instanceof byte[]) {
-                payloads = (byte[])message.getPayload();
+                payloads = (byte[]) message.getPayload();
             } else {
-                String jsonObj = (String)messageConverter.fromMessage(message, payloadObj.getClass());
+                String jsonObj = (String) messageConverter.fromMessage(message, payloadObj.getClass());
                 if (null == jsonObj) {
                     throw new RuntimeException(String.format(
                         "empty after conversion [messageConverter:%s,payloadClass:%s,payloadObj:%s]",
@@ -247,11 +246,41 @@ public class RocketMQUtil {
     public static String getInstanceName(RPCHook rpcHook, String identify) {
         String separator = "|";
         StringBuilder instanceName = new StringBuilder();
-        SessionCredentials sessionCredentials = ((AclClientRPCHook)rpcHook).getSessionCredentials();
+        SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
         instanceName.append(sessionCredentials.getAccessKey())
             .append(separator).append(sessionCredentials.getSecretKey())
             .append(separator).append(identify)
             .append(separator).append(UtilAll.getPid());
         return instanceName.toString();
     }
+
+    public static DefaultMQProducer createDefaultMQProducer(String groupName, String ak, String sk,
+        boolean isEnableMsgTrace, String customizedTraceTopic) {
+
+        boolean isEnableAcl = !StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk);
+        DefaultMQProducer producer;
+        if (isEnableAcl) {
+            producer = new TransactionMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
+            producer.setVipChannelEnabled(false);
+        } else {
+            producer = new TransactionMQProducer(groupName);
+        }
+
+        if (isEnableMsgTrace) {
+            try {
+                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
+                dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
+                Field field = DefaultMQProducer.class.getDeclaredField("traceDispatcher");
+                field.setAccessible(true);
+                field.set(producer, dispatcher);
+                producer.getDefaultMQProducerImpl().registerSendMessageHook(
+                    new SendMessageTraceHookImpl(dispatcher));
+            } catch (Throwable e) {
+                log.error("system trace hook init failed ,maybe can't send msg trace data");
+            }
+        }
+
+        return producer;
+    }
+
 }
