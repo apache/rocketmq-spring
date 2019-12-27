@@ -17,18 +17,13 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import java.lang.reflect.Field;
 import javax.annotation.PostConstruct;
-import org.apache.rocketmq.acl.common.AclClientRPCHook;
-import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.client.producer.TransactionMQProducer;
-import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
-import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,30 +79,12 @@ public class RocketMQAutoConfiguration {
 
         String accessChannel = rocketMQProperties.getAccessChannel();
 
-        DefaultMQProducer producer;
         String ak = rocketMQProperties.getProducer().getAccessKey();
         String sk = rocketMQProperties.getProducer().getSecretKey();
-        boolean isEnableAcl = !StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk);
-        if (isEnableAcl) {
-            producer = new TransactionMQProducer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
-            producer.setVipChannelEnabled(false);
-        } else {
-            producer = new TransactionMQProducer(groupName);
-        }
+        boolean isEnableMsgTrace = rocketMQProperties.getProducer().isEnableMsgTrace();
+        String customizedTraceTopic = rocketMQProperties.getProducer().getCustomizedTraceTopic();
 
-        if (rocketMQProperties.getProducer().isEnableMsgTrace()) {
-            try {
-                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(rocketMQProperties.getProducer().getCustomizedTraceTopic(), isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
-                dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
-                Field field = DefaultMQProducer.class.getDeclaredField("traceDispatcher");
-                field.setAccessible(true);
-                field.set(producer, dispatcher);
-                producer.getDefaultMQProducerImpl().registerSendMessageHook(
-                    new SendMessageTraceHookImpl(dispatcher));
-            } catch (Throwable e) {
-                log.error("system mqtrace hook init failed ,maybe can't send msg trace data");
-            }
-        }
+        DefaultMQProducer producer = RocketMQUtil.createDefaultMQProducer(groupName, ak, sk, isEnableMsgTrace, customizedTraceTopic);
 
         producer.setNamesrvAddr(nameServer);
         if (!StringUtils.isEmpty(accessChannel)) {
