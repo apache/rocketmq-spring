@@ -19,16 +19,13 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.rocketmq.acl.common.AclClientRPCHook;
-import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
-import org.apache.rocketmq.spring.support.SpringBeanUtil;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
+import org.apache.rocketmq.spring.support.SpringBeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
