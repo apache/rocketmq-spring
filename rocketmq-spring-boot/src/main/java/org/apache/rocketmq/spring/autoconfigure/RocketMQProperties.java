@@ -33,7 +33,7 @@ public class RocketMQProperties {
     private String nameServer;
 
     /**
-     * Enum type for accesChannel, values: LOCAL, CLOUD
+     * Enum type for accessChannel, values: LOCAL, CLOUD
      */
     private String accessChannel;
 

@@ -1,7 +1,5 @@
 # rocketmq-spring-boot-samples
 
-[中文](./README_zh_CN.md)
-
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 It's a demo project for how to use [rocketmq-spring-boot](https://github.com/apache/rocketmq-spring)
