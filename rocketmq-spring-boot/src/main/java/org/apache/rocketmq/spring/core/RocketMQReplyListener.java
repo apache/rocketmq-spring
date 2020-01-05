@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.spring.support;
+package org.apache.rocketmq.spring.core;
 
-import org.springframework.beans.factory.DisposableBean;
-
-public interface RocketMQListenerContainer extends DisposableBean {
-
+/**
+ * The consumer supported request-response model should implement this interface.
+ *
+ * @param <T> the type received by the listener
+ */
+public interface RocketMQReplyListener<T, R> {
+    /**
+     * @param message
+     * @return content that reply to producer
+     */
+    R onMessage(T message);
 }

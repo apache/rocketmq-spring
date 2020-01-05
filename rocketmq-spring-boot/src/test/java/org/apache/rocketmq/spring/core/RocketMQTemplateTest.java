@@ -58,8 +58,8 @@ public class RocketMQTemplateTest {
     @Value("${test.rocketmq.topic}")
     String topic;
 
-    @Value("requestTopic:tagA")
-    String requestTopic;
+    @Value("stringRequestTopicA:tagA")
+    String stringRequestTopic;
 
     @Test
     public void testSendMessage() {
@@ -90,10 +90,10 @@ public class RocketMQTemplateTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testRequestSync_NullMessage() {
+    @Test
+    public void testSendAndReceive_NullMessage() {
         try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, new Message<String>() {
+            String response = rocketMQTemplate.sendAndReceive(stringRequestTopic, new Message<String>() {
                 @Override public String getPayload() {
                     return null;
                 }
@@ -101,200 +101,49 @@ public class RocketMQTemplateTest {
                 @Override public MessageHeaders getHeaders() {
                     return null;
                 }
-            });
+            }, String.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessageContaining("`message` and `message.payload` cannot be null");
+        }
+
+        try {
+            String response = rocketMQTemplate.sendAndReceive(stringRequestTopic, (Object) null, String.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessageContaining("Payload must not be null");
+        }
+    }
+
+    @Test
+    public void testSendAndReceive_Sync() throws InterruptedException {
+        try {
+            String responseMessage = rocketMQTemplate.sendAndReceive(stringRequestTopic, new Message<String>() {
+                @Override public String getPayload() {
+                    return "requestTopicSync";
+                }
+
+                @Override public MessageHeaders getHeaders() {
+                    return null;
+                }
+            }, String.class);
+            assertThat(responseMessage).isNotNull();
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
+
+        try {
+            String responseMessage = rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicSync", String.class, "orderId");
+            assertThat(responseMessage).isNotNull();
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
     }
 
     @Test
-    public void testRequestSync() {
+    public void testSendAndReceive_Async() {
         try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, "requestSync");
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, "requestSync with timeout", 5000);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, "requestSync with timeout and delayLevel", 5000, 1);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, new Message<String>() {
+            rocketMQTemplate.sendAndReceive(stringRequestTopic, new Message<String>() {
                 @Override public String getPayload() {
-                    return "requestSync by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            });
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestSync with timeout by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, 5000);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestSync with timeout and delayLevel by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, 50000, 4);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testRequestSyncOrderly_NullMessage() {
-        String orderId = "order-10";
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return null;
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, orderId);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test
-    public void testRequestSyncOrderly_NullHashKey() {
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, "requestSyncOrderly", null);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test
-    public void testRequestSyncOrderly() {
-        String orderId = "order-10";
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, "requestSyncOrderly", orderId);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, "requestSyncOrderly with timeout", orderId, 5000);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, "requestSyncOrderly with timeout and delayLevel", orderId, 5000, 1);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestSyncOrderly by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, orderId);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestSyncOrderly with timeout by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, orderId, 5000);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            org.apache.rocketmq.common.message.Message responseMessage = rocketMQTemplate.requestSyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestSyncOrderly with timeout and delayLevel by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, orderId, 50000, 4);
-            assertThat(responseMessage).isNotNull();
-            assertThat(responseMessage.getTopic()).isNotEmpty();
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testRequestAsync_NullMessage() {
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return null;
+                    return "requestTopicASync";
                 }
 
                 @Override public MessageHeaders getHeaders() {
@@ -302,85 +151,11 @@ public class RocketMQTemplateTest {
                 }
             }, new RequestCallback() {
                 @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
+
                 }
 
                 @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            });
 
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test
-    public void testRequestAsync() throws InterruptedException {
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, "requestAsync", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            });
-
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, "requestAsync with timeout", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, 5000);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, "requestAsync with timeout and delayLevel", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, 5000, 1);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsync by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
                 }
             });
         } catch (MessagingException e) {
@@ -388,218 +163,18 @@ public class RocketMQTemplateTest {
         }
 
         try {
-            rocketMQTemplate.requestAsync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsync with timeout by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
+            rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicAsync", new RequestCallback() {
                 @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
+
                 }
 
                 @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
+
                 }
-            }, 5000);
+            }, "order-id");
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
-
-        try {
-            rocketMQTemplate.requestAsync(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsync with timeout and delayLevel by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, 10000, 2);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-        Thread.sleep(10000);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testRequestAsyncOrderly_NullMessage() {
-        String orderId = "orderId-11";
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, new Message<Object>() {
-                @Override public Object getPayload() {
-                    return null;
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId);
-
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test
-    public void testRequestAsyncOrderly_NullHashKey() {
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, "requestAsyncOrderly", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, null);
-
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-    }
-
-    @Test
-    public void testRequestAsyncOrderly() throws InterruptedException {
-        String orderId = "orderId-11";
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, "requestAsyncOrderly", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId);
-
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, "requestAsyncOrderly with timeout", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId, 5000);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, "requestAsyncOrderly with timeout and delayLevel", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId, 5000, 1);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsyncOrderly by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsyncOrderly with timeout by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId, 5000);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-
-        try {
-            rocketMQTemplate.requestAsyncOrderly(requestTopic, new Message<String>() {
-                @Override public String getPayload() {
-                    return "requestAsyncOrderly with timeout and delayLevel by using Message<T>";
-                }
-
-                @Override public MessageHeaders getHeaders() {
-                    return null;
-                }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                    assertThat(message).isNotNull();
-                    assertThat(message.getTopic()).isNotEmpty();
-                }
-
-                @Override public void onException(Throwable e) {
-                    assertThat(e).isNotNull();
-                }
-            }, orderId, 10000, 2);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
-        }
-        Thread.sleep(10000);
     }
 
     @Test

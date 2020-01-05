@@ -17,15 +17,18 @@
 
 package org.apache.rocketmq.samples.springboot;
 
+import com.alibaba.fastjson.TypeReference;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Resource;
+import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.samples.springboot.domain.ProductWithPayload;
 import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
@@ -60,6 +63,15 @@ public class ProducerApplication implements CommandLineRunner {
     private String orderPaidTopic;
     @Value("${demo.rocketmq.msgExtTopic}")
     private String msgExtTopic;
+    @Value("${demo.rocketmq.stringRequestTopic}")
+    private String stringRequestTopic;
+    @Value("${demo.rocketmq.bytesRequestTopic}")
+    private String bytesRequestTopic;
+    @Value("${demo.rocketmq.objectRequestTopic}")
+    private String objectRequestTopic;
+    @Value("${demo.rocketmq.genericRequestTopic}")
+    private String genericRequestTopic;
+
     @Resource(name = "extRocketMQTemplate")
     private RocketMQTemplate extRocketMQTemplate;
 
@@ -70,7 +82,7 @@ public class ProducerApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Send string
-        SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
+ /*       SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
         sendResult = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte) 18).setUserName("Kitty"));
@@ -116,6 +128,45 @@ public class ProducerApplication implements CommandLineRunner {
 
         // Send transactional messages using extRocketMQTemplate
         testExtRocketMQTemplateTransaction();
+
+        // send request in sync mode and receive a reply of String type.
+        String replyString = rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", String.class);
+        System.out.printf("send %s and receive %s %n", "request string", replyString);
+
+        // send request in sync mode with timeout parameter and receive a reply of byte[] type.
+        byte[] replyBytes = rocketMQTemplate.sendAndReceive(bytesRequestTopic, new Message<String>() {
+            @Override public String getPayload() {
+                return "request byte[]";
+            }
+
+            @Override public MessageHeaders getHeaders() {
+                return null;
+            }
+        }, byte[].class, 3000);
+        System.out.printf("send %s and receive %s %n", "request byte[]", replyBytes.toString());
+
+        // send request in sync mode with hashKey parameter and receive a reply of User type.
+        User requestUser = new User().setUserAge(Byte.valueOf((byte) 9)).setUserName("requestUserName");
+        User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
+        System.out.printf("send %s and receive %s %n", requestUser, replyUser);
+*/
+        // send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
+        ProductWithPayload<String> replyGenericObject = rocketMQTemplate.sendAndReceive(genericRequestTopic, "request generic",
+            new TypeReference<ProductWithPayload<String>>() {
+            }.getType(), 30000, 2);
+        System.out.printf("send %s and receive %s %n", "request generic", replyGenericObject);
+
+        // send request in async mode and receive a reply of String type.
+/*        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RequestCallback() {
+            @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
+                System.out.print("receive reply content in callback: " + message.toString());
+            }
+
+            @Override public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        });*/
+
     }
 
     private void testBatchMessages() {
