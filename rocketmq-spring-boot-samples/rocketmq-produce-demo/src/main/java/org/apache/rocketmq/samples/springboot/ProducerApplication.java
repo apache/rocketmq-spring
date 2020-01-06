@@ -82,7 +82,7 @@ public class ProducerApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Send string
- /*       SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
+        SendResult sendResult = rocketMQTemplate.syncSend(springTopic, "Hello, World!");
         System.out.printf("syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
         sendResult = rocketMQTemplate.syncSend(userTopic, new User().setUserAge((byte) 18).setUserName("Kitty"));
@@ -149,7 +149,6 @@ public class ProducerApplication implements CommandLineRunner {
         User requestUser = new User().setUserAge(Byte.valueOf((byte) 9)).setUserName("requestUserName");
         User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
         System.out.printf("send %s and receive %s %n", requestUser, replyUser);
-*/
         // send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
         ProductWithPayload<String> replyGenericObject = rocketMQTemplate.sendAndReceive(genericRequestTopic, "request generic",
             new TypeReference<ProductWithPayload<String>>() {
@@ -157,7 +156,7 @@ public class ProducerApplication implements CommandLineRunner {
         System.out.printf("send %s and receive %s %n", "request generic", replyGenericObject);
 
         // send request in async mode and receive a reply of String type.
-/*        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RequestCallback() {
+        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RequestCallback() {
             @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
                 System.out.print("receive reply content in callback: " + message.toString());
             }
@@ -165,7 +164,7 @@ public class ProducerApplication implements CommandLineRunner {
             @Override public void onException(Throwable e) {
                 e.printStackTrace();
             }
-        });*/
+        });
 
     }
 
