@@ -146,7 +146,7 @@ public class ProducerApplication implements CommandLineRunner {
         System.out.printf("send %s and receive %s %n", "request byte[]", replyBytes.toString());
 
         // send request in sync mode with hashKey parameter and receive a reply of User type.
-        User requestUser = new User().setUserAge(Byte.valueOf((byte) 9)).setUserName("requestUserName");
+        User requestUser = new User().setUserAge((byte) 9).setUserName("requestUserName");
         User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
         System.out.printf("send %s and receive %s %n", requestUser, replyUser);
         // send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
@@ -296,15 +296,4 @@ public class ProducerApplication implements CommandLineRunner {
             return RocketMQLocalTransactionState.COMMIT;
         }
     }
-
-    class RocketMQRequestCallbackImpl_User implements RocketMQLocalRequestCallback<User> {
-        @Override public void onSuccess(User message) {
-            System.out.println("receive User: " + message.toString());
-        }
-
-        @Override public void onException(Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
 }
