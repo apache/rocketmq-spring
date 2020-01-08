@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -38,6 +39,7 @@ import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.messaging.Message;
@@ -61,6 +63,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     private RocketMQMessageConverter rocketMQMessageConverter = new RocketMQMessageConverter();
 
+    private List<RocketMQLocalRequestCallback> rocketMQLocalRequestCallbackList = new ArrayList<>();
+
     public DefaultMQProducer getProducer() {
         return producer;
     }
@@ -83,6 +87,19 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     public void setMessageQueueSelector(MessageQueueSelector messageQueueSelector) {
         this.messageQueueSelector = messageQueueSelector;
+    }
+
+    public List<RocketMQLocalRequestCallback> getRocketMQLocalRequestCallbackList() {
+        return rocketMQLocalRequestCallbackList;
+    }
+
+    public void setRocketMQLocalRequestCallbackList(
+        List<RocketMQLocalRequestCallback> rocketMQLocalRequestCallbackList) {
+        this.rocketMQLocalRequestCallbackList = rocketMQLocalRequestCallbackList;
+    }
+
+    public void addRocketMQLocalRequestCallback(RocketMQLocalRequestCallback rocketMQLocalRequestCallback) {
+        this.rocketMQLocalRequestCallbackList.add(rocketMQLocalRequestCallback);
     }
 
     /**
@@ -249,149 +266,130 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback) {
-        sendAndReceive(destination, message, requestCallback, null, producer.getSendMsgTimeout(), 0);
+    public void sendAndReceive(String destination, Message<?> message) {
+        sendAndReceive(destination, message, (String) null, producer.getSendMsgTimeout(), 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback) {
-        sendAndReceive(destination, payload, requestCallback, null, producer.getSendMsgTimeout(), 0);
+    public void sendAndReceive(String destination, Object payload) {
+        sendAndReceive(destination, payload, (String) null, producer.getSendMsgTimeout(), 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param timeout send timeout in millis
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback, long timeout) {
-        sendAndReceive(destination, message, requestCallback, null, timeout, 0);
+    public void sendAndReceive(String destination, Message<?> message, long timeout) {
+        sendAndReceive(destination, message, (String) null, timeout, 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param timeout send timeout in millis
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback, long timeout) {
-        sendAndReceive(destination, payload, requestCallback, null, timeout, 0);
+    public void sendAndReceive(String destination, Object payload, long timeout) {
+        sendAndReceive(destination, payload, (String) null, timeout, 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback, long timeout,
-        int delayLevel) {
-        sendAndReceive(destination, message, requestCallback, null, timeout, delayLevel);
+    public void sendAndReceive(String destination, Message<?> message, long timeout, int delayLevel) {
+        sendAndReceive(destination, message, (String) null, timeout, delayLevel);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback, String hashKey) {
-        sendAndReceive(destination, payload, requestCallback, hashKey, producer.getSendMsgTimeout(), 0);
+    public void sendAndReceive(String destination, Object payload, String hashKey) {
+        sendAndReceive(destination, payload, hashKey, producer.getSendMsgTimeout(), 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback,
-        String hashKey, long timeout) {
-        sendAndReceive(destination, message, requestCallback, hashKey, timeout, 0);
+    public void sendAndReceive(String destination, Message<?> message, String hashKey, long timeout) {
+        sendAndReceive(destination, message, hashKey, timeout, 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback, String hashKey,
-        long timeout) {
-        sendAndReceive(destination, payload, requestCallback, hashKey, timeout, 0);
+    public void sendAndReceive(String destination, Object payload, String hashKey, long timeout) {
+        sendAndReceive(destination, payload, hashKey, timeout, 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback,
-        String hashKey) {
-        sendAndReceive(destination, message, requestCallback, hashKey, producer.getSendMsgTimeout(), 0);
+    public void sendAndReceive(String destination, Message<?> message, String hashKey) {
+        sendAndReceive(destination, message, hashKey, producer.getSendMsgTimeout(), 0);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback, long timeout,
-        int delayLevel) {
-        sendAndReceive(destination, payload, requestCallback, null, timeout, delayLevel);
+    public void sendAndReceive(String destination, Object payload, long timeout, int delayLevel) {
+        sendAndReceive(destination, payload, (String) null, timeout, delayLevel);
     }
 
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
      */
-    public void sendAndReceive(String destination, Object payload, RequestCallback requestCallback,
-        String hashKey, long timeout, int delayLevel) {
+    public void sendAndReceive(String destination, Object payload, String hashKey, long timeout, int delayLevel) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        sendAndReceive(destination, message, requestCallback, hashKey, timeout, delayLevel);
+        sendAndReceive(destination, message, hashKey, timeout, delayLevel);
     }
 
     /**
      * Send request message in asynchronous mode. </p> This method returns immediately. On receiving reply message,
-     * <code>requestCallback</code> will be executed. </p>
+     * <code>rocketMQLocalRequestCallback</code> will be executed. </p>
      *
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param requestCallback callback that will invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
      */
-    public void sendAndReceive(String destination, Message<?> message, RequestCallback requestCallback, String hashKey,
-        long timeout, int delayLevel) {
+    public void sendAndReceive(String destination, Message<?> message, String hashKey, long timeout, int delayLevel) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
@@ -404,6 +402,27 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             }
             if (timeout <= 0) {
                 timeout = producer.getSendMsgTimeout();
+            }
+            RequestCallback requestCallback = null;
+            if (!this.rocketMQLocalRequestCallbackList.isEmpty()) {
+                requestCallback = new RequestCallback() {
+                    @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
+
+                        RocketMQTemplate.this.rocketMQLocalRequestCallbackList.forEach(s -> {
+                            try {
+                                Object result = doConvertMessage((MessageExt) message, getMessageType(s));
+                                s.onSuccess(result);
+                            } catch (RuntimeException e) {
+                                log.warn("The RocketMQLocalRequestCallback: {} cannot handle the message: {}. expected type: {}",
+                                    AopProxyUtils.ultimateTargetClass(s).getSimpleName(), message, getMessageType(s));
+                            }
+                        });
+                    }
+
+                    @Override public void onException(Throwable e) {
+                        RocketMQTemplate.this.rocketMQLocalRequestCallbackList.forEach(s -> s.onException(e));
+                    }
+                };
             }
             if (Objects.isNull(hashKey) || hashKey.isEmpty()) {
                 producer.request(rocketMsg, requestCallback, timeout);
@@ -877,23 +896,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             destination, msg);
     }
 
-    private Message<?> validateMessageAndPayload(Message<?> message, Object payload) {
-        if (Objects.nonNull(message) && Objects.nonNull(payload)) {
-            log.error("`message` and `payload` cannot exist at the same time.");
-            throw new IllegalArgumentException("`message` and `payload` cannot exist at the same time");
-        }
-
-        if (Objects.nonNull(payload)) {
-            message = MessageBuilder.withPayload(payload).build();
-        }
-
-        if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
-            log.error("send request message failed. Either `message` or `payload` needed.");
-            throw new IllegalArgumentException("either `message` or `payload` needed.");
-        }
-        return message;
-    }
-
     private Object doConvertMessage(MessageExt messageExt, Type type) {
         if (Objects.equals(type, MessageExt.class)) {
             return messageExt;
@@ -915,11 +917,36 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                         return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) type).getRawType(), null);
                     }
                 } catch (Exception e) {
-                    log.info("convert failed. str:{}, msgType:{}", str, type);
+                    log.error("convert failed. str:{}, msgType:{}", str, type);
                     throw new RuntimeException("cannot convert message to " + type, e);
                 }
             }
         }
     }
 
+    private Type getMessageType(RocketMQLocalRequestCallback rocketMQLocalRequestCallback) {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQLocalRequestCallback);
+        Type matchedGenericInterface = null;
+        while (Objects.nonNull(targetClass)) {
+            Type[] interfaces = targetClass.getGenericInterfaces();
+            if (Objects.nonNull(interfaces)) {
+                for (Type type : interfaces) {
+                    if (type instanceof ParameterizedType && (Objects.equals(((ParameterizedType) type).getRawType(), RocketMQLocalRequestCallback.class))) {
+                        matchedGenericInterface = type;
+                        break;
+                    }
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+        }
+        if (Objects.isNull(matchedGenericInterface)) {
+            return Object.class;
+        }
+
+        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
+        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
+            return actualTypeArguments[0];
+        }
+        return Object.class;
+    }
 }

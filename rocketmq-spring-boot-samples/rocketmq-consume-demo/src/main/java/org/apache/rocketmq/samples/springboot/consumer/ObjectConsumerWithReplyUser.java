@@ -24,7 +24,7 @@ import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * Consumer that support request-response model
+ * The consumer that replying Object
  */
 @Service
 @RocketMQMessageListener(topic = "${demo.rocketmq.objectRequestTopic}", consumerGroup = "${demo.rocketmq.objectRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")

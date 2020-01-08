@@ -45,9 +45,9 @@ import org.springframework.util.StringUtils;
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
-@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, RocketMQTransactionConfiguration.class})
+@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, RocketMQTransactionConfiguration.class, RocketMQRequestCallbackConfiguration.class})
 @AutoConfigureAfter({MessageConverterConfiguration.class})
-@AutoConfigureBefore({RocketMQTransactionConfiguration.class})
+@AutoConfigureBefore({RocketMQTransactionConfiguration.class, RocketMQRequestCallbackConfiguration.class})
 
 public class RocketMQAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);

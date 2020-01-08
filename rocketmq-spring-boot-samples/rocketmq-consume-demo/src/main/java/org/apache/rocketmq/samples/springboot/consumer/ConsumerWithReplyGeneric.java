@@ -23,7 +23,7 @@ import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * RocketMQMessageListener
+ * The consumer that replying generic type
  */
 @Service
 @RocketMQMessageListener(topic = "${demo.rocketmq.genericRequestTopic}", consumerGroup = "${demo.rocketmq.genericRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")

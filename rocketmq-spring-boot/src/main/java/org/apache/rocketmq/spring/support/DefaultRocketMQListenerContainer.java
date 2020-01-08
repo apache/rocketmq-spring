@@ -351,7 +351,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 log.debug("received msg: {}", messageExt);
                 try {
                     long now = System.currentTimeMillis();
-                    handleReplyMessage(messageExt);
+                    handleMessage(messageExt);
                     long costTime = System.currentTimeMillis() - now;
                     log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
@@ -374,7 +374,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 log.debug("received msg: {}", messageExt);
                 try {
                     long now = System.currentTimeMillis();
-                    handleReplyMessage(messageExt);
+                    handleMessage(messageExt);
                     long costTime = System.currentTimeMillis() - now;
                     log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
@@ -388,7 +388,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private void handleReplyMessage(
+    private void handleMessage(
         MessageExt messageExt) throws MQClientException, RemotingException, InterruptedException {
         if (rocketMQListener != null) {
             rocketMQListener.onMessage(doConvertMessage(messageExt));
@@ -400,14 +400,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer().send(replyMessage, new SendCallback() {
                 @Override public void onSuccess(SendResult sendResult) {
                     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
-                        log.error("Consumer replys message failed. SendStatus: {}", sendResult.getSendStatus());
+                        log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
                     } else {
-                        log.info("Consumer replys message success.");
+                        log.info("Consumer replies message success.");
                     }
                 }
 
                 @Override public void onException(Throwable e) {
-                    log.error("Consumer replys message failed. error: {}", e.getLocalizedMessage());
+                    log.error("Consumer replies message failed. error: {}", e.getLocalizedMessage());
                 }
             });
         }

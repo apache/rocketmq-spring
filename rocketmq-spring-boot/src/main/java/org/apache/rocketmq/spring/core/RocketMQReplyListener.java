@@ -18,14 +18,15 @@
 package org.apache.rocketmq.spring.core;
 
 /**
- * The consumer supported request-response model should implement this interface.
+ * The consumer supporting request-reply should implement this interface.
  *
- * @param <T> the type received by the listener
+ * @param <T> the type of data received by the listener
+ * @param <R> the type of data replying to producer
  */
 public interface RocketMQReplyListener<T, R> {
     /**
-     * @param message
-     * @return content that reply to producer
+     * @param message data received by the listener
+     * @return data replying to producer
      */
     R onMessage(T message);
 }

@@ -25,9 +25,12 @@ import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.exception.RemotingException;
+import org.apache.rocketmq.spring.annotation.RocketMQRequestCallbackListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
+import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainerTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +52,7 @@ import static org.mockito.Mockito.when;
     "test.rocketmq.topic=test", "rocketmq.producer.access-key=test-ak",
     "rocketmq.producer.secret-key=test-sk", "rocketmq.accessChannel=LOCAL",
     "rocketmq.producer.sendMessageTimeout= 3500", "rocketmq.producer.retryTimesWhenSendFailed=3",
-    "rocketmq.producer.retryTimesWhenSendAsyncFailed=3"}, classes = {RocketMQAutoConfiguration.class, TransactionListenerImpl.class})
+    "rocketmq.producer.retryTimesWhenSendAsyncFailed=3"}, classes = {RocketMQAutoConfiguration.class, TransactionListenerImpl.class, RocketMQRequestCallbackImpl_String.class, RocketMQRequestCallbackImpl_MessageExt.class})
 
 public class RocketMQTemplateTest {
     @Resource
@@ -58,8 +61,11 @@ public class RocketMQTemplateTest {
     @Value("${test.rocketmq.topic}")
     String topic;
 
-    @Value("stringRequestTopicA:tagA")
+    @Value("stringRequestTopic:tagA")
     String stringRequestTopic;
+
+    @Value("objectRequestTopic:tagA")
+    String objectRequestTopic;
 
     @Test
     public void testSendMessage() {
@@ -149,29 +155,25 @@ public class RocketMQTemplateTest {
                 @Override public MessageHeaders getHeaders() {
                     return null;
                 }
-            }, new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-
-                }
-
-                @Override public void onException(Throwable e) {
-
-                }
             });
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
 
         try {
-            rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicAsync", new RequestCallback() {
-                @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
+            rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicAsyncWithHasKey", "order-id");
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
 
-                }
+        try {
+            rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicAsyncWithTimeout", "order-id", 5000);
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
 
-                @Override public void onException(Throwable e) {
-
-                }
-            }, "order-id");
+        try {
+            rocketMQTemplate.sendAndReceive(stringRequestTopic, "requestTopicAsyncWithTimeout", 5000);
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
@@ -205,5 +207,27 @@ class TransactionListenerImpl implements RocketMQLocalTransactionListener {
     @Override
     public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
         return RocketMQLocalTransactionState.COMMIT;
+    }
+}
+
+@RocketMQRequestCallbackListener
+class RocketMQRequestCallbackImpl_String implements RocketMQLocalRequestCallback<String> {
+    @Override public void onSuccess(String message) {
+        System.out.println("receive string: " + message);
+    }
+
+    @Override public void onException(Throwable e) {
+        e.printStackTrace();
+    }
+}
+
+@RocketMQRequestCallbackListener
+class RocketMQRequestCallbackImpl_MessageExt implements RocketMQLocalRequestCallback<MessageExt> {
+    @Override public void onSuccess(MessageExt message) {
+        System.out.println("receive messageExt: " + message.toString());
+    }
+
+    @Override public void onException(Throwable e) {
+        e.printStackTrace();
     }
 }
