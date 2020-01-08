@@ -24,14 +24,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Resource;
-import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
 import org.apache.rocketmq.samples.springboot.domain.ProductWithPayload;
 import org.apache.rocketmq.samples.springboot.domain.User;
-import org.apache.rocketmq.spring.annotation.RocketMQRequestCallbackListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalRequestCallback;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
@@ -159,9 +156,25 @@ public class ProducerApplication implements CommandLineRunner {
         System.out.printf("send %s and receive %s %n", "request generic", replyGenericObject);
 
         // send request in async mode and receive a reply of String type.
-        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string");
+        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RocketMQLocalRequestCallback<String>() {
+            @Override public void onSuccess(String message) {
+                System.out.println("receive string: " + message);
+            }
+
+            @Override public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        });
         // send request in async mode and receive a reply of User type.
-        rocketMQTemplate.sendAndReceive(objectRequestTopic, new User().setUserAge((byte) 9).setUserName("requestUserName"), 5000);
+        rocketMQTemplate.sendAndReceive(objectRequestTopic, new User().setUserAge((byte) 9).setUserName("requestUserName"), new RocketMQLocalRequestCallback<User>() {
+            @Override public void onSuccess(User message) {
+                System.out.println("receive User: " + message.toString());
+            }
+
+            @Override public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        }, 5000);
     }
 
     private void testBatchMessages() {
@@ -284,7 +297,6 @@ public class ProducerApplication implements CommandLineRunner {
         }
     }
 
-    @RocketMQRequestCallbackListener
     class RocketMQRequestCallbackImpl_User implements RocketMQLocalRequestCallback<User> {
         @Override public void onSuccess(User message) {
             System.out.println("receive User: " + message.toString());
