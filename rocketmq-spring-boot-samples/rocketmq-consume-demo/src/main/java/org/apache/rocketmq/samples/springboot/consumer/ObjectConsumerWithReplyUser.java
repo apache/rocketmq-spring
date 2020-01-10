@@ -34,7 +34,7 @@ public class ObjectConsumerWithReplyUser implements RocketMQReplyListener<User, 
     public User onMessage(User user) {
         System.out.printf("------- ObjectConsumerWithReplyUser received: %s \n", user);
         User replyUser = new User();
-        replyUser.setUserAge(Byte.valueOf((byte) 10));
+        replyUser.setUserAge((byte) 10);
         replyUser.setUserName("replyUserName");
         return replyUser;
     }

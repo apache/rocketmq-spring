@@ -129,46 +129,38 @@ public class ProducerApplication implements CommandLineRunner {
         // Send transactional messages using extRocketMQTemplate
         testExtRocketMQTemplateTransaction();
 
-        // send request in sync mode and receive a reply of String type.
+        // Send request in sync mode and receive a reply of String type.
         String replyString = rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", String.class);
         System.out.printf("send %s and receive %s %n", "request string", replyString);
 
-        // send request in sync mode with timeout parameter and receive a reply of byte[] type.
-        byte[] replyBytes = rocketMQTemplate.sendAndReceive(bytesRequestTopic, new Message<String>() {
-            @Override public String getPayload() {
-                return "request byte[]";
-            }
+        // Send request in sync mode with timeout parameter and receive a reply of byte[] type.
+        byte[] replyBytes = rocketMQTemplate.sendAndReceive(bytesRequestTopic, MessageBuilder.withPayload("request byte[]").build(), byte[].class, 3000);
+        System.out.printf("send %s and receive %s %n", "request byte[]", new String(replyBytes));
 
-            @Override public MessageHeaders getHeaders() {
-                return null;
-            }
-        }, byte[].class, 3000);
-        System.out.printf("send %s and receive %s %n", "request byte[]", replyBytes.toString());
-
-        // send request in sync mode with hashKey parameter and receive a reply of User type.
+        // Send request in sync mode with hashKey parameter and receive a reply of User type.
         User requestUser = new User().setUserAge((byte) 9).setUserName("requestUserName");
         User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
         System.out.printf("send %s and receive %s %n", requestUser, replyUser);
-        // send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
+        // Send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
         ProductWithPayload<String> replyGenericObject = rocketMQTemplate.sendAndReceive(genericRequestTopic, "request generic",
             new TypeReference<ProductWithPayload<String>>() {
             }.getType(), 30000, 2);
         System.out.printf("send %s and receive %s %n", "request generic", replyGenericObject);
 
-        // send request in async mode and receive a reply of String type.
+        // Send request in async mode and receive a reply of String type.
         rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RocketMQLocalRequestCallback<String>() {
             @Override public void onSuccess(String message) {
-                System.out.println("receive string: " + message);
+                System.out.printf("send %s and receive %s %n", "request string", message);
             }
 
             @Override public void onException(Throwable e) {
                 e.printStackTrace();
             }
         });
-        // send request in async mode and receive a reply of User type.
+        // Send request in async mode and receive a reply of User type.
         rocketMQTemplate.sendAndReceive(objectRequestTopic, new User().setUserAge((byte) 9).setUserName("requestUserName"), new RocketMQLocalRequestCallback<User>() {
             @Override public void onSuccess(User message) {
-                System.out.println("receive User: " + message.toString());
+                System.out.printf("send user object and receive %s %n", message.toString());
             }
 
             @Override public void onException(Throwable e) {
