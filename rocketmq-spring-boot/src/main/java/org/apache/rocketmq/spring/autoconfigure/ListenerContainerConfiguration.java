@@ -26,6 +26,7 @@ import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = (ConfigurableApplicationContext)applicationContext;
+        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
     }
 
     @Override
@@ -80,8 +81,12 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private void registerContainer(String beanName, Object bean) {
         Class<?> clazz = AopProxyUtils.ultimateTargetClass(bean);
 
-        if (!RocketMQListener.class.isAssignableFrom(bean.getClass())) {
-            throw new IllegalStateException(clazz + " is not instance of " + RocketMQListener.class.getName());
+        if (RocketMQListener.class.isAssignableFrom(bean.getClass()) && RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
+            throw new IllegalStateException(clazz + " cannot be both instance of " + RocketMQListener.class.getName() + " and " + RocketMQReplyListener.class.getName());
+        }
+
+        if (!RocketMQListener.class.isAssignableFrom(bean.getClass()) && !RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
+            throw new IllegalStateException(clazz + " is not instance of " + RocketMQListener.class.getName() + " or " + RocketMQReplyListener.class.getName());
         }
 
         RocketMQMessageListener annotation = clazz.getAnnotation(RocketMQMessageListener.class);
@@ -90,7 +95,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         String topic = this.environment.resolvePlaceholders(annotation.topic());
 
         boolean listenerEnabled =
-            (boolean)rocketMQProperties.getConsumer().getListeners().getOrDefault(consumerGroup, Collections.EMPTY_MAP)
+            (boolean) rocketMQProperties.getConsumer().getListeners().getOrDefault(consumerGroup, Collections.EMPTY_MAP)
                 .getOrDefault(topic, true);
 
         if (!listenerEnabled) {
@@ -103,7 +108,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
 
         String containerBeanName = String.format("%s_%s", DefaultRocketMQListenerContainer.class.getName(),
             counter.incrementAndGet());
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext)applicationContext;
+        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
         genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
             () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
@@ -124,9 +129,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
         RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
-        
+
         container.setRocketMQMessageListener(annotation);
-        
+
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
         nameServer = StringUtils.isEmpty(nameServer) ? rocketMQProperties.getNameServer() : nameServer;
         String accessChannel = environment.resolvePlaceholders(annotation.accessChannel());
@@ -140,7 +145,11 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
-        container.setRocketMQListener((RocketMQListener)bean);
+        if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
+            container.setRocketMQListener((RocketMQListener) bean);
+        } else if (RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
+            container.setRocketMQReplyListener((RocketMQReplyListener) bean);
+        }
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);  // REVIEW ME, use the same clientId or multiple?
 

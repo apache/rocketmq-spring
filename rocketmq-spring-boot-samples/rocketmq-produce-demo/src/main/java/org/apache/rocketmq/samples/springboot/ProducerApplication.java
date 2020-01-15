@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.samples.springboot;
 
+import com.alibaba.fastjson.TypeReference;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,10 @@ import javax.annotation.Resource;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.samples.springboot.domain.ProductWithPayload;
 import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
+import org.apache.rocketmq.spring.core.RocketMQLocalRequestCallback;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -60,6 +63,15 @@ public class ProducerApplication implements CommandLineRunner {
     private String orderPaidTopic;
     @Value("${demo.rocketmq.msgExtTopic}")
     private String msgExtTopic;
+    @Value("${demo.rocketmq.stringRequestTopic}")
+    private String stringRequestTopic;
+    @Value("${demo.rocketmq.bytesRequestTopic}")
+    private String bytesRequestTopic;
+    @Value("${demo.rocketmq.objectRequestTopic}")
+    private String objectRequestTopic;
+    @Value("${demo.rocketmq.genericRequestTopic}")
+    private String genericRequestTopic;
+
     @Resource(name = "extRocketMQTemplate")
     private RocketMQTemplate extRocketMQTemplate;
 
@@ -116,6 +128,45 @@ public class ProducerApplication implements CommandLineRunner {
 
         // Send transactional messages using extRocketMQTemplate
         testExtRocketMQTemplateTransaction();
+
+        // Send request in sync mode and receive a reply of String type.
+        String replyString = rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", String.class);
+        System.out.printf("send %s and receive %s %n", "request string", replyString);
+
+        // Send request in sync mode with timeout parameter and receive a reply of byte[] type.
+        byte[] replyBytes = rocketMQTemplate.sendAndReceive(bytesRequestTopic, MessageBuilder.withPayload("request byte[]").build(), byte[].class, 3000);
+        System.out.printf("send %s and receive %s %n", "request byte[]", new String(replyBytes));
+
+        // Send request in sync mode with hashKey parameter and receive a reply of User type.
+        User requestUser = new User().setUserAge((byte) 9).setUserName("requestUserName");
+        User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
+        System.out.printf("send %s and receive %s %n", requestUser, replyUser);
+        // Send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
+        ProductWithPayload<String> replyGenericObject = rocketMQTemplate.sendAndReceive(genericRequestTopic, "request generic",
+            new TypeReference<ProductWithPayload<String>>() {
+            }.getType(), 30000, 2);
+        System.out.printf("send %s and receive %s %n", "request generic", replyGenericObject);
+
+        // Send request in async mode and receive a reply of String type.
+        rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RocketMQLocalRequestCallback<String>() {
+            @Override public void onSuccess(String message) {
+                System.out.printf("send %s and receive %s %n", "request string", message);
+            }
+
+            @Override public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        });
+        // Send request in async mode and receive a reply of User type.
+        rocketMQTemplate.sendAndReceive(objectRequestTopic, new User().setUserAge((byte) 9).setUserName("requestUserName"), new RocketMQLocalRequestCallback<User>() {
+            @Override public void onSuccess(User message) {
+                System.out.printf("send user object and receive %s %n", message.toString());
+            }
+
+            @Override public void onException(Throwable e) {
+                e.printStackTrace();
+            }
+        }, 5000);
     }
 
     private void testBatchMessages() {
@@ -237,5 +288,4 @@ public class ProducerApplication implements CommandLineRunner {
             return RocketMQLocalTransactionState.COMMIT;
         }
     }
-
 }

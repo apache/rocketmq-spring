@@ -17,18 +17,25 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
+import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * StringConsumer
+ * The consumer that replying Object
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumer implements RocketMQListener<String> {
+@RocketMQMessageListener(topic = "${demo.rocketmq.objectRequestTopic}", consumerGroup = "${demo.rocketmq.objectRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
+public class ObjectConsumerWithReplyUser implements RocketMQReplyListener<User, User> {
+
     @Override
-    public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
+    public User onMessage(User user) {
+        System.out.printf("------- ObjectConsumerWithReplyUser received: %s \n", user);
+        User replyUser = new User();
+        replyUser.setUserAge((byte) 10);
+        replyUser.setUserName("replyUserName");
+        return replyUser;
     }
 }
