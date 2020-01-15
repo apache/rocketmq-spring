@@ -17,18 +17,23 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 /**
- * StringConsumer
+ * The consumer that replying bytes
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumer implements RocketMQListener<String> {
+@RocketMQMessageListener(topic = "${demo.rocketmq.bytesRequestTopic}", consumerGroup = "${demo.rocketmq.bytesRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
+public class ConsumerWithReplyBytes implements RocketMQReplyListener<MessageExt, byte[]> {
+
     @Override
-    public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
+    public byte[] onMessage(MessageExt message) {
+        System.out.printf("------- ConsumerWithReplyBytes received: %s \n", message);
+        return "reply message content".getBytes();
     }
 }

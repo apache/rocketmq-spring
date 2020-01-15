@@ -17,18 +17,20 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
+import org.apache.rocketmq.samples.springboot.domain.ProductWithPayload;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * StringConsumer
+ * The consumer that replying generic type
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumer implements RocketMQListener<String> {
+@RocketMQMessageListener(topic = "${demo.rocketmq.genericRequestTopic}", consumerGroup = "${demo.rocketmq.genericRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
+public class ConsumerWithReplyGeneric implements RocketMQReplyListener<String, ProductWithPayload<String>> {
     @Override
-    public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
+    public ProductWithPayload<String> onMessage(String message) {
+        System.out.printf("------- ConsumerWithReplyGeneric received: %s \n", message);
+        return new ProductWithPayload<String>("replyProductName", "product payload");
     }
 }

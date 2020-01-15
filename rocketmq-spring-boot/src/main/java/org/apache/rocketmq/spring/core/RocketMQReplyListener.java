@@ -15,20 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.samples.springboot.consumer;
-
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.stereotype.Service;
+package org.apache.rocketmq.spring.core;
 
 /**
- * StringConsumer
+ * The consumer supporting request-reply should implement this interface.
+ *
+ * @param <T> the type of data received by the listener
+ * @param <R> the type of data replying to producer
  */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumer implements RocketMQListener<String> {
-    @Override
-    public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
-    }
+public interface RocketMQReplyListener<T, R> {
+    /**
+     * @param message data received by the listener
+     * @return data replying to producer
+     */
+    R onMessage(T message);
 }

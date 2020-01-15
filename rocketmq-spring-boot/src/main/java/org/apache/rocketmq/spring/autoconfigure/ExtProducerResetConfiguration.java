@@ -137,12 +137,5 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
                     "please check the @ExtRocketMQTemplateConfiguration",
                 annotation.value()));
         }
-
-        if (rocketMQProperties.getNameServer() == null ||
-            rocketMQProperties.getNameServer().equals(environment.resolvePlaceholders(annotation.nameServer()))) {
-            throw new BeanDefinitionValidationException(
-                "Bad annotation definition in @ExtRocketMQTemplateConfiguration, nameServer property is same with " +
-                    "global property, please use the default RocketMQTemplate!");
-        }
     }
 }

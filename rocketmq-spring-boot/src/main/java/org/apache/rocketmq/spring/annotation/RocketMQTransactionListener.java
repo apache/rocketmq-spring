@@ -26,7 +26,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * This annotation is used over a class which implements interface
- * org.apache.rocketmq.client.producer.TransactionListener. The class implements
+ * org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener, which will be converted to
+ * org.apache.rocketmq.client.producer.TransactionListener later. The class implements
  * two methods for process callback events after the txProducer sends a transactional message.
  * <p>Note: The annotation is used only on RocketMQ client producer side, it can not be used
  * on consumer side.

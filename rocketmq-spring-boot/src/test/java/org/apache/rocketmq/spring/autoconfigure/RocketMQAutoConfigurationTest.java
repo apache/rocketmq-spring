@@ -27,16 +27,14 @@ import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -88,17 +86,6 @@ public class RocketMQAutoConfigurationTest {
 
     @Test
     public void testExtRocketMQTemplate() {
-        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-            withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
-            run(new ContextConsumer<AssertableApplicationContext>() {
-                @Override
-                public void accept(AssertableApplicationContext context) throws Throwable {
-                    Throwable th = context.getStartupFailure();
-                    System.out.printf("th==" + th + "\n");
-                    Assert.assertTrue(th instanceof BeanDefinitionValidationException);
-                }
-            });
-
         runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
             withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
             run((context) -> {
@@ -183,6 +170,24 @@ public class RocketMQAutoConfigurationTest {
             });
     }
 
+    @Test
+    public void testRocketMQListenerContainer_RocketMQReplyListener() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+            withUserConfiguration(TestConfigWithRocketMQReplyListener.class).
+            run((context) -> {
+                assertThat(context).getFailure().hasMessageContaining("connect to [127.0.0.1:9876] failed");
+            });
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRocketMQListenerContainer_WrongRocketMQListenerType() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+            withUserConfiguration(TestConfigWithWrongRocketMQListener.class).
+            run((context) -> {
+                context.getBean(RocketMQMessageConverter.class);
+            });
+    }
+
     @Configuration
     static class TestConfig {
 
@@ -196,6 +201,30 @@ public class RocketMQAutoConfigurationTest {
             return new TestCustomNameServerListener();
         }
 
+    }
+
+    @Configuration
+    static class TestConfigWithRocketMQReplyListener {
+
+        @Bean
+        public Object consumeListener() {
+            return new TestDefaultNameServerRocketMQReplyListener();
+        }
+
+        @Bean
+        public Object consumeListener1() {
+            return new TestCustomNameServerRocketMQReplyListener();
+        }
+
+    }
+
+    @Configuration
+    static class TestConfigWithWrongRocketMQListener {
+
+        @Bean
+        public Object consumeListener() {
+            return new WrongRocketMQListener();
+        }
     }
 
     @Configuration
@@ -233,6 +262,32 @@ public class RocketMQAutoConfigurationTest {
         @Override
         public void onMessage(Object message) {
 
+        }
+    }
+
+    @RocketMQMessageListener(consumerGroup = "abcd", topic = "test")
+    static class TestDefaultNameServerRocketMQReplyListener implements RocketMQReplyListener<String, String> {
+
+        @Override
+        public String onMessage(String message) {
+            return "test";
+        }
+    }
+
+    @RocketMQMessageListener(consumerGroup = "abcde", topic = "test")
+    static class WrongRocketMQListener {
+
+        public String onMessage(String message) {
+            return "test";
+        }
+    }
+
+    @RocketMQMessageListener(nameServer = "127.0.1.1:9876", consumerGroup = "abcd1", topic = "test")
+    static class TestCustomNameServerRocketMQReplyListener implements RocketMQReplyListener<String, String> {
+
+        @Override
+        public String onMessage(String message) {
+            return "test";
         }
     }
 

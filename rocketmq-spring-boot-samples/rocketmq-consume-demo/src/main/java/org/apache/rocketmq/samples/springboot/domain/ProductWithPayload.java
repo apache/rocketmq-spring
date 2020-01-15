@@ -17,33 +17,38 @@
 
 package org.apache.rocketmq.samples.springboot.domain;
 
-public class User {
-    private String userName;
-    private Byte userAge;
+public class ProductWithPayload<T> {
+    private String productName;
+    private T payload;
 
-    public String getUserName() {
-        return userName;
+    public ProductWithPayload() {
     }
 
-    public User setUserName(String userName) {
-        this.userName = userName;
-        return this;
+    public ProductWithPayload(String productName, T payload) {
+        this.productName = productName;
+        this.payload = payload;
     }
 
-    public Byte getUserAge() {
-        return userAge;
+    public String getProductName() {
+        return productName;
     }
 
-    public User setUserAge(Byte userAge) {
-        this.userAge = userAge;
-        return this;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-            "userName='" + userName + '\'' +
-            ", userAge=" + userAge +
+    public T getPayload() {
+        return payload;
+    }
+
+    public void setPayload(T payload) {
+        this.payload = payload;
+    }
+
+    @Override public String toString() {
+        return "ProductWithPayload{" +
+            "productName='" + productName + '\'' +
+            ", payload=" + payload +
             '}';
     }
 }

@@ -14,21 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.rocketmq.samples.springboot.consumer;
-
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.stereotype.Service;
+package org.apache.rocketmq.spring.core;
 
 /**
- * StringConsumer
+ * Classes implementing this interface are used for processing callback events after receiving
+ * reply messages from consumers.
+ *
+ * @param <T> the type of message that wanted to receive from consumer
  */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.topic}", consumerGroup = "string_consumer", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumer implements RocketMQListener<String> {
-    @Override
-    public void onMessage(String message) {
-        System.out.printf("------- StringConsumer received: %s \n", message);
-    }
+public interface RocketMQLocalRequestCallback<T> {
+    void onSuccess(final T message);
+
+    void onException(final Throwable e);
 }

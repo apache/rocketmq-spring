@@ -34,14 +34,20 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.utils.MessageUtil;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -51,10 +57,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.MethodParameter;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
@@ -91,6 +101,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private MessageConverter messageConverter;
 
     private RocketMQListener rocketMQListener;
+
+    private RocketMQReplyListener rocketMQReplyListener;
 
     private RocketMQMessageListener rocketMQMessageListener;
 
@@ -186,6 +198,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.rocketMQListener = rocketMQListener;
     }
 
+    public RocketMQReplyListener getRocketMQReplyListener() {
+        return rocketMQReplyListener;
+    }
+
+    public void setRocketMQReplyListener(RocketMQReplyListener rocketMQReplyListener) {
+        this.rocketMQReplyListener = rocketMQReplyListener;
+    }
+
     public RocketMQMessageListener getRocketMQMessageListener() {
         return rocketMQMessageListener;
     }
@@ -209,12 +229,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         return selectorType;
     }
 
-    public String getSelectorExpression() {
-        return selectorExpression;
-    }
-
     public void setSelectorExpression(String selectorExpression) {
         this.selectorExpression = selectorExpression;
+    }
+
+    public String getSelectorExpression() {
+        return selectorExpression;
     }
 
     public MessageModel getMessageModel() {
@@ -227,11 +247,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setConsumer(DefaultMQPushConsumer consumer) {
         this.consumer = consumer;
-    }
-
-    @Override
-    public void setupMessageListener(RocketMQListener rocketMQListener) {
-        this.rocketMQListener = rocketMQListener;
     }
 
     @Override
@@ -327,6 +342,119 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.name = name;
     }
 
+    public class DefaultMessageListenerConcurrently implements MessageListenerConcurrently {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+            for (MessageExt messageExt : msgs) {
+                log.debug("received msg: {}", messageExt);
+                try {
+                    long now = System.currentTimeMillis();
+                    handleMessage(messageExt);
+                    long costTime = System.currentTimeMillis() - now;
+                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                } catch (Exception e) {
+                    log.warn("consume message failed. messageExt:{}, error:{}", messageExt, e);
+                    context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
+                    return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+                }
+            }
+
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        }
+    }
+
+    public class DefaultMessageListenerOrderly implements MessageListenerOrderly {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
+            for (MessageExt messageExt : msgs) {
+                log.debug("received msg: {}", messageExt);
+                try {
+                    long now = System.currentTimeMillis();
+                    handleMessage(messageExt);
+                    long costTime = System.currentTimeMillis() - now;
+                    log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                } catch (Exception e) {
+                    log.warn("consume message failed. messageExt:{}", messageExt, e);
+                    context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
+                    return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
+                }
+            }
+
+            return ConsumeOrderlyStatus.SUCCESS;
+        }
+    }
+
+    private void handleMessage(
+        MessageExt messageExt) throws MQClientException, RemotingException, InterruptedException {
+        if (rocketMQListener != null) {
+            rocketMQListener.onMessage(doConvertMessage(messageExt));
+        } else if (rocketMQReplyListener != null) {
+            Object replyContent = rocketMQReplyListener.onMessage(doConvertMessage(messageExt));
+            Message<?> message = MessageBuilder.withPayload(replyContent).build();
+
+            org.apache.rocketmq.common.message.Message replyMessage = MessageUtil.createReplyMessage(messageExt, convertToBytes(message));
+            consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer().send(replyMessage, new SendCallback() {
+                @Override public void onSuccess(SendResult sendResult) {
+                    if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
+                        log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
+                    } else {
+                        log.info("Consumer replies message success.");
+                    }
+                }
+
+                @Override public void onException(Throwable e) {
+                    log.error("Consumer replies message failed. error: {}", e.getLocalizedMessage());
+                }
+            });
+        }
+    }
+
+    private byte[] convertToBytes(Message<?> message) {
+        Message<?> messageWithSerializedPayload = doConvert(message.getPayload(), message.getHeaders());
+        Object payloadObj = messageWithSerializedPayload.getPayload();
+        byte[] payloads;
+        try {
+            if (null == payloadObj) {
+                throw new RuntimeException("the message cannot be empty");
+            }
+            if (payloadObj instanceof String) {
+                payloads = ((String) payloadObj).getBytes(Charset.forName(charset));
+            } else if (payloadObj instanceof byte[]) {
+                payloads = (byte[]) messageWithSerializedPayload.getPayload();
+            } else {
+                String jsonObj = (String) this.messageConverter.fromMessage(messageWithSerializedPayload, payloadObj.getClass());
+                if (null == jsonObj) {
+                    throw new RuntimeException(String.format(
+                        "empty after conversion [messageConverter:%s,payloadClass:%s,payloadObj:%s]",
+                        this.messageConverter.getClass(), payloadObj.getClass(), payloadObj));
+                }
+                payloads = jsonObj.getBytes(Charset.forName(charset));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("convert to bytes failed.", e);
+        }
+        return payloads;
+    }
+
+    private Message<?> doConvert(Object payload, MessageHeaders headers) {
+        Message<?> message = this.messageConverter instanceof SmartMessageConverter ?
+            ((SmartMessageConverter) this.messageConverter).toMessage(payload, headers, null) :
+            this.messageConverter.toMessage(payload, headers);
+        if (message == null) {
+            String payloadType = payload.getClass().getName();
+            Object contentType = headers != null ? headers.get(MessageHeaders.CONTENT_TYPE) : null;
+            throw new MessageConversionException("Unable to convert payload with type='" + payloadType +
+                "', contentType='" + contentType + "', converter=[" + this.messageConverter + "]");
+        }
+        MessageBuilder<?> builder = MessageBuilder.fromMessage(message);
+        builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN);
+        return builder.build();
+    }
+
     @SuppressWarnings("unchecked")
     private Object doConvertMessage(MessageExt messageExt) {
         if (Objects.equals(messageType, MessageExt.class)) {
@@ -355,7 +483,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     }
 
     private MethodParameter getMethodParameter() {
-        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
+        Class<?> targetClass;
+        if (rocketMQListener != null) {
+            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
+        } else {
+            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQReplyListener);
+        }
         Type messageType = this.getMessageType();
         Class clazz = null;
         if (messageType instanceof ParameterizedType && messageConverter instanceof SmartMessageConverter) {
@@ -375,36 +508,41 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     }
 
     private Type getMessageType() {
-        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
-        Type[] interfaces = targetClass.getGenericInterfaces();
-        Class<?> superclass = targetClass.getSuperclass();
-        while ((Objects.isNull(interfaces) || 0 == interfaces.length) && Objects.nonNull(superclass)) {
-            interfaces = superclass.getGenericInterfaces();
-            superclass = targetClass.getSuperclass();
+        Class<?> targetClass;
+        if (rocketMQListener != null) {
+            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
+        } else {
+            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQReplyListener);
         }
-        if (Objects.nonNull(interfaces)) {
-            for (Type type : interfaces) {
-                if (type instanceof ParameterizedType) {
-                    ParameterizedType parameterizedType = (ParameterizedType) type;
-                    if (Objects.equals(parameterizedType.getRawType(), RocketMQListener.class)) {
-                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-                            return actualTypeArguments[0];
-                        } else {
-                            return Object.class;
-                        }
+        Type matchedGenericInterface = null;
+        while (Objects.nonNull(targetClass)) {
+            Type[] interfaces = targetClass.getGenericInterfaces();
+            if (Objects.nonNull(interfaces)) {
+                for (Type type : interfaces) {
+                    if (type instanceof ParameterizedType &&
+                        (Objects.equals(((ParameterizedType) type).getRawType(), RocketMQListener.class) || Objects.equals(((ParameterizedType) type).getRawType(), RocketMQReplyListener.class))) {
+                        matchedGenericInterface = type;
+                        break;
                     }
                 }
             }
-
-            return Object.class;
-        } else {
+            targetClass = targetClass.getSuperclass();
+        }
+        if (Objects.isNull(matchedGenericInterface)) {
             return Object.class;
         }
+
+        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
+        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
+            return actualTypeArguments[0];
+        }
+        return Object.class;
     }
 
     private void initRocketMQPushConsumer() throws MQClientException {
-        Assert.notNull(rocketMQListener, "Property 'rocketMQListener' is required");
+        if (rocketMQListener == null && rocketMQReplyListener == null) {
+            throw new IllegalArgumentException("Property 'rocketMQListener' or 'rocketMQReplyListener' is required");
+        }
         Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
         Assert.notNull(nameServer, "Property 'nameServer' is required");
         Assert.notNull(topic, "Property 'topic' is required");
@@ -475,54 +613,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
         if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
             ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(consumer);
+        } else if (rocketMQReplyListener instanceof RocketMQPushConsumerLifecycleListener) {
+            ((RocketMQPushConsumerLifecycleListener) rocketMQReplyListener).prepareStart(consumer);
         }
 
-    }
-
-    public class DefaultMessageListenerConcurrently implements MessageListenerConcurrently {
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-            for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
-                try {
-                    long now = System.currentTimeMillis();
-                    rocketMQListener.onMessage(doConvertMessage(messageExt));
-                    long costTime = System.currentTimeMillis() - now;
-                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
-                } catch (Exception e) {
-                    log.warn("consume message failed. messageExt:{}", messageExt, e);
-                    context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
-                    return ConsumeConcurrentlyStatus.RECONSUME_LATER;
-                }
-            }
-
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-        }
-    }
-
-    public class DefaultMessageListenerOrderly implements MessageListenerOrderly {
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
-            for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
-                try {
-                    long now = System.currentTimeMillis();
-                    rocketMQListener.onMessage(doConvertMessage(messageExt));
-                    long costTime = System.currentTimeMillis() - now;
-                    log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
-                } catch (Exception e) {
-                    log.warn("consume message failed. messageExt:{}", messageExt, e);
-                    context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
-                    return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
-                }
-            }
-
-            return ConsumeOrderlyStatus.SUCCESS;
-        }
     }
 
 }
