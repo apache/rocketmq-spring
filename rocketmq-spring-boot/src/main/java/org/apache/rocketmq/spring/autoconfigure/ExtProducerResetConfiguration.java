@@ -18,17 +18,17 @@
 package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Map;
-import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
-import org.apache.rocketmq.spring.support.SpringBeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
@@ -53,7 +53,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     private RocketMQMessageConverter rocketMQMessageConverter;
 
     public ExtProducerResetConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
-                                         StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
+        StandardEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -66,11 +66,11 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
 
     @Override
     public void afterSingletonsInstantiated() {
-        Map<String, Object> beans = SpringBeanUtil.getBeansWithAnnotation(this.applicationContext, ExtRocketMQTemplateConfiguration.class);
+        Map<String, Object> beans = this.applicationContext.getBeansWithAnnotation(ExtRocketMQTemplateConfiguration.class)
+            .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        if (Objects.nonNull(beans)) {
-            beans.forEach(this::registerTemplate);
-        }
+        beans.forEach(this::registerTemplate);
     }
 
     private void registerTemplate(String beanName, Object bean) {
@@ -131,7 +131,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     }
 
     private void validate(ExtRocketMQTemplateConfiguration annotation,
-                          GenericApplicationContext genericApplicationContext) {
+        GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
             throw new BeanDefinitionValidationException(String.format("Bean {} has been used in Spring Application Context, " +
                     "please check the @ExtRocketMQTemplateConfiguration",
