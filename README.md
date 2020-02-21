@@ -20,7 +20,7 @@ This project aims to help developers quickly integrate [RocketMQ](http://rocketm
 - [x] Consume messages with concurrently mode (broadcasting/clustering)
 - [x] Consume ordered messages
 - [x] Filter messages using the tag or sql92 expression
-- [x] Suport message tracing
+- [x] Support message tracing
 - [x] Support authentication and authorization
 - [x] Support request-reply message exchange pattern
 
