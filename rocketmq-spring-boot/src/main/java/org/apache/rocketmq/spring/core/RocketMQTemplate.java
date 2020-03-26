@@ -474,32 +474,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return {@link SendResult}
      */
     public <T extends Message> SendResult syncSend(String destination, Collection<T> messages) {
-        if (Objects.isNull(messages) || messages.size() == 0) {
-            log.error("syncSend with batch failed. destination:{}, messages is empty ", destination);
-            throw new IllegalArgumentException("`messages` can not be empty");
-        }
-
-        try {
-            long now = System.currentTimeMillis();
-            Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
-            for (Message msg : messages) {
-                if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
-                    log.warn("Found a message empty in the batch, skip it");
-                    continue;
-                }
-                rmqMsgs.add(this.createRocketMqMessage(destination, msg));
-            }
-
-            SendResult sendResult = producer.send(rmqMsgs);
-            long costTime = System.currentTimeMillis() - now;
-            if (log.isDebugEnabled()) {
-                log.debug("send messages cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
-            }
-            return sendResult;
-        } catch (Exception e) {
-            log.error("syncSend with batch failed. destination:{}, messages.size:{} ", destination, messages.size());
-            throw new MessagingException(e.getMessage(), e);
-        }
+       return syncSend(destination,messages,producer.getSendMsgTimeout());
     }
 
     /**
