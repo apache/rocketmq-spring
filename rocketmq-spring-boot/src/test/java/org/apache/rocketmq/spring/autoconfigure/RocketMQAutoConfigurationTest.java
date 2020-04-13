@@ -46,10 +46,21 @@ public class RocketMQAutoConfigurationTest {
     private ApplicationContextRunner runner = new ApplicationContextRunner()
         .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
 
-    @Test(expected = NoSuchBeanDefinitionException.class)
+    @Test(expected = IllegalStateException.class)
     public void testDefaultMQProducerNotCreatedByDefault() {
         // You will see the WARN log message about missing rocketmq.name-server spring property when running this test case.
         runner.run(context -> context.getBean(DefaultMQProducer.class));
+    }
+
+    @Test
+    public void testDefaultMQProducerDiscovery() {
+        // You will see the WARN log message about missing rocketmq.name-server spring property when running this test case.
+        runner.withPropertyValues("rocketmq.discovery.enabled=true", "rocketmq.producer.group=spring_rocketmq")
+            .run(context -> {
+                assertThat(context).hasSingleBean(DefaultMQProducer.class);
+                assertThat(context).hasSingleBean(RocketMQProperties.class);
+                context.getBean(DefaultMQProducer.class);
+            });
     }
 
     @Test

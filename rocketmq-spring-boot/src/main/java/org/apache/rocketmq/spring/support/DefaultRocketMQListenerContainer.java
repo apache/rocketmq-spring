@@ -544,7 +544,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             throw new IllegalArgumentException("Property 'rocketMQListener' or 'rocketMQReplyListener' is required");
         }
         Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
-        Assert.notNull(nameServer, "Property 'nameServer' is required");
         Assert.notNull(topic, "Property 'topic' is required");
 
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),

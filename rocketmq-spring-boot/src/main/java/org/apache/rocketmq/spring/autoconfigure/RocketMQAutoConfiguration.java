@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import javax.annotation.PostConstruct;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
@@ -26,7 +25,6 @@ import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -37,48 +35,58 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
-@ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "rocketmq", value = "enabled", matchIfMissing = true)
 @Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, RocketMQTransactionConfiguration.class})
 @AutoConfigureAfter({MessageConverterConfiguration.class})
 @AutoConfigureBefore({RocketMQTransactionConfiguration.class})
-
 public class RocketMQAutoConfiguration {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
 
-    public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
-        "rocketMQTemplate";
+    public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME = "rocketMQTemplate";
+    private static final String ROCKETMQ_NAME_SRV_DOMAIN = "rocketmq.namesrv.domain";
+    private static final String ROCKETMQ_NAME_SRV_SUB_DOMAIN = "rocketmq.namesrv.domain.subgroup";
 
-    @Autowired
-    private Environment environment;
+    final private RocketMQProperties rocketMQProperties;
 
-    @PostConstruct
-    public void checkProperties() {
-        String nameServer = environment.getProperty("rocketmq.name-server", String.class);
+    public RocketMQAutoConfiguration(RocketMQProperties rocketMQProperties) {
+        this.rocketMQProperties = rocketMQProperties;
+        checkSettings();
+    }
+
+    private void checkSettings() {
+        String nameServer = rocketMQProperties.getNameServer();
         log.debug("rocketmq.nameServer = {}", nameServer);
-        if (nameServer == null) {
-            log.warn("The necessary spring property 'rocketmq.name-server' is not defined, all rockertmq beans creation are skipped!");
+        if (StringUtils.isEmpty(nameServer)) {
+            if (rocketMQProperties.getDiscovery().isEnabled()) {
+                log.warn("The necessary spring property 'rocketmq.name-server' is not defined, will use http endpoint for discovery {}!",
+                    System.getProperty(ROCKETMQ_NAME_SRV_DOMAIN));
+                if (!rocketMQProperties.getDiscovery().getDomain().isEmpty()) {
+                    System.setProperty(ROCKETMQ_NAME_SRV_DOMAIN, rocketMQProperties.getDiscovery().getDomain());
+                }
+
+                if (!rocketMQProperties.getDiscovery().getSubDomain().isEmpty()) {
+                    System.setProperty(ROCKETMQ_NAME_SRV_SUB_DOMAIN, rocketMQProperties.getDiscovery().getSubDomain());
+                }
+            } else {
+                Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
+            }
         }
     }
 
     @Bean
     @ConditionalOnMissingBean(DefaultMQProducer.class)
-    @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "producer.group"})
-    public DefaultMQProducer defaultMQProducer(RocketMQProperties rocketMQProperties) {
+    @ConditionalOnProperty(prefix = "rocketmq", value = "producer.group")
+    public DefaultMQProducer defaultMQProducer() {
         RocketMQProperties.Producer producerConfig = rocketMQProperties.getProducer();
-        String nameServer = rocketMQProperties.getNameServer();
+
         String groupName = producerConfig.getGroup();
-        Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
         Assert.hasText(groupName, "[rocketmq.producer.group] must not be null");
-
-        String accessChannel = rocketMQProperties.getAccessChannel();
-
         String ak = rocketMQProperties.getProducer().getAccessKey();
         String sk = rocketMQProperties.getProducer().getSecretKey();
         boolean isEnableMsgTrace = rocketMQProperties.getProducer().isEnableMsgTrace();
@@ -86,7 +94,9 @@ public class RocketMQAutoConfiguration {
 
         DefaultMQProducer producer = RocketMQUtil.createDefaultMQProducer(groupName, ak, sk, isEnableMsgTrace, customizedTraceTopic);
 
-        producer.setNamesrvAddr(nameServer);
+        producer.setNamesrvAddr(rocketMQProperties.getNameServer());
+
+        String accessChannel = rocketMQProperties.getAccessChannel();
         if (!StringUtils.isEmpty(accessChannel)) {
             producer.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }

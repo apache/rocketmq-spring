@@ -49,6 +49,58 @@ public class RocketMQProperties {
      */
     private Consumer consumer = new Consumer();
 
+    /**
+     * The http endpoint support for rocketMQ
+     */
+    private Discovery discovery = new Discovery();
+
+    public static class Discovery {
+        /**
+         * http discovery namesrv enabled
+         */
+        private boolean enabled = false;
+        /**
+         * domain, default: `jmenv.tbsite.net`.
+         */
+        private String domain = "jmenv.tbsite.net";
+        /**
+         * subdomain, default: `nsaddr`.
+         */
+        private String subDomain = "nsaddr";
+
+        public String getDomain() {
+            return domain;
+        }
+
+        public void setDomain(String domain) {
+            this.domain = domain;
+        }
+
+        public String getSubDomain() {
+            return subDomain;
+        }
+
+        public void setSubDomain(String subDomain) {
+            this.subDomain = subDomain;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+    }
+
+    public Discovery getDiscovery() {
+        return discovery;
+    }
+
+    public void setDiscovery(Discovery discovery) {
+        this.discovery = discovery;
+    }
+
     public String getNameServer() {
         return nameServer;
     }
