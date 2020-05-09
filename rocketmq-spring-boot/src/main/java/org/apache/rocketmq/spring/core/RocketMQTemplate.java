@@ -467,6 +467,17 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     }
 
     /**
+     * syncSend batch messages
+     *
+     * @param destination formats: `topicName:tags`
+     * @param messages Collection of {@link org.springframework.messaging.Message}
+     * @return {@link SendResult}
+     */
+    public <T extends Message> SendResult syncSend(String destination, Collection<T> messages) {
+        return syncSend(destination, messages, producer.getSendMsgTimeout());
+    }
+
+    /**
      * syncSend batch messages in a given timeout.
      *
      * @param destination formats: `topicName:tags`

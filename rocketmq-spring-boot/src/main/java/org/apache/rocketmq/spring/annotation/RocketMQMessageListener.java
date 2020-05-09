@@ -76,9 +76,9 @@ public @interface RocketMQMessageListener {
     int consumeThreadMax() default 64;
 
     /**
-     * Max consumer timeout, default 30s.
+     * Maximum amount of time in minutes a message may block the consuming thread.
      */
-    long consumeTimeout() default 30000L;
+    long consumeTimeout() default 15L;
 
     /**
      * The property of "access-key".
