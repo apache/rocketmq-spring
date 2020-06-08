@@ -34,6 +34,13 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -82,6 +89,38 @@ public class RocketMQTemplateTest {
 
         try {
             rocketMQTemplate.syncSendOrderly(topic, "payload", "hashkey");
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
+    }
+
+    @Test
+    public void testSendMessage_withCustomAsyncSenderExecutor() {
+        ExecutorService executorService = new ThreadPoolExecutor(
+            2,
+            5,
+            100,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(2000),
+            new ThreadFactory() {
+                private AtomicInteger threadIndex = new AtomicInteger(0);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "AsyncSenderExecutor_" + this.threadIndex.incrementAndGet());
+                }
+            });
+        rocketMQTemplate.setAsyncSenderExecutor(executorService);
+        try {
+            rocketMQTemplate.asyncSend(topic, "payload", new SendCallback() {
+                @Override public void onSuccess(SendResult sendResult) {
+
+                }
+
+                @Override public void onException(Throwable e) {
+
+                }
+            });
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
