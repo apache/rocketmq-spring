@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
+import org.apache.rocketmq.spring.annotation.ConsumerType;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -153,7 +154,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         }
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);
-
+        ConsumerType consumerType = ConsumerType.valueOf(environment.resolvePlaceholders(annotation.consumerType()));
+        container.setConsumerType(consumerType);
         return container;
     }
 

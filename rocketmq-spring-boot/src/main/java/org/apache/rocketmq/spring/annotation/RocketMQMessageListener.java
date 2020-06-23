@@ -33,6 +33,7 @@ public @interface RocketMQMessageListener {
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
     String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
     String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
+    String CONSUMER_TYPE = "PUSHCONSUMER";
 
     /**
      * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve
@@ -93,7 +94,7 @@ public @interface RocketMQMessageListener {
     /**
      * Switch flag instance for message trace.
      */
-    boolean enableMsgTrace() default true;
+    boolean enableMsgTrace() default false;
 
     /**
      * The name value of message trace topic.If you don't config,you can use the default trace topic name.
@@ -109,4 +110,9 @@ public @interface RocketMQMessageListener {
      * The property of "access-channel".
      */
     String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+
+    /**
+     * The property of "consumerType".
+     */
+    String consumerType() default CONSUMER_TYPE;
 }

@@ -40,7 +40,7 @@
 
         <rocketmq.spring.boot.version>2.1.1-SNAPSHOT</rocketmq.spring.boot.version>
 
-        <rocketmq-version>4.6.0</rocketmq-version>
+        <rocketmq-version>4.7.0</rocketmq-version>
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.9.7</jackson.version>
 
