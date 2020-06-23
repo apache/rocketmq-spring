@@ -94,7 +94,7 @@ public @interface RocketMQMessageListener {
     /**
      * Switch flag instance for message trace.
      */
-    boolean enableMsgTrace() default false;
+    boolean enableMsgTrace() default true;
 
     /**
      * The name value of message trace topic.If you don't config,you can use the default trace topic name.
