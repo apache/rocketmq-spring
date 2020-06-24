@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
+import org.apache.rocketmq.spring.core.RocketMQDefaultMQProducerLifecycle;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
@@ -85,6 +86,11 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         validate(annotation, genericApplicationContext);
 
         DefaultMQProducer mqProducer = createProducer(annotation);
+
+        if(bean instanceof RocketMQDefaultMQProducerLifecycle) {
+            ((RocketMQDefaultMQProducerLifecycle)bean).prepareStart(mqProducer);
+        }
+
         // Set instanceName same as the beanName
         mqProducer.setInstanceName(beanName);
         try {
