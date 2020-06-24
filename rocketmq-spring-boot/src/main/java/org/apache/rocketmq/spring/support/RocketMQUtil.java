@@ -29,6 +29,7 @@ import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
+import org.apache.rocketmq.client.trace.TraceDispatcher;
 import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
 import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.Message;
@@ -268,7 +269,7 @@ public class RocketMQUtil {
 
         if (isEnableMsgTrace) {
             try {
-                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
+                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(groupName, TraceDispatcher.Type.PRODUCE, customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
                 dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
                 Field field = DefaultMQProducer.class.getDeclaredField("traceDispatcher");
                 field.setAccessible(true);

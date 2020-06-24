@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MessageQueueSelector;
@@ -84,6 +86,10 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     public void setMessageQueueSelector(MessageQueueSelector messageQueueSelector) {
         this.messageQueueSelector = messageQueueSelector;
+    }
+
+    public void setAsyncSenderExecutor(ExecutorService asyncSenderExecutor) {
+        this.producer.setAsyncSenderExecutor(asyncSenderExecutor);
     }
 
     /**
