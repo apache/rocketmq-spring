@@ -110,9 +110,9 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         groupName = StringUtils.isEmpty(groupName) ? producerConfig.getGroup() : groupName;
 
         String ak = environment.resolvePlaceholders(annotation.accessKey());
-        ak = StringUtils.isEmpty(ak) ? producerConfig.getAccessKey() : annotation.accessKey();
+        ak = StringUtils.isEmpty(ak) ? producerConfig.getAccessKey() : ak;
         String sk = environment.resolvePlaceholders(annotation.secretKey());
-        sk = StringUtils.isEmpty(sk) ? producerConfig.getSecretKey() : annotation.secretKey();
+        sk = StringUtils.isEmpty(sk) ? producerConfig.getSecretKey() : sk;
         boolean isEnableMsgTrace = annotation.enableMsgTrace();
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
         customizedTraceTopic = StringUtils.isEmpty(customizedTraceTopic) ? producerConfig.getCustomizedTraceTopic() : customizedTraceTopic;
