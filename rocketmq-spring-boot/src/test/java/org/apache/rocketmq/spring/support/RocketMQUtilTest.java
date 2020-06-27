@@ -140,4 +140,12 @@ public class RocketMQUtilTest {
         String expected = "ak|sk|consumerGroup|";
         assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
     }
+
+    @Test
+    public void testGetInstanceNameWithoutAcl() {
+        Long timeStamp = System.currentTimeMillis();
+        String consumerGroup = "consumerGroup";
+        String expected = timeStamp + "|" + consumerGroup;
+        assertEquals(expected, RocketMQUtil.getInstanceName(timeStamp, consumerGroup));
+    }
 }

@@ -255,6 +255,14 @@ public class RocketMQUtil {
         return instanceName.toString();
     }
 
+    public static String getInstanceName(Long timeStamp, String identify) {
+        String separator = "|";
+        StringBuilder instanceName = new StringBuilder();
+        instanceName.append(timeStamp)
+            .append(separator).append(identify);
+        return instanceName.toString();
+    }
+
     public static DefaultMQProducer createDefaultMQProducer(String groupName, String ak, String sk,
         boolean isEnableMsgTrace, String customizedTraceTopic) {
 

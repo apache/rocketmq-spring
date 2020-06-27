@@ -561,6 +561,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             consumer = new DefaultMQPushConsumer(consumerGroup, enableMsgTrace,
                 this.applicationContext.getEnvironment().
                     resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
+            consumer.setInstanceName(RocketMQUtil.getInstanceName(System.currentTimeMillis(), consumerGroup));
         }
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
