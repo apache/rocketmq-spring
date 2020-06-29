@@ -27,4 +27,5 @@
     </parent>
     
     <artifactId>rocketmq-consume-demo</artifactId>
+
 </project>

@@ -33,7 +33,7 @@ public @interface RocketMQMessageListener {
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
     String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
     String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
-    String CONSUMER_TYPE = "PUSHCONSUMER";
+    String CONSUMER_TYPE = "PUSH_CONSUMER";
 
     /**
      * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve

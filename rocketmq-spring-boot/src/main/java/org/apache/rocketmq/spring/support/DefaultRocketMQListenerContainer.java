@@ -113,7 +113,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private DefaultMQPushConsumer consumer;
 
-    private DefaultLitePullConsumer litePullConsumer;
+    private DefaultLitePullConsumer litePullConsumerSubscribe;
 
     private Type messageType;
 
@@ -256,12 +256,13 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumer = consumer;
     }
 
-    public DefaultLitePullConsumer getLitePullConsumer() {
-        return litePullConsumer;
+    public DefaultLitePullConsumer getLitePullConsumerSubscribe() {
+        return litePullConsumerSubscribe;
     }
 
-    public void setLitePullConsumer(DefaultLitePullConsumer litePullConsumer) {
-        this.litePullConsumer = litePullConsumer;
+    public void setLitePullConsumerSubscribe(
+        DefaultLitePullConsumer litePullConsumerSubscribe) {
+        this.litePullConsumerSubscribe = litePullConsumerSubscribe;
     }
 
     public ConsumerType getConsumerType() {
@@ -282,8 +283,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 }
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
-                if (Objects.nonNull(litePullConsumer)) {
-                    litePullConsumer.shutdown();
+                if (Objects.nonNull(litePullConsumerSubscribe)) {
+                    litePullConsumerSubscribe.shutdown();
                 }
                 break;
             default:
@@ -318,8 +319,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
                 try {
-                    litePullConsumer.start();
-                    litePullConsumerPollMessage(litePullConsumer);
+                    litePullConsumerSubscribe.start();
+                    litePullConsumerPollMessage(litePullConsumerSubscribe);
                 } catch (MQClientException e) {
                     throw new IllegalStateException("Failed to start RocketMQ litePullConsumerSubscribe", e);
                 }
@@ -339,7 +340,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     consumer.shutdown();
                     break;
                 case LITE_PULL_CONSUMER_SUBSCRIBE:
-                    litePullConsumer.shutdown();
+                    litePullConsumerSubscribe.shutdown();
                     break;
                 default:
                     throw new IllegalArgumentException("Property 'consumerType' was wrong.");
@@ -706,31 +707,31 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
             this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
         if (Objects.nonNull(rpcHook)) {
-            litePullConsumer = new DefaultLitePullConsumer(consumerGroup, rpcHook);
-            litePullConsumer.setVipChannelEnabled(false);
-            litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
+            litePullConsumerSubscribe = new DefaultLitePullConsumer(consumerGroup, rpcHook);
+            litePullConsumerSubscribe.setVipChannelEnabled(false);
+            litePullConsumerSubscribe.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
-            litePullConsumer = new DefaultLitePullConsumer(consumerGroup);
+            litePullConsumerSubscribe = new DefaultLitePullConsumer(consumerGroup);
         }
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
         if (customizedNameServer != null) {
-            litePullConsumer.setNamesrvAddr(customizedNameServer);
+            litePullConsumerSubscribe.setNamesrvAddr(customizedNameServer);
         } else {
-            litePullConsumer.setNamesrvAddr(nameServer);
+            litePullConsumerSubscribe.setNamesrvAddr(nameServer);
         }
         if (accessChannel != null) {
-            litePullConsumer.setAccessChannel(accessChannel);
+            litePullConsumerSubscribe.setAccessChannel(accessChannel);
         }
-        litePullConsumer.setConsumerPullTimeoutMillis(consumeTimeout);
-        litePullConsumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+        litePullConsumerSubscribe.setConsumerPullTimeoutMillis(consumeTimeout);
+        litePullConsumerSubscribe.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
         switch (messageModel) {
             case CLUSTERING:
-                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                litePullConsumerSubscribe.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
                 break;
             case BROADCASTING:
-                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                litePullConsumerSubscribe.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
@@ -738,10 +739,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
         switch (selectorType) {
             case SQL92:
-                litePullConsumer.subscribe(topic, MessageSelector.bySql(selectorExpression));
+                litePullConsumerSubscribe.subscribe(topic, MessageSelector.bySql(selectorExpression));
                 break;
             case TAG:
-                litePullConsumer.subscribe(topic, selectorExpression);
+                litePullConsumerSubscribe.subscribe(topic, selectorExpression);
                 break;
             default:
                 throw new IllegalArgumentException("Property 'selectorType' was wrong.");
