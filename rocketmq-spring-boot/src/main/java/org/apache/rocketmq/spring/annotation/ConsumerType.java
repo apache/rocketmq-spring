@@ -23,11 +23,11 @@ public enum ConsumerType {
     /**
      * pushConsumer
      */
-    PUSHCONSUMER,
+    PUSH_CONSUMER,
 
     /**
      * litePullConsumerSubscribe
      */
-    LITEPULLCONSUMESUBSCRIBE
+    LITE_PULL_CONSUMER_SUBSCRIBE
 
 }

@@ -276,13 +276,13 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     public void destroy() {
         this.setRunning(false);
         switch (consumerType) {
-            case PUSHCONSUMER:
+            case PUSH_CONSUMER:
                 if (Objects.nonNull(consumer)) {
                     consumer.shutdown();
                 }
                 break;
-            case LITEPULLCONSUMESUBSCRIBE:
-                if (Objects.nonNull(litePullConsumer)){
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
+                if (Objects.nonNull(litePullConsumer)) {
                     litePullConsumer.shutdown();
                 }
                 break;
@@ -309,14 +309,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             throw new IllegalStateException("container already running. " + this.toString());
         }
         switch (consumerType) {
-            case PUSHCONSUMER:
+            case PUSH_CONSUMER:
                 try {
                     consumer.start();
                 } catch (MQClientException e) {
                     throw new IllegalStateException("Failed to start RocketMQ push consumer", e);
                 }
                 break;
-            case LITEPULLCONSUMESUBSCRIBE:
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
                 try {
                     litePullConsumer.start();
                     litePullConsumerPollMessage(litePullConsumer);
@@ -335,16 +335,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     public void stop() {
         if (this.isRunning()) {
             switch (consumerType) {
-                case PUSHCONSUMER:
+                case PUSH_CONSUMER:
                     consumer.shutdown();
                     break;
-                case LITEPULLCONSUMESUBSCRIBE:
-                    try {
-                        litePullConsumer.start();
-                        litePullConsumerPollMessage(litePullConsumer);
-                    } catch (MQClientException e) {
-                        throw new IllegalStateException("Failed to start RocketMQ litePullConsumerSubscribe", e);
-                    }
+                case LITE_PULL_CONSUMER_SUBSCRIBE:
+                    litePullConsumer.shutdown();
                     break;
                 default:
                     throw new IllegalArgumentException("Property 'consumerType' was wrong.");
@@ -372,10 +367,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     @Override
     public void afterPropertiesSet() throws Exception {
         switch (consumerType) {
-            case PUSHCONSUMER:
+            case PUSH_CONSUMER:
                 initRocketMQPushConsumer();
                 break;
-            case LITEPULLCONSUMESUBSCRIBE:
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
                 initRocketMQLitePullConsumer();
                 break;
             default:
