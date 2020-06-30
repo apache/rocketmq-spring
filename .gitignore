@@ -11,3 +11,4 @@ target/
 !LICENSE-BIN
 .DS_Store
 .vscode
+.factorypath

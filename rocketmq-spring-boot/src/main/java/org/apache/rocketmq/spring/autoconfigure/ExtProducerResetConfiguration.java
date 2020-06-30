@@ -87,7 +87,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
 
         DefaultMQProducer mqProducer = createProducer(annotation);
 
-        if(bean instanceof RocketMQDefaultMQProducerLifecycle) {
+        if (bean instanceof RocketMQDefaultMQProducerLifecycle) {
             ((RocketMQDefaultMQProducerLifecycle)bean).prepareStart(mqProducer);
         }
 

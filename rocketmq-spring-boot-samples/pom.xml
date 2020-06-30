@@ -38,7 +38,10 @@
     </modules>
 
     <properties>
-        <rocketmq-spring-boot-starter-version>2.1.0</rocketmq-spring-boot-starter-version>
+        <rocketmq-spring-boot-starter-version>2.1.1-SNAPSHOT</rocketmq-spring-boot-starter-version>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencies>

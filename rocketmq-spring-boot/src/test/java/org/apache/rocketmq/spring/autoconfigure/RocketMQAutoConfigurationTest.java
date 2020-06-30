@@ -24,6 +24,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
+import org.apache.rocketmq.spring.core.RocketMQDefaultMQProducerLifecycle;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
@@ -91,6 +92,17 @@ public class RocketMQAutoConfigurationTest {
             run((context) -> {
                 // No producer on consume side
                 assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("producer");
+                // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
+            });
+    }
+
+    @Test
+    public void testRocketMQProducerLifecycleTemplate() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
+            withUserConfiguration(TestRocketMQProducerLifecycleTemplateConfig.class, CustomObjectMappersConfig.class).
+            run((context) -> {
+                // No producer on consume side
+                assertThat(context).getBean("rocketMQProducerLifecycleTemplate").hasFieldOrProperty("producer");
                 // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
             });
     }
@@ -327,6 +339,25 @@ public class RocketMQAutoConfigurationTest {
     @ExtRocketMQTemplateConfiguration(group = "test", nameServer = "127.0.0.1:9876")
     static class TestExtRocketMQTemplate extends RocketMQTemplate {
 
+    }
+    
+    
+    @Configuration
+    static class TestRocketMQProducerLifecycleTemplateConfig {
+
+        @Bean
+        public RocketMQTemplate rocketMQProducerLifecycleTemplate() {
+            return new TestRocketMQProducerLifecycleTemplate();
+        }
+
+    }
+
+    @ExtRocketMQTemplateConfiguration(group = "producerLifecycleGroup", nameServer = "127.0.0.1:9876")
+    static class TestRocketMQProducerLifecycleTemplate extends RocketMQTemplate implements RocketMQDefaultMQProducerLifecycle {
+
+        @Override
+        public void prepareStart(DefaultMQProducer consumer) {
+        }
     }
 
     @Configuration
