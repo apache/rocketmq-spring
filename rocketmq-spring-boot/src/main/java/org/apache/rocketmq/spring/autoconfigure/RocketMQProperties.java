@@ -132,6 +132,11 @@ public class RocketMQProperties {
          */
         private String customizedTraceTopic = MixAll.RMQ_SYS_TRACE_TOPIC;
 
+        /**
+         * Default Producer is use TLS
+         */
+        private boolean isUseTLS = false;
+
         public String getGroup() {
             return group;
         }
@@ -218,6 +223,14 @@ public class RocketMQProperties {
 
         public void setCustomizedTraceTopic(String customizedTraceTopic) {
             this.customizedTraceTopic = customizedTraceTopic;
+        }
+
+        public boolean isUseTLS() {
+            return isUseTLS;
+        }
+
+        public void setUseTLS(boolean isUseTLS) {
+            this.isUseTLS = isUseTLS;
         }
     }
 
