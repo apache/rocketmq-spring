@@ -74,7 +74,10 @@ public class ProducerApplication implements CommandLineRunner {
 
     @Resource(name = "extRocketMQTemplate")
     private RocketMQTemplate extRocketMQTemplate;
-
+    
+    @Resource(name = "rocketMQProducerLifecycleTemplate")
+    private RocketMQTemplate rocketMQProducerLifecycleTemplate;
+    
     public static void main(String[] args) {
         SpringApplication.run(ProducerApplication.class, args);
     }
@@ -96,6 +99,10 @@ public class ProducerApplication implements CommandLineRunner {
         sendResult = extRocketMQTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World!2222".getBytes()).build());
         System.out.printf("extRocketMQTemplate.syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
 
+        // Use the rocketMQProducerLifecycleTemplate
+        sendResult = rocketMQProducerLifecycleTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World!3333".getBytes()).build());
+        System.out.printf("rocketMQProducerLifecycleTemplate.syncSend1 to topic %s sendResult=%s %n", springTopic, sendResult);
+        
         // Send string with spring Message
         sendResult = rocketMQTemplate.syncSend(springTopic, MessageBuilder.withPayload("Hello, World! I'm from spring message").build());
         System.out.printf("syncSend2 to topic %s sendResult=%s %n", springTopic, sendResult);
