@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.apache.rocketmq.client.AccessChannel;
@@ -41,6 +42,7 @@ import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.utils.MessageUtil;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
@@ -49,6 +51,7 @@ import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQLitePullConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.slf4j.Logger;
@@ -109,11 +112,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private RocketMQMessageListener rocketMQMessageListener;
 
-    private ConsumerType consumerType;
-
     private DefaultMQPushConsumer consumer;
 
-    private DefaultLitePullConsumer litePullConsumerSubscribe;
+    private DefaultLitePullConsumer litePullConsumer;
 
     private Type messageType;
 
@@ -127,6 +128,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String selectorExpression;
     private MessageModel messageModel;
     private long consumeTimeout;
+    private ConsumerType consumerType;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -256,13 +258,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumer = consumer;
     }
 
-    public DefaultLitePullConsumer getLitePullConsumerSubscribe() {
-        return litePullConsumerSubscribe;
+    public DefaultLitePullConsumer getLitePullConsumer() {
+        return litePullConsumer;
     }
 
-    public void setLitePullConsumerSubscribe(
-        DefaultLitePullConsumer litePullConsumerSubscribe) {
-        this.litePullConsumerSubscribe = litePullConsumerSubscribe;
+    public void setLitePullConsumer(DefaultLitePullConsumer litePullConsumer) {
+        this.litePullConsumer = litePullConsumer;
     }
 
     public ConsumerType getConsumerType() {
@@ -283,8 +284,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 }
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
-                if (Objects.nonNull(litePullConsumerSubscribe)) {
-                    litePullConsumerSubscribe.shutdown();
+            case LITE_PULL_CONSUMER_ASSIGN:
+                if (Objects.nonNull(litePullConsumer)) {
+                    litePullConsumer.shutdown();
                 }
                 break;
             default:
@@ -318,11 +320,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 }
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
+            case LITE_PULL_CONSUMER_ASSIGN:
                 try {
-                    litePullConsumerSubscribe.start();
-                    litePullConsumerPollMessage(litePullConsumerSubscribe);
+                    litePullConsumer.start();
+                    afterLitePullConsumerSubscribeStart(litePullConsumer);
                 } catch (MQClientException e) {
-                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumerSubscribe", e);
+                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
                 }
                 break;
             default:
@@ -340,7 +343,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     consumer.shutdown();
                     break;
                 case LITE_PULL_CONSUMER_SUBSCRIBE:
-                    litePullConsumerSubscribe.shutdown();
+                case LITE_PULL_CONSUMER_ASSIGN:
+                    litePullConsumer.shutdown();
                     break;
                 default:
                     throw new IllegalArgumentException("Property 'consumerType' was wrong.");
@@ -372,6 +376,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 initRocketMQPushConsumer();
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
+            case LITE_PULL_CONSUMER_ASSIGN:
                 initRocketMQLitePullConsumer();
                 break;
             default:
@@ -463,6 +468,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 log.warn("consume message failed. messageExt:{}", messageExt, e);
             }
         }
+    }
+
+    private void afterLitePullConsumerSubscribeStart(
+        DefaultLitePullConsumer litePullConsumer) throws MQClientException {
+        if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener) {
+            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).litePullConsumerInitPollMessage(litePullConsumer);
+        }
+        litePullConsumerPollMessage(litePullConsumer);
     }
 
     private void handleMessage(
@@ -707,46 +720,47 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
             this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
         if (Objects.nonNull(rpcHook)) {
-            litePullConsumerSubscribe = new DefaultLitePullConsumer(consumerGroup, rpcHook);
-            litePullConsumerSubscribe.setVipChannelEnabled(false);
-            litePullConsumerSubscribe.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
+            litePullConsumer = new DefaultLitePullConsumer(consumerGroup, rpcHook);
+            litePullConsumer.setVipChannelEnabled(false);
+            litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
         } else {
             log.debug("Access-key or secret-key not configure in " + this + ".");
-            litePullConsumerSubscribe = new DefaultLitePullConsumer(consumerGroup);
+            litePullConsumer = new DefaultLitePullConsumer(consumerGroup);
         }
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
         if (customizedNameServer != null) {
-            litePullConsumerSubscribe.setNamesrvAddr(customizedNameServer);
+            litePullConsumer.setNamesrvAddr(customizedNameServer);
         } else {
-            litePullConsumerSubscribe.setNamesrvAddr(nameServer);
+            litePullConsumer.setNamesrvAddr(nameServer);
         }
         if (accessChannel != null) {
-            litePullConsumerSubscribe.setAccessChannel(accessChannel);
+            litePullConsumer.setAccessChannel(accessChannel);
         }
-        litePullConsumerSubscribe.setConsumerPullTimeoutMillis(consumeTimeout);
-        litePullConsumerSubscribe.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
         switch (messageModel) {
             case CLUSTERING:
-                litePullConsumerSubscribe.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
                 break;
             case BROADCASTING:
-                litePullConsumerSubscribe.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
         }
-
-        switch (selectorType) {
-            case SQL92:
-                litePullConsumerSubscribe.subscribe(topic, MessageSelector.bySql(selectorExpression));
-                break;
-            case TAG:
-                litePullConsumerSubscribe.subscribe(topic, selectorExpression);
-                break;
-            default:
-                throw new IllegalArgumentException("Property 'selectorType' was wrong.");
+        if (consumerType.equals(ConsumerType.LITE_PULL_CONSUMER_SUBSCRIBE)) {
+            switch (selectorType) {
+                case SQL92:
+                    litePullConsumer.subscribe(topic, MessageSelector.bySql(selectorExpression));
+                    break;
+                case TAG:
+                    litePullConsumer.subscribe(topic, selectorExpression);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Property 'selectorType' was wrong.");
+            }
+        }
+        if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener) {
+            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).prepareStart(litePullConsumer);
         }
     }
-
 }

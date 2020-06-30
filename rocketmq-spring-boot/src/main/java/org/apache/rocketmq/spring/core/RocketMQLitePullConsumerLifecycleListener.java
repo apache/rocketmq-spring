@@ -15,24 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.spring.annotation;
+package org.apache.rocketmq.spring.core;
 
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.spring.support.RocketMQConsumerLifecycleListener;
 
-public enum ConsumerType {
-
-    /**
-     * pushConsumer
-     */
-    PUSH_CONSUMER,
-
-    /**
-     * litePullConsumerSubscribe
-     */
-    LITE_PULL_CONSUMER_SUBSCRIBE,
-
-    /**
-     * litePullConsumerAssign
-     */
-    LITE_PULL_CONSUMER_ASSIGN
-
+public interface RocketMQLitePullConsumerLifecycleListener extends RocketMQConsumerLifecycleListener<DefaultLitePullConsumer> {
+    default void litePullConsumerInitPollMessage(DefaultLitePullConsumer litePullConsumer) throws MQClientException {}
 }
