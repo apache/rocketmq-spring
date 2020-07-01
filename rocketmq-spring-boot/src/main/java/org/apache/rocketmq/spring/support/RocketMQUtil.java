@@ -266,7 +266,7 @@ public class RocketMQUtil {
             producer = new TransactionMQProducer(groupName);
         }
 
-        /*if (isEnableMsgTrace) {
+        if (isEnableMsgTrace) {
             try {
                 AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
                 dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
@@ -278,7 +278,7 @@ public class RocketMQUtil {
             } catch (Throwable e) {
                 log.error("system trace hook init failed ,maybe can't send msg trace data");
             }
-        }*/
+        }
 
         return producer;
     }
