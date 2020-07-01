@@ -76,7 +76,6 @@ import org.springframework.util.MimeTypeUtils;
 public class DefaultRocketMQListenerContainer implements InitializingBean,
     RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(DefaultRocketMQListenerContainer.class);
-
     private ApplicationContext applicationContext;
 
     /**
@@ -320,10 +319,17 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 }
                 break;
             case LITE_PULL_CONSUMER_SUBSCRIBE:
+                try {
+                    litePullConsumer.start();
+                    litePullConsumerPollMessage(litePullConsumer);
+                } catch (MQClientException e) {
+                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
+                }
+                break;
             case LITE_PULL_CONSUMER_ASSIGN:
                 try {
                     litePullConsumer.start();
-                    afterLitePullConsumerSubscribeStart(litePullConsumer);
+                    afterLitePullConsumerAssignStart(litePullConsumer);
                 } catch (MQClientException e) {
                     throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
                 }
@@ -456,21 +462,23 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     }
 
     private void litePullConsumerPollMessage(DefaultLitePullConsumer litePullConsumer) {
-        List<MessageExt> messageExts = litePullConsumer.poll();
-        for (MessageExt messageExt : messageExts) {
-            log.info("received msg: {}", messageExt);
-            try {
-                long now = System.currentTimeMillis();
-                handleMessage(messageExt);
-                long costTime = System.currentTimeMillis() - now;
-                log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
-            } catch (Exception e) {
-                log.warn("consume message failed. messageExt:{}", messageExt, e);
+        while (true) {
+            List<MessageExt> messageExts = litePullConsumer.poll();
+            for (MessageExt messageExt : messageExts) {
+                log.info("received msg: {}", messageExt);
+                try {
+                    long now = System.currentTimeMillis();
+                    handleMessage(messageExt);
+                    long costTime = System.currentTimeMillis() - now;
+                    log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                } catch (Exception e) {
+                    log.warn("consume message failed. messageExt:{}", messageExt, e);
+                }
             }
         }
     }
 
-    private void afterLitePullConsumerSubscribeStart(
+    private void afterLitePullConsumerAssignStart(
         DefaultLitePullConsumer litePullConsumer) throws MQClientException {
         if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener) {
             ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).litePullConsumerInitPollMessage(litePullConsumer);

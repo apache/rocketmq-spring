@@ -16,27 +16,34 @@
  */
 package org.apache.rocketmq.spring.support;
 
+import java.beans.Beans;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.message.MessageExt;
-import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
+import org.apache.rocketmq.spring.annotation.ConsumerType;
+import org.apache.rocketmq.spring.annotation.MessageModel;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
+@RocketMQMessageListener(topic = "topic", consumerGroup = "string_pull_consumer", messageModel = MessageModel.CLUSTERING)
 public class DefaultRocketMQListenerContainerTest {
     @Test
     public void testGetMessageType() throws Exception {
@@ -151,6 +158,90 @@ public class DefaultRocketMQListenerContainerTest {
         assertThat(type.getRawType() == ArrayList.class);
         methodParameter = ((MethodParameter) getMethodParameter.invoke(listenerContainer));
         assertThat(methodParameter.getParameterType() == ArrayList.class);
+    }
+
+    @Test
+    public void testInitRocketMQPushConsumer() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer();
+        consumer.setConsumerGroup("test");
+        consumer.subscribe("topic", "*");
+        DefaultMQPushConsumer pushConsumer = new DefaultMQPushConsumer();
+        listenerContainer.setConsumer(pushConsumer);
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(Beans.class);
+        listenerContainer.setApplicationContext(ctx);
+        listenerContainer.setNameServer("127.0.0.1:9876");
+        listenerContainer.setConsumerType(ConsumerType.PUSH_CONSUMER);
+        listenerContainer.setSelectorExpression("*");
+        listenerContainer.setTopic("topic");
+        listenerContainer.setConsumerGroup("test");
+        Class clazz = DefaultRocketMQListenerContainerTest.class;
+        RocketMQMessageListener rocketMQMessageListener = (RocketMQMessageListener) clazz.getAnnotation(RocketMQMessageListener.class);
+        listenerContainer.setRocketMQMessageListener(rocketMQMessageListener);
+        listenerContainer.setRocketMQListener(new RocketMQListener<ArrayList<Date>>() {
+            @Override
+            public void onMessage(ArrayList<Date> message) {
+
+            }
+        });
+        Method initRocketMQPushConsumer = DefaultRocketMQListenerContainer.class.getDeclaredMethod("initRocketMQPushConsumer");
+        initRocketMQPushConsumer.setAccessible(true);
+        initRocketMQPushConsumer.invoke(listenerContainer);
+        assertEquals(consumer.getConsumerGroup(), listenerContainer.getConsumer().getConsumerGroup());
+
+    }
+
+    @Test
+    public void testInitRocketMQLitePullConsumer() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        DefaultLitePullConsumer consumer = new DefaultLitePullConsumer();
+        consumer.setConsumerGroup("test");
+        consumer.subscribe("topic", "*");
+        DefaultLitePullConsumer litePullConsumer = new DefaultLitePullConsumer();
+        listenerContainer.setLitePullConsumer(litePullConsumer);
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(Beans.class);
+        listenerContainer.setApplicationContext(ctx);
+        listenerContainer.setNameServer("127.0.0.1:9876");
+        listenerContainer.setConsumerType(ConsumerType.LITE_PULL_CONSUMER_SUBSCRIBE);
+        listenerContainer.setSelectorExpression("*");
+        listenerContainer.setTopic("topic");
+        listenerContainer.setConsumerGroup("test");
+        Class clazz = DefaultRocketMQListenerContainerTest.class;
+        RocketMQMessageListener rocketMQMessageListener = (RocketMQMessageListener) clazz.getAnnotation(RocketMQMessageListener.class);
+        listenerContainer.setRocketMQMessageListener(rocketMQMessageListener);
+        listenerContainer.setRocketMQListener(new RocketMQListener<ArrayList<Date>>() {
+            @Override
+            public void onMessage(ArrayList<Date> message) {
+
+            }
+        });
+        Method initRocketMQPushConsumer = DefaultRocketMQListenerContainer.class.getDeclaredMethod("initRocketMQPushConsumer");
+        initRocketMQPushConsumer.setAccessible(true);
+        initRocketMQPushConsumer.invoke(listenerContainer);
+        assertEquals(consumer.getConsumerGroup(), listenerContainer.getConsumer().getConsumerGroup());
+
+    }
+
+    @Test
+    public void testLitePullConsumerPollMessage() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        DefaultLitePullConsumer consumer = new DefaultLitePullConsumer();
+        consumer.setConsumerGroup("test");
+        consumer.subscribe("topic", "*");
+        consumer.setNamesrvAddr("127.0.0.1:9876");
+        consumer.start();
+        Class clazz = DefaultRocketMQListenerContainerTest.class;
+        RocketMQMessageListener rocketMQMessageListener = (RocketMQMessageListener) clazz.getAnnotation(RocketMQMessageListener.class);
+        listenerContainer.setRocketMQMessageListener(rocketMQMessageListener);
+        listenerContainer.setRocketMQListener(new RocketMQListener<ArrayList<Date>>() {
+            @Override
+            public void onMessage(ArrayList<Date> message) {
+
+            }
+        });
+        Method litePullConsumerPollMessage = DefaultRocketMQListenerContainer.class.getDeclaredMethod("litePullConsumerPollMessage", DefaultLitePullConsumer.class);
+        litePullConsumerPollMessage.setAccessible(true);
+        litePullConsumerPollMessage.invoke(listenerContainer, consumer);
     }
 
     class User {
