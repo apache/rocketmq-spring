@@ -465,7 +465,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         new Thread() {
             @Override
             public void run() {
-                while (running) {
+                while (true) {
                     List<MessageExt> messageExts = consumer.poll();
                     for (MessageExt messageExt : messageExts) {
                         log.info("received msg: {}", messageExt);
