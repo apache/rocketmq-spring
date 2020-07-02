@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
 import org.apache.rocketmq.client.AccessChannel;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -42,10 +43,12 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
+import org.apache.rocketmq.spring.annotation.ConsumerType;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQLitePullConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.slf4j.Logger;
@@ -66,11 +69,12 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.apache.rocketmq.spring.annotation.ConsumerType.LITE_PULL_CONSUMER_ASSIGN;
+
 @SuppressWarnings("WeakerAccess")
 public class DefaultRocketMQListenerContainer implements InitializingBean,
     RocketMQListenerContainer, SmartLifecycle, ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(DefaultRocketMQListenerContainer.class);
-
     private ApplicationContext applicationContext;
 
     /**
@@ -108,6 +112,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private DefaultMQPushConsumer consumer;
 
+    private DefaultLitePullConsumer litePullConsumer;
+
     private Type messageType;
 
     private MethodParameter methodParameter;
@@ -120,6 +126,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String selectorExpression;
     private MessageModel messageModel;
     private long consumeTimeout;
+    private ConsumerType consumerType;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -249,11 +256,39 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumer = consumer;
     }
 
+    public DefaultLitePullConsumer getLitePullConsumer() {
+        return litePullConsumer;
+    }
+
+    public void setLitePullConsumer(DefaultLitePullConsumer litePullConsumer) {
+        this.litePullConsumer = litePullConsumer;
+    }
+
+    public ConsumerType getConsumerType() {
+        return consumerType;
+    }
+
+    public void setConsumerType(ConsumerType consumerType) {
+        this.consumerType = consumerType;
+    }
+
     @Override
     public void destroy() {
         this.setRunning(false);
-        if (Objects.nonNull(consumer)) {
-            consumer.shutdown();
+        switch (consumerType) {
+            case PUSH_CONSUMER:
+                if (Objects.nonNull(consumer)) {
+                    consumer.shutdown();
+                }
+                break;
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
+            case LITE_PULL_CONSUMER_ASSIGN:
+                if (Objects.nonNull(litePullConsumer)) {
+                    litePullConsumer.shutdown();
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'consumerType' was wrong.");
         }
         log.info("container destroyed, {}", this.toString());
     }
@@ -274,22 +309,51 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         if (this.isRunning()) {
             throw new IllegalStateException("container already running. " + this.toString());
         }
-
-        try {
-            consumer.start();
-        } catch (MQClientException e) {
-            throw new IllegalStateException("Failed to start RocketMQ push consumer", e);
+        switch (consumerType) {
+            case PUSH_CONSUMER:
+                try {
+                    consumer.start();
+                } catch (MQClientException e) {
+                    throw new IllegalStateException("Failed to start RocketMQ push consumer", e);
+                }
+                break;
+   /*         case LITE_PULL_CONSUMER_SUBSCRIBE:
+                try {
+                    litePullConsumer.start();
+                    //litePullConsumerPollMessage(litePullConsumer);
+                } catch (MQClientException e) {
+                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
+                }
+                break;*/
+            case LITE_PULL_CONSUMER_ASSIGN:
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
+                try {
+                    litePullConsumer.start();
+                    afterLitePullConsumerAssignStart(litePullConsumer);
+                } catch (MQClientException e) {
+                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'consumerType' was wrong.");
         }
         this.setRunning(true);
-
         log.info("running container: {}", this.toString());
     }
 
     @Override
     public void stop() {
         if (this.isRunning()) {
-            if (Objects.nonNull(consumer)) {
-                consumer.shutdown();
+            switch (consumerType) {
+                case PUSH_CONSUMER:
+                    consumer.shutdown();
+                    break;
+                case LITE_PULL_CONSUMER_SUBSCRIBE:
+                case LITE_PULL_CONSUMER_ASSIGN:
+                    litePullConsumer.shutdown();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Property 'consumerType' was wrong.");
             }
             setRunning(false);
         }
@@ -313,8 +377,17 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        initRocketMQPushConsumer();
-
+        switch (consumerType) {
+            case PUSH_CONSUMER:
+                initRocketMQPushConsumer();
+                break;
+            case LITE_PULL_CONSUMER_SUBSCRIBE:
+            case LITE_PULL_CONSUMER_ASSIGN:
+                initRocketMQLitePullConsumer();
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'consumerType' was wrong.");
+        }
         this.messageType = getMessageType();
         this.methodParameter = getMethodParameter();
         log.debug("RocketMQ messageType: {}", messageType);
@@ -386,6 +459,36 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
             return ConsumeOrderlyStatus.SUCCESS;
         }
+    }
+
+    public void litePullConsumerPollMessage(DefaultLitePullConsumer consumer) {
+        new Thread() {
+            @Override
+            public void run() {
+                while (running) {
+                    List<MessageExt> messageExts = consumer.poll();
+                    for (MessageExt messageExt : messageExts) {
+                        log.info("received msg: {}", messageExt);
+                        try {
+                            long now = System.currentTimeMillis();
+                            handleMessage(messageExt);
+                            long costTime = System.currentTimeMillis() - now;
+                            log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                        } catch (Exception e) {
+                            log.warn("consume message failed. messageExt:{}", messageExt, e);
+                        }
+                    }
+                }
+            }
+        }.start();
+    }
+
+    private void afterLitePullConsumerAssignStart(
+        DefaultLitePullConsumer litePullConsumer) throws MQClientException {
+        if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener && consumerType.equals(LITE_PULL_CONSUMER_ASSIGN)) {
+            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).litePullConsumerInitPollMessage(litePullConsumer);
+        }
+        litePullConsumerPollMessage(litePullConsumer);
     }
 
     private void handleMessage(
@@ -619,4 +722,58 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     }
 
+    private void initRocketMQLitePullConsumer() throws MQClientException {
+        if (rocketMQListener == null && rocketMQReplyListener == null) {
+            throw new IllegalArgumentException("Property 'rocketMQListener' or 'rocketMQReplyListener' is required");
+        }
+        Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
+        Assert.notNull(nameServer, "Property 'nameServer' is required");
+        Assert.notNull(topic, "Property 'topic' is required");
+
+        RPCHook rpcHook = RocketMQUtil.getRPCHookByAkSk(applicationContext.getEnvironment(),
+            this.rocketMQMessageListener.accessKey(), this.rocketMQMessageListener.secretKey());
+        if (Objects.nonNull(rpcHook)) {
+            litePullConsumer = new DefaultLitePullConsumer(consumerGroup, rpcHook);
+            litePullConsumer.setVipChannelEnabled(false);
+            litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
+        } else {
+            log.debug("Access-key or secret-key not configure in " + this + ".");
+            litePullConsumer = new DefaultLitePullConsumer(consumerGroup);
+        }
+
+        String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
+        if (customizedNameServer != null) {
+            litePullConsumer.setNamesrvAddr(customizedNameServer);
+        } else {
+            litePullConsumer.setNamesrvAddr(nameServer);
+        }
+        if (accessChannel != null) {
+            litePullConsumer.setAccessChannel(accessChannel);
+        }
+        switch (messageModel) {
+            case CLUSTERING:
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                break;
+            case BROADCASTING:
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'messageModel' was wrong.");
+        }
+        if (consumerType.equals(ConsumerType.LITE_PULL_CONSUMER_SUBSCRIBE)) {
+            switch (selectorType) {
+                case SQL92:
+                    litePullConsumer.subscribe(topic, MessageSelector.bySql(selectorExpression));
+                    break;
+                case TAG:
+                    litePullConsumer.subscribe(topic, selectorExpression);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Property 'selectorType' was wrong.");
+            }
+        }
+        if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener) {
+            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).prepareStart(litePullConsumer);
+        }
+    }
 }

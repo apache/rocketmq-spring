@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
-import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;

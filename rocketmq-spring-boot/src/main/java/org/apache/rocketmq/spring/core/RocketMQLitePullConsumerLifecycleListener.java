@@ -15,22 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.samples.springboot.consumer;
+package org.apache.rocketmq.spring.core;
 
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQReplyListener;
-import org.springframework.stereotype.Service;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.spring.support.RocketMQConsumerLifecycleListener;
 
-/**
- * The consumer that replying String
- */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.stringRequestTopic}", consumerGroup = "${demo.rocketmq.stringRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
-public class StringConsumerWithReplyString implements RocketMQReplyListener<String, String> {
-
-    @Override
-    public String onMessage(String message) {
-        System.out.printf("------- StringConsumerWithReplyString received: %s \n", message);
-        return "reply string";
+public interface RocketMQLitePullConsumerLifecycleListener extends RocketMQConsumerLifecycleListener<DefaultLitePullConsumer> {
+    default void litePullConsumerInitPollMessage(DefaultLitePullConsumer litePullConsumer) throws MQClientException {
     }
 }
