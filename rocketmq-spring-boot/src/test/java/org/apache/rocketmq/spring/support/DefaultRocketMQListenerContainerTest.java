@@ -23,6 +23,7 @@ import java.lang.reflect.ParameterizedType;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.ConsumerType;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -42,7 +43,7 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-@RocketMQMessageListener(topic = "topic", consumerGroup = "string_pull_consumer", messageModel = MessageModel.CLUSTERING)
+@RocketMQMessageListener(topic = "topic", consumerGroup = "string_pull_consumer", messageModel = MessageModel.CLUSTERING, nameServer = "127.0.0.1:9876")
 public class DefaultRocketMQListenerContainerTest {
     @Test
     public void testGetMessageType() throws Exception {
@@ -162,9 +163,6 @@ public class DefaultRocketMQListenerContainerTest {
     @Test
     public void testInitRocketMQPushConsumer() throws Exception {
         DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer();
-        consumer.setConsumerGroup("test");
-        consumer.subscribe("topic", "*");
         DefaultMQPushConsumer pushConsumer = new DefaultMQPushConsumer();
         listenerContainer.setConsumer(pushConsumer);
         ApplicationContext ctx = new AnnotationConfigApplicationContext(Beans.class);
@@ -186,16 +184,16 @@ public class DefaultRocketMQListenerContainerTest {
         Method initRocketMQPushConsumer = DefaultRocketMQListenerContainer.class.getDeclaredMethod("initRocketMQPushConsumer");
         initRocketMQPushConsumer.setAccessible(true);
         initRocketMQPushConsumer.invoke(listenerContainer);
-        assertEquals(consumer.getConsumerGroup(), listenerContainer.getConsumer().getConsumerGroup());
-
+        assertEquals("test", listenerContainer.getConsumer().getConsumerGroup());
+        assertEquals("127.0.0.1:9876", listenerContainer.getConsumer().getNamesrvAddr());
+        assertEquals(ConsumerType.PUSH_CONSUMER, listenerContainer.getConsumerType());
+        assertEquals(ConsumeMode.CONCURRENTLY, listenerContainer.getConsumeMode());
+        assertEquals(MessageModel.CLUSTERING, listenerContainer.getMessageModel());
     }
 
     @Test
     public void testInitRocketMQLitePullConsumer() throws Exception {
         DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
-        DefaultLitePullConsumer consumer = new DefaultLitePullConsumer();
-        consumer.setConsumerGroup("test");
-        consumer.subscribe("topic", "*");
         DefaultLitePullConsumer litePullConsumer = new DefaultLitePullConsumer();
         listenerContainer.setLitePullConsumer(litePullConsumer);
         ApplicationContext ctx = new AnnotationConfigApplicationContext(Beans.class);
@@ -214,13 +212,14 @@ public class DefaultRocketMQListenerContainerTest {
 
             }
         });
-        Method initRocketMQPushConsumer = DefaultRocketMQListenerContainer.class.getDeclaredMethod("initRocketMQPushConsumer");
-        initRocketMQPushConsumer.setAccessible(true);
-        initRocketMQPushConsumer.invoke(listenerContainer);
-        assertEquals(consumer.getConsumerGroup(), listenerContainer.getConsumer().getConsumerGroup());
-
+        Method initRocketMQLitePullConsumer = DefaultRocketMQListenerContainer.class.getDeclaredMethod("initRocketMQLitePullConsumer");
+        initRocketMQLitePullConsumer.setAccessible(true);
+        initRocketMQLitePullConsumer.invoke(listenerContainer);
+        assertEquals("test", listenerContainer.getLitePullConsumer().getConsumerGroup());
+        assertEquals("127.0.0.1:9876", listenerContainer.getLitePullConsumer().getNamesrvAddr());
+        assertEquals(ConsumerType.LITE_PULL_CONSUMER_SUBSCRIBE, listenerContainer.getConsumerType());
     }
-    
+
     class User {
         private String userName;
         private int userAge;
