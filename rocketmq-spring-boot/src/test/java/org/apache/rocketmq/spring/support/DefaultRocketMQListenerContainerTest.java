@@ -220,29 +220,7 @@ public class DefaultRocketMQListenerContainerTest {
         assertEquals(consumer.getConsumerGroup(), listenerContainer.getConsumer().getConsumerGroup());
 
     }
-
-    @Test
-    public void testLitePullConsumerPollMessage() throws Exception {
-        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
-        DefaultLitePullConsumer consumer = new DefaultLitePullConsumer();
-        consumer.setConsumerGroup("test");
-        consumer.subscribe("topic", "*");
-        consumer.setNamesrvAddr("127.0.0.1:9876");
-        consumer.start();
-        Class clazz = DefaultRocketMQListenerContainerTest.class;
-        RocketMQMessageListener rocketMQMessageListener = (RocketMQMessageListener) clazz.getAnnotation(RocketMQMessageListener.class);
-        listenerContainer.setRocketMQMessageListener(rocketMQMessageListener);
-        listenerContainer.setRocketMQListener(new RocketMQListener<ArrayList<Date>>() {
-            @Override
-            public void onMessage(ArrayList<Date> message) {
-
-            }
-        });
-        Method litePullConsumerPollMessage = DefaultRocketMQListenerContainer.class.getDeclaredMethod("litePullConsumerPollMessage", DefaultLitePullConsumer.class);
-        litePullConsumerPollMessage.setAccessible(true);
-        litePullConsumerPollMessage.invoke(listenerContainer, consumer);
-    }
-
+    
     class User {
         private String userName;
         private int userAge;
