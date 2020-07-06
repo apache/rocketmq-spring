@@ -317,19 +317,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     throw new IllegalStateException("Failed to start RocketMQ push consumer", e);
                 }
                 break;
-   /*         case LITE_PULL_CONSUMER_SUBSCRIBE:
-                try {
-                    litePullConsumer.start();
-                    //litePullConsumerPollMessage(litePullConsumer);
-                } catch (MQClientException e) {
-                    throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
-                }
-                break;*/
             case LITE_PULL_CONSUMER_ASSIGN:
             case LITE_PULL_CONSUMER_SUBSCRIBE:
                 try {
                     litePullConsumer.start();
-                    afterLitePullConsumerAssignStart(litePullConsumer);
+                    afterLitePullConsumerStart(litePullConsumer);
                 } catch (MQClientException e) {
                     throw new IllegalStateException("Failed to start RocketMQ litePullConsumer", e);
                 }
@@ -483,10 +475,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }.start();
     }
 
-    private void afterLitePullConsumerAssignStart(
+    private void afterLitePullConsumerStart(
         DefaultLitePullConsumer litePullConsumer) throws MQClientException {
         if (rocketMQListener instanceof RocketMQLitePullConsumerLifecycleListener && consumerType.equals(LITE_PULL_CONSUMER_ASSIGN)) {
-            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).litePullConsumerInitPollMessage(litePullConsumer);
+            ((RocketMQLitePullConsumerLifecycleListener) rocketMQListener).assignMessageQueue(litePullConsumer);
         }
         litePullConsumerPollMessage(litePullConsumer);
     }

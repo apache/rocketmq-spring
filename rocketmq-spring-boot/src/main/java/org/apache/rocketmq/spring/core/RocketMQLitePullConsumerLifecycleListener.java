@@ -22,6 +22,9 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.spring.support.RocketMQConsumerLifecycleListener;
 
 public interface RocketMQLitePullConsumerLifecycleListener extends RocketMQConsumerLifecycleListener<DefaultLitePullConsumer> {
-    default void litePullConsumerInitPollMessage(DefaultLitePullConsumer litePullConsumer) throws MQClientException {
+    /**
+     * Only assign LitePullConsumer can use this method
+     */
+    default void assignMessageQueue(DefaultLitePullConsumer litePullConsumer) throws MQClientException {
     }
 }

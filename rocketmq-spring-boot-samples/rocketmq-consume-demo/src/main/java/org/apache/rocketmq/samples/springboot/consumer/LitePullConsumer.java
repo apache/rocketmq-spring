@@ -28,6 +28,7 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQLitePullConsumerLifecycleListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,6 +37,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RocketMQMessageListener(topic = "${demo.rocketmq.topic.litePullConsumerAssign}", consumerGroup = "${demo.rocketmq.litePullConsumerAssign}", selectorExpression = "${demo.rocketmq.tag}", consumerType = "${demo.rocketmq.consumerType}")
 public class LitePullConsumer implements RocketMQListener<String>, RocketMQLitePullConsumerLifecycleListener {
+    @Value("${demo.rocketmq.topic.litePullConsumerAssign}")
+    private String topic;
+
     @Override
     public void onMessage(String message) {
         System.out.printf("------- string_pull_consumer received: %s \n", message);
@@ -48,8 +52,8 @@ public class LitePullConsumer implements RocketMQListener<String>, RocketMQLiteP
     }
 
     @Override
-    public void litePullConsumerInitPollMessage(DefaultLitePullConsumer litePullConsumer) throws MQClientException {
-        Collection<MessageQueue> mqSet = litePullConsumer.fetchMessageQueues("TopicTest");
+    public void assignMessageQueue(DefaultLitePullConsumer litePullConsumer) throws MQClientException {
+        Collection<MessageQueue> mqSet = litePullConsumer.fetchMessageQueues(topic);
         List<MessageQueue> list = new ArrayList<MessageQueue>(mqSet);
         List<MessageQueue> assignList = new ArrayList<MessageQueue>();
         for (int i = 0; i < list.size() / 2; i++) {
