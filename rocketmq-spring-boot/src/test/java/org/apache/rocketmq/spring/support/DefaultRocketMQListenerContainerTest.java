@@ -22,8 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.ConsumerType;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -178,6 +180,33 @@ public class DefaultRocketMQListenerContainerTest {
         MessageExt messageExt = new MessageExt(0, System.currentTimeMillis(), null, System.currentTimeMillis(), null, null);
         messageExt.setBody("hello".getBytes());
         handleMessage.invoke(listenerContainer, messageExt);
+    }
+
+    @Test
+    public void testConvertToBytes() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        listenerContainer.setMessageConverter(new CompositeMessageConverter(Arrays.asList(new StringMessageConverter(), new MappingJackson2MessageConverter())));
+        listenerContainer.setRocketMQListener(new RocketMQListener() {
+            @Override public void onMessage(Object message) {
+
+            }
+        });
+      /*  Message message = new Message("TopicTest",
+            "TagA",
+            "OrderID188",
+            "Hello world".getBytes(RemotingHelper.DEFAULT_CHARSET));*/
+        Method convertToBytes = DefaultRocketMQListenerContainer.class.getDeclaredMethod("convertToBytes", Message.class);
+        convertToBytes.setAccessible(true);
+        Message message = new Message() {
+            @Override public Object getPayload() {
+                return "test";
+            }
+
+            @Override public MessageHeaders getHeaders() {
+                return null;
+            }
+        };
+        convertToBytes.invoke(listenerContainer, message);
     }
 
     @Test
