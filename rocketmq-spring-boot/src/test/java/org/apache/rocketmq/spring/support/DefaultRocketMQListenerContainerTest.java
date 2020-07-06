@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.ConsumerType;
@@ -158,6 +159,25 @@ public class DefaultRocketMQListenerContainerTest {
         assertThat(type.getRawType() == ArrayList.class);
         methodParameter = ((MethodParameter) getMethodParameter.invoke(listenerContainer));
         assertThat(methodParameter.getParameterType() == ArrayList.class);
+    }
+
+    @Test
+    public void testHandleMessage() throws Exception {
+        DefaultRocketMQListenerContainer listenerContainer = new DefaultRocketMQListenerContainer();
+        listenerContainer.setMessageConverter(new CompositeMessageConverter(Arrays.asList(new StringMessageConverter(), new MappingJackson2MessageConverter())));
+        listenerContainer.setRocketMQListener(new RocketMQListener() {
+            @Override public void onMessage(Object message) {
+
+            }
+        });
+        Field messageType = DefaultRocketMQListenerContainer.class.getDeclaredField("messageType");
+        messageType.setAccessible(true);
+        messageType.set(listenerContainer, String.class);
+        Method handleMessage = DefaultRocketMQListenerContainer.class.getDeclaredMethod("handleMessage", MessageExt.class);
+        handleMessage.setAccessible(true);
+        MessageExt messageExt = new MessageExt(0, System.currentTimeMillis(), null, System.currentTimeMillis(), null, null);
+        messageExt.setBody("hello".getBytes());
+        handleMessage.invoke(listenerContainer, messageExt);
     }
 
     @Test
