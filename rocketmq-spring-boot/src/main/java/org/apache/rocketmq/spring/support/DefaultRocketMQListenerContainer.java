@@ -173,6 +173,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         return consumeThreadMax;
     }
 
+    public void setConsumeThreadMax(int consumeThreadMax) {
+        this.consumeThreadMax = consumeThreadMax;
+    }
+
     public String getCharset() {
         return charset;
     }
@@ -225,8 +229,16 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         return consumeMode;
     }
 
+    public void setConsumeMode(ConsumeMode consumeMode) {
+        this.consumeMode = consumeMode;
+    }
+
     public SelectorType getSelectorType() {
         return selectorType;
+    }
+
+    public void setSelectorType(SelectorType selectorType) {
+        this.selectorType = selectorType;
     }
 
     public void setSelectorExpression(String selectorExpression) {
@@ -239,6 +251,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public MessageModel getMessageModel() {
         return messageModel;
+    }
+
+    public void setMessageModel(MessageModel messageModel) {
+        this.messageModel = messageModel;
+    }
+
+    public void setConsumeTimeout(long consumeTimeout) {
+        this.consumeTimeout = consumeTimeout;
     }
 
     public DefaultMQPushConsumer getConsumer() {

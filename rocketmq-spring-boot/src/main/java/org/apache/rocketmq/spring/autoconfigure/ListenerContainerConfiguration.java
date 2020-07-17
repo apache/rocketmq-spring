@@ -35,6 +35,8 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -111,8 +113,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
-        genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
-            () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
+        BeanDefinition beanDefinition = buildBeanDefinition(bean, annotation, containerBeanName);
+        genericApplicationContext.registerBeanDefinition(containerBeanName, beanDefinition);
+
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
             DefaultRocketMQListenerContainer.class);
         if (!container.isRunning()) {
@@ -127,34 +130,41 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
     }
 
-    private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
-        RocketMQMessageListener annotation) {
-        DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
-
-        container.setRocketMQMessageListener(annotation);
+    private BeanDefinition buildBeanDefinition(Object bean, RocketMQMessageListener annotation,
+        String containerBeanName) {
 
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
         nameServer = StringUtils.isEmpty(nameServer) ? rocketMQProperties.getNameServer() : nameServer;
         String accessChannel = environment.resolvePlaceholders(annotation.accessChannel());
-        container.setNameServer(nameServer);
-        if (!StringUtils.isEmpty(accessChannel)) {
-            container.setAccessChannel(AccessChannel.valueOf(accessChannel));
-        }
-        container.setTopic(environment.resolvePlaceholders(annotation.topic()));
         String tags = environment.resolvePlaceholders(annotation.selectorExpression());
-        if (!StringUtils.isEmpty(tags)) {
-            container.setSelectorExpression(tags);
-        }
-        container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
-        if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
-            container.setRocketMQListener((RocketMQListener) bean);
-        } else if (RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
-            container.setRocketMQReplyListener((RocketMQReplyListener) bean);
-        }
-        container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-        container.setName(name);
 
-        return container;
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder
+            .genericBeanDefinition(DefaultRocketMQListenerContainer.class)
+            .addPropertyValue("rocketMQMessageListener", annotation)
+            .addPropertyValue("nameServer", nameServer)
+            .addPropertyValue("topic", environment.resolvePlaceholders(annotation.topic()))
+            .addPropertyValue("consumerGroup", environment.resolvePlaceholders(annotation.consumerGroup()))
+            .addPropertyValue("messageConverter", rocketMQMessageConverter.getMessageConverter())
+            .addPropertyValue("name", containerBeanName)
+            .addPropertyValue("consumeMode", annotation.consumeMode())
+            .addPropertyValue("consumeThreadMax", annotation.consumeThreadMax())
+            .addPropertyValue("messageModel", annotation.messageModel())
+            .addPropertyValue("selectorType", annotation.selectorType())
+            .addPropertyValue("consumeTimeout", annotation.consumeTimeout());
+
+        if (!StringUtils.isEmpty(accessChannel)) {
+            builder.addPropertyValue("accessChannel", AccessChannel.valueOf(accessChannel));
+        }
+        if (!StringUtils.isEmpty(tags)) {
+            builder.addPropertyValue("selectorExpression", tags);
+        }
+        if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
+            builder.addPropertyValue("rocketMQListener", bean);
+        } else if (RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
+            builder.addPropertyValue("rocketMQReplyListener", bean);
+        }
+
+        return builder.getBeanDefinition();
     }
 
     private void validate(RocketMQMessageListener annotation) {
