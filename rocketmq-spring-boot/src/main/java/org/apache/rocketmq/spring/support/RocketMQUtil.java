@@ -31,7 +31,6 @@ import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
 import org.apache.rocketmq.client.trace.TraceDispatcher;
 import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
-import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -242,17 +241,6 @@ public class RocketMQUtil {
             return new AclClientRPCHook(new SessionCredentials(ak, sk));
         }
         return null;
-    }
-
-    public static String getInstanceName(RPCHook rpcHook, String identify) {
-        String separator = "|";
-        StringBuilder instanceName = new StringBuilder();
-        SessionCredentials sessionCredentials = ((AclClientRPCHook) rpcHook).getSessionCredentials();
-        instanceName.append(sessionCredentials.getAccessKey())
-            .append(separator).append(sessionCredentials.getSecretKey())
-            .append(separator).append(identify)
-            .append(separator).append(UtilAll.getPid());
-        return instanceName.toString();
     }
 
     public static DefaultMQProducer createDefaultMQProducer(String groupName, String ak, String sk,
