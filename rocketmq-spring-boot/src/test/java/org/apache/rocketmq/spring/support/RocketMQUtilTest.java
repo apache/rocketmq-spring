@@ -130,14 +130,4 @@ public class RocketMQUtilTest {
         assertEquals("tagA", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.TAGS)));
         assertEquals("key1", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.KEYS)));
     }
-
-    @Test
-    public void testGetInstanceName() {
-        String ak = "ak";
-        String sk = "sk";
-        String consumerGroup = "consumerGroup";
-        RPCHook rpcHook = new AclClientRPCHook(new SessionCredentials(ak, sk));
-        String expected = "ak|sk|consumerGroup|";
-        assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(rpcHook, consumerGroup));
-    }
 }
