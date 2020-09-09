@@ -18,5 +18,5 @@
 package org.apache.rocketmq.spring.support;
 
 public interface RocketMQProducerLifecycle<T> {
-    void prepareStart(final T consumer);
+    void prepareStart(final T producer);
 }

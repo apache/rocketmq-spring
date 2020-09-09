@@ -17,20 +17,23 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
-import org.apache.rocketmq.spring.core.RocketMQDefaultMQProducerLifecycle;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQProducerLifecycle;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -40,8 +43,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class RocketMQAutoConfigurationTest {
     private ApplicationContextRunner runner = new ApplicationContextRunner()
@@ -354,10 +355,10 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @ExtRocketMQTemplateConfiguration(group = "producerLifecycleGroup", nameServer = "127.0.0.1:9876")
-    static class TestRocketMQProducerLifecycleTemplate extends RocketMQTemplate implements RocketMQDefaultMQProducerLifecycle {
+    static class TestRocketMQProducerLifecycleTemplate extends RocketMQTemplate implements RocketMQProducerLifecycle<DefaultMQProducer> {
 
         @Override
-        public void prepareStart(DefaultMQProducer consumer) {
+        public void prepareStart(DefaultMQProducer producer) {
         }
     }
 

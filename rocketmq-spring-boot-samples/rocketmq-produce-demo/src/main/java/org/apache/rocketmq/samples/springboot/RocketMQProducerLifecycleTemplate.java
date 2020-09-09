@@ -18,13 +18,17 @@ package org.apache.rocketmq.samples.springboot;
 
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
-import org.apache.rocketmq.spring.core.RocketMQDefaultMQProducerLifecycle;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQProducerLifecycle;
+import org.springframework.beans.factory.annotation.Value;
 
 @ExtRocketMQTemplateConfiguration(nameServer = "${demo.rocketmq.extNameServer}")
-public class RocketMQProducerLifecycleTemplate extends RocketMQTemplate implements RocketMQDefaultMQProducerLifecycle {
+public class RocketMQProducerLifecycleTemplate extends RocketMQTemplate implements RocketMQProducerLifecycle<DefaultMQProducer> {
 
-    public void prepareStart(DefaultMQProducer consumer) {
+    @Value("${samples.producer.useTLS}")
+    private boolean useTLS;
 
+    public void prepareStart(DefaultMQProducer producer) {
+        producer.setUseTLS(useTLS);
     }
 }
