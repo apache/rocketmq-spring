@@ -17,7 +17,7 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import org.apache.rocketmq.common.MixAll;
+import org.apache.rocketmq.common.topic.TopicValidator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;
@@ -130,7 +130,7 @@ public class RocketMQProperties {
         /**
          * The name value of message trace topic.If you don't config,you can use the default trace topic name.
          */
-        private String customizedTraceTopic = MixAll.RMQ_SYS_TRACE_TOPIC;
+        private String customizedTraceTopic = TopicValidator.RMQ_SYS_TRACE_TOPIC;
 
         /**
          * Default Producer is use TLS
