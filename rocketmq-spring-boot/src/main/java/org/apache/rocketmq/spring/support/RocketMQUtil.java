@@ -170,6 +170,10 @@ public class RocketMQUtil {
         Message rocketMsg = new Message(topic, tags, payloads);
         if (Objects.nonNull(headers) && !headers.isEmpty()) {
             Object keys = headers.get(RocketMQHeaders.KEYS);
+            // if headers not have 'KEYS', try add prefix when getting keys
+            if (StringUtils.isEmpty(keys)) {
+                keys = headers.get(toRocketHeaderKey(RocketMQHeaders.KEYS));
+            }
             if (!StringUtils.isEmpty(keys)) { // if headers has 'KEYS', set rocketMQ message key
                 rocketMsg.setKeys(keys.toString());
             }
