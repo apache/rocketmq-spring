@@ -355,7 +355,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     long costTime = System.currentTimeMillis() - now;
                     log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
-                    log.warn("consume message failed. messageExt:{}, error:{}", messageExt, e);
+                    log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt.getMsgId(), messageExt.getTopic(), messageExt.getReconsumeTimes(), e);
                     context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
                     return ConsumeConcurrentlyStatus.RECONSUME_LATER;
                 }
@@ -378,7 +378,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     long costTime = System.currentTimeMillis() - now;
                     log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
-                    log.warn("consume message failed. messageExt:{}", messageExt, e);
+                    log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt.getMsgId(), messageExt.getTopic(), messageExt.getReconsumeTimes(), e);
                     context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
                     return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
                 }
