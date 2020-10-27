@@ -561,6 +561,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 this.applicationContext.getEnvironment().
                     resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
+        
+        consumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
         if (customizedNameServer != null) {
