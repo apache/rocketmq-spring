@@ -278,7 +278,7 @@ public class RocketMQUtil {
     }
     
     public static String getInstanceName(String identify) {
-        String separator = "|";
+        char separator = '@';
         StringBuilder instanceName = new StringBuilder();
         instanceName.append(identify)
                 .append(separator).append(UtilAll.getPid());
