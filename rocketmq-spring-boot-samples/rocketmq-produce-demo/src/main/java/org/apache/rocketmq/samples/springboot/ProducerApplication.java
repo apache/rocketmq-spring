@@ -257,13 +257,13 @@ public class ProducerApplication implements CommandLineRunner {
             if (null != status) {
                 switch (status) {
                     case 0:
-                        retState = RocketMQLocalTransactionState.UNKNOWN;
-                        break;
-                    case 1:
                         retState = RocketMQLocalTransactionState.COMMIT;
                         break;
-                    case 2:
+                    case 1:
                         retState = RocketMQLocalTransactionState.ROLLBACK;
+                        break;
+                    case 2:
+                        retState = RocketMQLocalTransactionState.UNKNOWN;
                         break;
                 }
             }
