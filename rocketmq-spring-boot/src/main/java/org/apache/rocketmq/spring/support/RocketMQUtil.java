@@ -17,12 +17,11 @@
 package org.apache.rocketmq.spring.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
+import org.apache.rocketmq.client.AccessChannel;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
@@ -36,6 +35,8 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
+import org.apache.rocketmq.spring.annotation.MessageModel;
+import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.slf4j.Logger;
@@ -47,6 +48,11 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Objects;
 
 public class RocketMQUtil {
     private final static Logger log = LoggerFactory.getLogger(RocketMQUtil.class);
@@ -285,4 +291,45 @@ public class RocketMQUtil {
         return instanceName.toString();
     }
 
+    public static DefaultLitePullConsumer createDefaultLitePullConsumer(String nameServer, String accessChannel,
+            String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
+            String selectorExpression, String ak, String sk)
+            throws MQClientException {
+        DefaultLitePullConsumer litePullConsumer = null;
+        if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
+            litePullConsumer = new DefaultLitePullConsumer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
+            litePullConsumer.setVipChannelEnabled(false);
+        } else {
+            litePullConsumer = new DefaultLitePullConsumer(groupName);
+        }
+        litePullConsumer.setNamesrvAddr(nameServer);
+        litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
+        if (accessChannel != null) {
+            litePullConsumer.setAccessChannel(AccessChannel.valueOf(accessChannel));
+        }
+
+        switch (messageModel) {
+            case BROADCASTING:
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                break;
+            case CLUSTERING:
+                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'messageModel' was wrong.");
+        }
+
+        switch (selectorType) {
+            case SQL92:
+                litePullConsumer.subscribe(topicName, MessageSelector.bySql(selectorExpression));
+                break;
+            case TAG:
+                litePullConsumer.subscribe(topicName, selectorExpression);
+                break;
+            default:
+                throw new IllegalArgumentException("Property 'selectorType' was wrong.");
+        }
+
+        return litePullConsumer;
+    }
 }

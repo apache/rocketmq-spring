@@ -17,15 +17,7 @@
 
 package org.apache.rocketmq.spring.core;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.MessageQueueSelector;
@@ -52,11 +44,23 @@ import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeTypeUtils;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> implements InitializingBean, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(RocketMQTemplate.class);
 
     private DefaultMQProducer producer;
+
+    private DefaultLitePullConsumer consumer;
 
     private String charset = "UTF-8";
 
@@ -70,6 +74,14 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     public void setProducer(DefaultMQProducer producer) {
         this.producer = producer;
+    }
+
+    public DefaultLitePullConsumer getConsumer() {
+        return consumer;
+    }
+
+    public void setConsumer(DefaultLitePullConsumer consumer) {
+        this.consumer = consumer;
     }
 
     public String getCharset() {
@@ -860,6 +872,13 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         if (producer != null) {
             producer.start();
         }
+        if (Objects.nonNull(consumer)) {
+            try {
+                consumer.start();
+            } catch (Exception e) {
+                log.error("Failed to startup PullConsumer for RocketMQTemplate", e);
+            }
+        }
     }
 
     @Override
@@ -882,6 +901,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     public void destroy() {
         if (Objects.nonNull(producer)) {
             producer.shutdown();
+        }
+        if (Objects.nonNull(consumer)) {
+            consumer.shutdown();
         }
     }
 
@@ -966,5 +988,53 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             return actualTypeArguments[0];
         }
         return Object.class;
+    }
+
+    /**
+     * receive message  in pull mode.
+     *
+     * @param clazz message object type
+     * @param <T>
+     * @return message list
+     */
+    public <T> List<T> receive(Class<T> clazz) {
+        return receive(clazz, this.consumer.getPollTimeoutMillis());
+    }
+
+    /**
+     * Same to {@link #receive(Class<T>)} with receive timeout specified in addition.
+     *
+     * @param clazz   message object type
+     * @param timeout receive timeout with millis
+     * @param <T>
+     * @return message list
+     */
+    public <T> List<T> receive(Class<T> clazz, long timeout) {
+        List<MessageExt> messageExts = this.consumer.poll(timeout);
+        List<T> list = new ArrayList<>(messageExts.size());
+        for (MessageExt messageExt : messageExts) {
+            list.add(doConvertMessage(messageExt, clazz));
+        }
+        return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T doConvertMessage(MessageExt messageExt, Class<T> messageType) {
+        if (Objects.equals(messageType, MessageExt.class)) {
+            return (T) messageExt;
+        } else {
+            String str = new String(messageExt.getBody(), Charset.forName(charset));
+            if (Objects.equals(messageType, String.class)) {
+                return (T) str;
+            } else {
+                // If msgType not string, use objectMapper change it.
+                try {
+                    return (T) this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
+                } catch (Exception e) {
+                    log.info("convert failed. str:{}, msgType:{}", str, messageType);
+                    throw new RuntimeException("cannot convert message to " + messageType, e);
+                }
+            }
+        }
     }
 }

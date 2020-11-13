@@ -20,21 +20,30 @@ package org.apache.rocketmq.spring.autoconfigure;
 import javax.annotation.PostConstruct;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.MQAdmin;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.spring.annotation.MessageModel;
+import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
@@ -45,18 +54,27 @@ import org.springframework.util.StringUtils;
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
-@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, RocketMQTransactionConfiguration.class})
+@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, ExtConsumerResetConfiguration.class, RocketMQTransactionConfiguration.class})
 @AutoConfigureAfter({MessageConverterConfiguration.class})
 @AutoConfigureBefore({RocketMQTransactionConfiguration.class})
 
-public class RocketMQAutoConfiguration {
+public class RocketMQAutoConfiguration implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
 
     public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
         "rocketMQTemplate";
+    public static final String PRODUCER_BEAN_NAME = "defaultMQProducer";
+    public static final String CONSUMER_BEAN_NAME = "defaultLitePullConsumer";
 
     @Autowired
     private Environment environment;
+
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     @PostConstruct
     public void checkProperties() {
@@ -67,7 +85,7 @@ public class RocketMQAutoConfiguration {
         }
     }
 
-    @Bean
+    @Bean(PRODUCER_BEAN_NAME)
     @ConditionalOnMissingBean(DefaultMQProducer.class)
     @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "producer.group"})
     public DefaultMQProducer defaultMQProducer(RocketMQProperties rocketMQProperties) {
@@ -100,14 +118,58 @@ public class RocketMQAutoConfiguration {
         return producer;
     }
 
+    @Bean(CONSUMER_BEAN_NAME)
+    @ConditionalOnMissingBean(DefaultLitePullConsumer.class)
+    @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "consumer.group", "consumer.topic"})
+    public DefaultLitePullConsumer defaultLitePullConsumer(RocketMQProperties rocketMQProperties)
+            throws MQClientException {
+        RocketMQProperties.Consumer consumerConfig = rocketMQProperties.getConsumer();
+        String nameServer = rocketMQProperties.getNameServer();
+        String groupName = consumerConfig.getGroup();
+        String topicName = consumerConfig.getTopic();
+        Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
+        Assert.hasText(groupName, "[rocketmq.consumer.group] must not be null");
+        Assert.hasText(topicName, "[rocketmq.consumer.topic] must not be null");
+
+        String accessChannel = rocketMQProperties.getAccessChannel();
+        MessageModel messageModel = MessageModel.valueOf(consumerConfig.getMessageModel());
+        SelectorType selectorType = SelectorType.valueOf(consumerConfig.getSelectorType());
+        String selectorExpression = consumerConfig.getSelectorExpression();
+        String ak = consumerConfig.getAccessKey();
+        String sk = consumerConfig.getSecretKey();
+
+        DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer,
+                accessChannel, groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk);
+        return litePullConsumer;
+    }
+
     @Bean(destroyMethod = "destroy")
-    @ConditionalOnBean(DefaultMQProducer.class)
+    @Conditional(ProducerOrConsumerPropertyCondition.class)
     @ConditionalOnMissingBean(name = ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
-    public RocketMQTemplate rocketMQTemplate(DefaultMQProducer mqProducer,
-        RocketMQMessageConverter rocketMQMessageConverter) {
+    public RocketMQTemplate rocketMQTemplate(RocketMQMessageConverter rocketMQMessageConverter) {
         RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
-        rocketMQTemplate.setProducer(mqProducer);
+        if (applicationContext.containsBean(PRODUCER_BEAN_NAME)) {
+            rocketMQTemplate.setProducer((DefaultMQProducer) applicationContext.getBean(PRODUCER_BEAN_NAME));
+        }
+        if (applicationContext.containsBean(CONSUMER_BEAN_NAME)) {
+            rocketMQTemplate.setConsumer((DefaultLitePullConsumer) applicationContext.getBean(CONSUMER_BEAN_NAME));
+        }
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         return rocketMQTemplate;
+    }
+
+    static class ProducerOrConsumerPropertyCondition extends AnyNestedCondition {
+
+        public ProducerOrConsumerPropertyCondition() {
+            super(ConfigurationPhase.REGISTER_BEAN);
+        }
+
+        @ConditionalOnBean(DefaultMQProducer.class)
+        static class DefaultMQProducerExistsCondition {
+        }
+
+        @ConditionalOnBean(DefaultLitePullConsumer.class)
+        static class DefaultLitePullConsumerExistsCondition {
+        }
     }
 }

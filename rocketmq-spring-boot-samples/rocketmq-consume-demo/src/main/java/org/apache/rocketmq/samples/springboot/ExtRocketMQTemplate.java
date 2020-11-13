@@ -14,34 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.rocketmq.samples.springboot;
 
+import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import javax.annotation.Resource;
-import java.util.List;
-
-/**
- * ConsumerApplication
- */
-@SpringBootApplication
-public class ConsumerACLApplication implements CommandLineRunner {
-
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
-
-    public static void main(String[] args) {
-        SpringApplication.run(ConsumerACLApplication.class, args);
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        List<String> messages = rocketMQTemplate.receive(String.class);
-        System.out.printf("receive from rocketMQTemplate, messages=%s %n", messages);
-    }
+@ExtRocketMQConsumerConfiguration(topic = "${demo.rocketmq.topic}", group = "string_consumer")
+public class ExtRocketMQTemplate extends RocketMQTemplate {
 }
-
