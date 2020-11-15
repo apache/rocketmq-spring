@@ -89,4 +89,9 @@ public @interface ExtRocketMQConsumerConfiguration {
      * The property of "secret-key".
      */
     String secretKey() default SECRET_KEY_PLACEHOLDER;
+
+    /**
+     * Maximum number of messages pulled each time.
+     */
+    int pullBatchSize() default 10;
 }

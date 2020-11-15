@@ -17,7 +17,6 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import javax.annotation.PostConstruct;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
@@ -49,6 +48,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
@@ -137,9 +138,10 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         String selectorExpression = consumerConfig.getSelectorExpression();
         String ak = consumerConfig.getAccessKey();
         String sk = consumerConfig.getSecretKey();
+        int pullBatchSize = consumerConfig.getPullBatchSize();
 
-        DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer,
-                accessChannel, groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk);
+        DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
+                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize);
         return litePullConsumer;
     }
 

@@ -267,6 +267,11 @@ public class RocketMQProperties {
         private String secretKey;
 
         /**
+         * Maximum number of messages pulled each time.
+         */
+        private int pullBatchSize = 10;
+
+        /**
          * listener configuration container
          * the pattern is like this:
          * group1.topic1 = false
@@ -329,6 +334,14 @@ public class RocketMQProperties {
 
         public void setSecretKey(String secretKey) {
             this.secretKey = secretKey;
+        }
+
+        public int getPullBatchSize() {
+            return pullBatchSize;
+        }
+
+        public void setPullBatchSize(int pullBatchSize) {
+            this.pullBatchSize = pullBatchSize;
         }
 
         public Map<String, Map<String, Boolean>> getListeners() {
