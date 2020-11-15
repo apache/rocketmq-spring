@@ -40,6 +40,7 @@ public class ConsumerACLApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        ////This is an example of pull consumer with access-key and secret-key.
         List<String> messages = rocketMQTemplate.receive(String.class);
         System.out.printf("receive from rocketMQTemplate, messages=%s %n", messages);
     }

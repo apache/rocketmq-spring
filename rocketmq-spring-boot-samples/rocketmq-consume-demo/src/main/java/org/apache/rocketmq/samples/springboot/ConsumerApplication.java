@@ -43,9 +43,11 @@ public class ConsumerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        //This is an example of pull consumer using rocketMQTemplate.
         List<String> messages = rocketMQTemplate.receive(String.class);
         System.out.printf("receive from rocketMQTemplate, messages=%s %n", messages);
 
+        //This is an example of pull consumer using extRocketMQTemplate.
         messages = extRocketMQTemplate.receive(String.class);
         System.out.printf("receive from extRocketMQTemplate, messages=%s %n", messages);
     }
