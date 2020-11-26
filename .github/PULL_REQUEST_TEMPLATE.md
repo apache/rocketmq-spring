@@ -17,4 +17,4 @@ Follow this checklist to help us incorporate your contribution quickly and easil
 - [] Write a pull request description that is detailed enough to understand what the pull request does, how, and why.
 - [] Write necessary unit-test(over 80% coverage) to verify your logic correction, more mock a little better when cross module dependency exist. 
 - [] Run `mvn -B clean apache-rat:check findbugs:findbugs checkstyle:checkstyle` to make sure basic checks pass. Run `mvn clean install -DskipITs` to make sure unit-test pass. Run `mvn clean test-compile failsafe:integration-test`  to make sure integration-test pass.
-- [ ] If this contribution is large, please file an [Apache Individual Contributor License Agreement](http://www.apache.org/licenses/#clas).
+- [] If this contribution is large, please file an [Apache Individual Contributor License Agreement](http://www.apache.org/licenses/#clas).
