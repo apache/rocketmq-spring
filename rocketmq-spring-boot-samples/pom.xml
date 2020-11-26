@@ -38,6 +38,8 @@
     </modules>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <rocketmq-spring-boot-starter-version>2.1.0</rocketmq-spring-boot-starter-version>
     </properties>
 
@@ -60,7 +62,6 @@
                         <id>validate</id>
                         <phase>validate</phase>
                         <configuration>
-                            <skip>${disable.checks}</skip>
                             <excludes>src/main/resources</excludes>
                             <configLocation>style/rmq_checkstyle.xml</configLocation>
                             <encoding>UTF-8</encoding>
