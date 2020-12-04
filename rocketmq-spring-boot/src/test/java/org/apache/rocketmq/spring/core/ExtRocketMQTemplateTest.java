@@ -16,8 +16,8 @@
  */
 package org.apache.rocketmq.spring.core;
 
-import javax.annotation.Resource;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
@@ -29,16 +29,21 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.annotation.Resource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 
 @SpringBootTest(properties = {
-    "rocketmq.nameServer=127.0.0.1:9876", "rocketmq.producer.group=extRocketMQTemplate-test-producer_group"}, classes = {RocketMQAutoConfiguration.class, ExtRocketMQTemplate.class, ExtTransactionListenerImpl.class})
+    "rocketmq.nameServer=127.0.0.1:9876", "rocketmq.producer.group=extRocketMQTemplate-test-producer_group"}, classes = {RocketMQAutoConfiguration.class, ExtRocketMQTemplate.class, ExtTransactionListenerImpl.class, ExtRocketMQConsumer.class})
 public class ExtRocketMQTemplateTest {
 
     @Resource(name = "extRocketMQTemplate")
     private RocketMQTemplate extRocketMQTemplate;
+
+    @Resource(name = "extRocketMQConsumer")
+    private ExtRocketMQConsumer extRocketMQConsumer;
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
@@ -49,6 +54,10 @@ public class ExtRocketMQTemplateTest {
         assertThat(extRocketMQTemplate.getProducer().getProducerGroup()).isEqualTo("extRocketMQTemplate-test-group");
         assertThat(extRocketMQTemplate.getProducer().getSendMsgTimeout()).isEqualTo(3000);
         assertThat(extRocketMQTemplate.getProducer().getMaxMessageSize()).isEqualTo(4 * 1024);
+
+        assertThat(extRocketMQConsumer.getConsumer().getNamesrvAddr()).isEqualTo("172.0.0.1:9876");
+        assertThat(extRocketMQConsumer.getConsumer().getConsumerGroup()).isEqualTo("extRocketMQTemplate-test-group");
+        assertThat(extRocketMQConsumer.getConsumer().getPullBatchSize()).isEqualTo(3);
     }
 
     @Test
@@ -91,6 +100,11 @@ class ExtTransactionListenerImpl implements RocketMQLocalTransactionListener {
     public RocketMQLocalTransactionState checkLocalTransaction(Message msg) {
         return RocketMQLocalTransactionState.COMMIT;
     }
+}
+
+@ExtRocketMQConsumerConfiguration(nameServer = "172.0.0.1:9876", group = "extRocketMQTemplate-test-group", topic = "test", pullBatchSize = 3)
+class ExtRocketMQConsumer extends RocketMQTemplate {
+
 }
 
 

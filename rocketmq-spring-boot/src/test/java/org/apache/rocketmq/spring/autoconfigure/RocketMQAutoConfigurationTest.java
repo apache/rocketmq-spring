@@ -19,8 +19,11 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
@@ -52,6 +55,12 @@ public class RocketMQAutoConfigurationTest {
         runner.run(context -> context.getBean(DefaultMQProducer.class));
     }
 
+    @Test(expected = NoSuchBeanDefinitionException.class)
+    public void testDefaultLitePullConsumerNotCreatedByDefault() {
+        // You will see the WARN log message about missing rocketmq.name-server spring property when running this test case.
+        runner.run(context -> context.getBean(DefaultLitePullConsumer.class));
+    }
+
     @Test
     public void testDefaultMQProducerWithRelaxPropertyName() {
         runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
@@ -65,6 +74,19 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Test
+    public void testDefaultLitePullConsumerWithRelaxPropertyName() {
+        runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
+                "rocketmq.consumer.group=spring_rocketmq",
+                "rocketmq.consumer.topic=test",
+                "rocketmq.accessChannel=LOCAL").
+                run((context) -> {
+                    assertThat(context).hasSingleBean(DefaultLitePullConsumer.class);
+                    assertThat(context).hasSingleBean(RocketMQProperties.class);
+                });
+
+    }
+
+    @Test
     public void testBadAccessChannelProperty() {
         runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
             "rocketmq.producer.group=spring_rocketmq",
@@ -73,6 +95,15 @@ public class RocketMQAutoConfigurationTest {
                 //Should throw exception for bad accessChannel property
                 assertThat(context).getFailure();
             });
+
+        runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
+                "rocketmq.consumer.group=spring_rocketmq",
+                "rocketmq.consumer.topic=test",
+                "rocketmq.accessChannel=LOCAL123").
+                run((context) -> {
+                    //Should throw exception for bad accessChannel property
+                    assertThat(context).getFailure();
+                });
     }
 
     @Test
@@ -85,6 +116,16 @@ public class RocketMQAutoConfigurationTest {
     }
 
     @Test
+    public void testDefaultLitePullConsumer() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
+                "rocketmq.consumer.group=spring_rocketmq",
+                "rocketmq.consumer.topic=test").
+                run((context) -> {
+                    assertThat(context).hasSingleBean(DefaultLitePullConsumer.class);
+                });
+    }
+
+    @Test
     public void testExtRocketMQTemplate() {
         runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
             withUserConfiguration(TestExtRocketMQTemplateConfig.class, CustomObjectMappersConfig.class).
@@ -93,6 +134,16 @@ public class RocketMQAutoConfigurationTest {
                 assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("producer");
                 // Auto-create consume container if existing Bean annotated with @RocketMQMessageListener
             });
+    }
+
+
+    @Test
+    public void testExtRocketMQConsumer() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.1.1:9876").
+                withUserConfiguration(TestExtRocketMQConsumerConfig.class, CustomObjectMappersConfig.class).
+                run((context) -> {
+                    assertThat(context).getBean("extRocketMQTemplate").hasFieldOrProperty("consumer");
+                });
     }
 
     @Test
@@ -346,6 +397,21 @@ public class RocketMQAutoConfigurationTest {
         public void onMessage(Object message) {
 
         }
+    }
+
+    @Configuration
+    static class TestExtRocketMQConsumerConfig {
+
+        @Bean
+        public RocketMQTemplate extRocketMQTemplate() {
+            return new TestExtRocketMQConsumer();
+        }
+
+    }
+
+    @ExtRocketMQConsumerConfiguration(topic = "test", group = "test", nameServer = "127.0.0.1:9876")
+    static class TestExtRocketMQConsumer extends RocketMQTemplate {
+
     }
 }
 

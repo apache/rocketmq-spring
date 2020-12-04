@@ -231,6 +231,47 @@ public class RocketMQProperties {
 
     public static final class Consumer {
         /**
+         * Group name of consumer.
+         */
+        private String group;
+
+        /**
+         * Topic name of consumer.
+         */
+        private String topic;
+
+        /**
+         * Control message mode, if you want all subscribers receive message all message, broadcasting is a good choice.
+         */
+        private String  messageModel = "CLUSTERING";
+
+        /**
+         * Control how to selector message.
+         *
+         */
+        private String selectorType = "TAG";
+
+        /**
+         * Control which message can be select.
+         */
+        private String selectorExpression = "*";
+
+        /**
+         * The property of "access-key".
+         */
+        private String accessKey;
+
+        /**
+         * The property of "secret-key".
+         */
+        private String secretKey;
+
+        /**
+         * Maximum number of messages pulled each time.
+         */
+        private int pullBatchSize = 10;
+
+        /**
          * listener configuration container
          * the pattern is like this:
          * group1.topic1 = false
@@ -238,6 +279,70 @@ public class RocketMQProperties {
          * group3.topic3 = false
          */
         private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
+
+        public String getGroup() {
+            return group;
+        }
+
+        public void setGroup(String group) {
+            this.group = group;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
+
+        public String getMessageModel() {
+            return messageModel;
+        }
+
+        public void setMessageModel(String messageModel) {
+            this.messageModel = messageModel;
+        }
+
+        public String getSelectorType() {
+            return selectorType;
+        }
+
+        public void setSelectorType(String selectorType) {
+            this.selectorType = selectorType;
+        }
+
+        public String getSelectorExpression() {
+            return selectorExpression;
+        }
+
+        public void setSelectorExpression(String selectorExpression) {
+            this.selectorExpression = selectorExpression;
+        }
+
+        public String getAccessKey() {
+            return accessKey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretKey = secretKey;
+        }
+
+        public int getPullBatchSize() {
+            return pullBatchSize;
+        }
+
+        public void setPullBatchSize(int pullBatchSize) {
+            this.pullBatchSize = pullBatchSize;
+        }
 
         public Map<String, Map<String, Boolean>> getListeners() {
             return listeners;
