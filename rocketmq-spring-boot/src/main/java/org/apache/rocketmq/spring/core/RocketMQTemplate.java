@@ -527,7 +527,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                 rmqMsgs.add(this.createRocketMqMessage(destination, msg));
             }
 
-            if(!rmqMsgs.isEmpty()){
+            if (!rmqMsgs.isEmpty()) {
                 MetricExtensionProvider.addProducerMessageCount(rmqMsgs.get(0).getTopic(), rmqMsgs.size());
             }
 
