@@ -31,6 +31,8 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.MessageBatch;
 import org.apache.rocketmq.common.message.MessageClientIDSetter;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.metric.EConsumerMode;
+import org.apache.rocketmq.spring.metric.MetricExtensionProvider;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
@@ -239,6 +241,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             MessageExt replyMessage;
 
             if (Objects.isNull(hashKey) || hashKey.isEmpty()) {
@@ -444,6 +447,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                     }
                 };
             }
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             if (Objects.isNull(hashKey) || hashKey.isEmpty()) {
                 producer.request(rocketMsg, requestCallback, timeout);
             } else {
@@ -514,13 +518,17 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
         try {
             long now = System.currentTimeMillis();
-            Collection<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
+            List<org.apache.rocketmq.common.message.Message> rmqMsgs = new ArrayList<>();
             for (Message msg : messages) {
                 if (Objects.isNull(msg) || Objects.isNull(msg.getPayload())) {
                     log.warn("Found a message empty in the batch, skip it");
                     continue;
                 }
                 rmqMsgs.add(this.createRocketMqMessage(destination, msg));
+            }
+
+            if(!rmqMsgs.isEmpty()){
+                MetricExtensionProvider.addProducerMessageCount(rmqMsgs.get(0).getTopic(), rmqMsgs.size());
             }
 
             SendResult sendResult = producer.send(rmqMsgs, timeout);
@@ -555,6 +563,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             SendResult sendResult = producer.send(rocketMsg, timeout);
             long costTime = System.currentTimeMillis() - now;
             if (log.isDebugEnabled()) {
@@ -620,6 +629,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             long now = System.currentTimeMillis();
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             SendResult sendResult = producer.send(rocketMsg, messageQueueSelector, hashKey, timeout);
             long costTime = System.currentTimeMillis() - now;
             if (log.isDebugEnabled()) {
@@ -726,6 +736,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             if (delayLevel > 0) {
                 rocketMsg.setDelayTimeLevel(delayLevel);
             }
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             producer.send(rocketMsg, sendCallback, timeout);
         } catch (Exception e) {
             log.info("asyncSend failed. destination:{}, message:{} ", destination, message);
@@ -805,6 +816,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             producer.send(rocketMsg, messageQueueSelector, hashKey, sendCallback, timeout);
         } catch (Exception e) {
             log.error("asyncSendOrderly failed. destination:{}, message:{} ", destination, message);
@@ -867,6 +879,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             producer.sendOneway(rocketMsg);
         } catch (Exception e) {
             log.error("sendOneWay failed. destination:{}, message:{} ", destination, message);
@@ -899,6 +912,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         try {
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             producer.sendOneway(rocketMsg, messageQueueSelector, hashKey);
         } catch (Exception e) {
             log.error("sendOneWayOrderly failed. destination:{}, message:{}", destination, message);
@@ -973,6 +987,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
                 throw new IllegalStateException("The rocketMQTemplate does not exist TransactionListener");
             }
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            MetricExtensionProvider.addProducerMessageCount(rocketMsg.getTopic(), 1);
             return producer.sendMessageInTransaction(rocketMsg, arg);
         } catch (MQClientException e) {
             throw RocketMQUtil.convert(e);
@@ -1082,6 +1097,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         for (MessageExt messageExt : messageExts) {
             list.add(doConvertMessage(messageExt, clazz));
         }
+        MetricExtensionProvider.addConsumerMessageCount(
+                ((DefaultLitePullConsumerWithTopic) consumer).getTopic(), list.size(), EConsumerMode.Pull);
         return list;
     }
 

@@ -48,6 +48,8 @@ import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
+import org.apache.rocketmq.spring.metric.EConsumerMode;
+import org.apache.rocketmq.spring.metric.MetricExtensionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -392,6 +394,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private void handleMessage(
         MessageExt messageExt) throws MQClientException, RemotingException, InterruptedException {
+        MetricExtensionProvider.addConsumerMessageCount(messageExt.getTopic(), 1, EConsumerMode.Push);
         if (rocketMQListener != null) {
             rocketMQListener.onMessage(doConvertMessage(messageExt));
         } else if (rocketMQReplyListener != null) {
