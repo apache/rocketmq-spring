@@ -73,9 +73,17 @@ public class MetricExtensionProvider {
         }
     }
 
-    public static void addConsumerMessageCount(String topic, int count, EConsumerMode consumerMode) {
+    public static void producerMessageCountIncrement(String topic) {
+        addProducerMessageCount(topic, 1);
+    }
+
+    public static void addConsumerMessageCount(String topic, EConsumerMode consumerMode, int count) {
         for (MetricExtension m : MetricExtensionProvider.getMetricExtensions()) {
-            m.addConsumerMessageCount(topic, count, consumerMode);
+            m.addConsumerMessageCount(topic, consumerMode, count);
         }
+    }
+
+    public static void consumerMessageCountIncrement(String topic, EConsumerMode consumerMode) {
+        addConsumerMessageCount(topic, consumerMode, 1);
     }
 }

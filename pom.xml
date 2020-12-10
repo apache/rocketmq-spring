@@ -176,8 +176,8 @@
                         <exclude>.github/**</exclude>
                         <exclude>src/test/resources/certs/*</exclude>
                         <exclude>src/test/**/*.log</exclude>
-                        <exclude>**/src/main/resources/META-INF/services/*</exclude>
-                        <exclude>**/src/test/resources/META-INF/services/*</exclude>
+                        <exclude>src/main/resources/META-INF/services/*</exclude>
+                        <exclude>src/test/resources/META-INF/services/*</exclude>
                         <exclude>**/target/**</exclude>
                         <exclude>**/*.iml</exclude>
                         <exclude>**/*/spring.factories</exclude>

@@ -19,6 +19,8 @@ package org.apache.rocketmq.samples.springboot;
 
 import org.apache.rocketmq.spring.metric.EConsumerMode;
 import org.apache.rocketmq.spring.metric.MetricExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,20 +28,20 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AtomicLongMetricExtension implements MetricExtension {
 
-    private final Map<String, AtomicLong> producerMessageCountMap = new ConcurrentHashMap<>();
+    private final static Logger LOGGER = LoggerFactory.getLogger(AtomicLongMetricExtension.class);
+
     private final Map<String, AtomicLong> consumerMessageCountMap = new ConcurrentHashMap<>();
 
     @Override
     public void addProducerMessageCount(String topic, int count) {
-        AtomicLong atomicLong = producerMessageCountMap.computeIfAbsent(topic, t -> new AtomicLong());
-        System.out.printf("The count of producer messages for %s is %d.%n", topic, atomicLong.addAndGet(count));
+        //nothing
     }
 
     @Override
-    public void addConsumerMessageCount(String topic, int count, EConsumerMode consumerMode) {
+    public void addConsumerMessageCount(String topic, EConsumerMode consumerMode, int count) {
         String key = topic + "_" + consumerMode.name();
         AtomicLong atomicLong = consumerMessageCountMap.computeIfAbsent(key, t -> new AtomicLong());
-        System.out.printf("The count of %s consumer messages for %s is %d.%n"
+        LOGGER.info("The count of {} consumer messages for {} is {}"
                 , consumerMode.name(), topic, atomicLong.addAndGet(count));
     }
 }

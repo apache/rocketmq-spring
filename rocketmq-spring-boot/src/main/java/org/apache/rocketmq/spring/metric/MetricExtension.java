@@ -31,8 +31,8 @@ public interface MetricExtension {
      * Add current count of message from the consumer.
      *
      * @param topic topic name
-     * @param count count of message
      * @param consumerMode consumer mode
+     * @param count count of message
      */
-    void addConsumerMessageCount(String topic, int count, EConsumerMode consumerMode);
+    void addConsumerMessageCount(String topic, EConsumerMode consumerMode, int count);
 }

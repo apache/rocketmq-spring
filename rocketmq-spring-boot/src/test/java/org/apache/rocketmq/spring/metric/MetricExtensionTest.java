@@ -34,7 +34,7 @@ public class MetricExtensionTest implements MetricExtension {
     }
 
     @Override
-    public void addConsumerMessageCount(String topic, int count, EConsumerMode consumerMode) {
+    public void addConsumerMessageCount(String topic, EConsumerMode consumerMode, int count) {
         TOPIC = topic;
         COUNT = count;
         CONSUMER_MODE = consumerMode;
@@ -49,7 +49,7 @@ public class MetricExtensionTest implements MetricExtension {
 
     @Test
     public void testAddConsumerMessageCount() {
-        MetricExtensionProvider.addConsumerMessageCount("topic2", 222, EConsumerMode.Push);
+        MetricExtensionProvider.addConsumerMessageCount("topic2", EConsumerMode.Push, 222);
         assertEquals("topic2", TOPIC);
         assertEquals(222, COUNT);
         assertEquals(EConsumerMode.Push, CONSUMER_MODE);
