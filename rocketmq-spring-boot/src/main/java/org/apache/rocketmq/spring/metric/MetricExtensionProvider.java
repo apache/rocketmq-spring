@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.metric;
 
+import org.apache.rocketmq.spring.metric.MetricExtension.EConsumerMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -31,7 +31,7 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.MessageBatch;
 import org.apache.rocketmq.common.message.MessageClientIDSetter;
 import org.apache.rocketmq.common.message.MessageExt;
-import org.apache.rocketmq.spring.metric.EConsumerMode;
+import org.apache.rocketmq.spring.metric.MetricExtension.EConsumerMode;
 import org.apache.rocketmq.spring.metric.MetricExtensionProvider;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;

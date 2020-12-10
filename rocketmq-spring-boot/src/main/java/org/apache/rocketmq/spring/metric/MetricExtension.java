@@ -19,6 +19,17 @@ package org.apache.rocketmq.spring.metric;
 
 public interface MetricExtension {
 
+    enum EConsumerMode {
+        /**
+         * pull mode
+         */
+        Pull,
+        /**
+         * push mode
+         */
+        Push,
+    }
+
     /**
      * Add current count of message from the producer.
      *

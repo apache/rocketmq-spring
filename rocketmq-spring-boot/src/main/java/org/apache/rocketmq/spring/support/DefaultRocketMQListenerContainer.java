@@ -48,7 +48,7 @@ import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
-import org.apache.rocketmq.spring.metric.EConsumerMode;
+import org.apache.rocketmq.spring.metric.MetricExtension.EConsumerMode;
 import org.apache.rocketmq.spring.metric.MetricExtensionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
