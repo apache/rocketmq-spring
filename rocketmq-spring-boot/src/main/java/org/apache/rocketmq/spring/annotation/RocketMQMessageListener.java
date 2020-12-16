@@ -109,4 +109,9 @@ public @interface RocketMQMessageListener {
      * The property of "access-channel".
      */
     String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+
+    /**
+     * Max re-consume times. -1 means 16 times.
+     */
+    int maxReconsumeTimes() default -1;
 }

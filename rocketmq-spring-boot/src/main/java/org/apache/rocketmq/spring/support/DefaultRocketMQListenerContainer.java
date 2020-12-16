@@ -120,6 +120,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String selectorExpression;
     private MessageModel messageModel;
     private long consumeTimeout;
+    private int maxReconsumeTimes = -1;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -219,6 +220,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.selectorType = anno.selectorType();
         this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
+        this.maxReconsumeTimes = anno.maxReconsumeTimes();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -573,6 +575,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         if (accessChannel != null) {
             consumer.setAccessChannel(accessChannel);
         }
+        consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         consumer.setConsumeThreadMax(consumeThreadMax);
         if (consumeThreadMax < consumer.getConsumeThreadMin()) {
             consumer.setConsumeThreadMin(consumeThreadMax);
