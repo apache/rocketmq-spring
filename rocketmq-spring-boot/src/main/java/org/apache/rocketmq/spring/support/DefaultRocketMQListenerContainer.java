@@ -376,7 +376,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     long now = System.currentTimeMillis();
                     handleMessage(messageExt);
                     long costTime = System.currentTimeMillis() - now;
-                    log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
                     log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt.getMsgId(), messageExt.getTopic(), messageExt.getReconsumeTimes(), e);
                     context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
@@ -402,7 +402,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
                         log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
                     } else {
-                        log.info("Consumer replies message success.");
+                        log.debug("Consumer replies message success.");
                     }
                 }
 
