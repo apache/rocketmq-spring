@@ -40,7 +40,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <rocketmq-spring-boot-starter-version>2.1.0</rocketmq-spring-boot-starter-version>
+        <rocketmq-spring-boot-starter-version>2.1.1</rocketmq-spring-boot-starter-version>
     </properties>
 
     <dependencies>
