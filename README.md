@@ -23,6 +23,7 @@ This project aims to help developers quickly integrate [RocketMQ](http://rocketm
 - [x] Support message tracing
 - [x] Support authentication and authorization
 - [x] Support request-reply message exchange pattern
+- [x] Consume messages with push/pull mode
 
 ## Prerequisites
 - JDK 1.8 and above
