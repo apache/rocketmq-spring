@@ -50,7 +50,8 @@ import static org.mockito.ArgumentMatchers.any;
     "test.rocketmq.topic=test", "rocketmq.producer.access-key=test-ak",
     "rocketmq.producer.secret-key=test-sk", "rocketmq.accessChannel=LOCAL",
     "rocketmq.producer.sendMessageTimeout= 3500", "rocketmq.producer.retryTimesWhenSendFailed=3",
-    "rocketmq.producer.retryTimesWhenSendAsyncFailed=3"}, classes = {RocketMQAutoConfiguration.class, TransactionListenerImpl.class})
+    "rocketmq.producer.retryTimesWhenSendAsyncFailed=3",
+    "rocketmq.consumer.group=spring_rocketmq", "rocketmq.consumer.topic=test"}, classes = {RocketMQAutoConfiguration.class, TransactionListenerImpl.class})
 
 public class RocketMQTemplateTest {
     @Resource
@@ -89,6 +90,15 @@ public class RocketMQTemplateTest {
 
         try {
             rocketMQTemplate.syncSendOrderly(topic, "payload", "hashkey");
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
+    }
+
+    @Test
+    public void testReceiveMessage() {
+        try {
+            rocketMQTemplate.receive(String.class);
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
@@ -234,6 +244,10 @@ public class RocketMQTemplateTest {
         assertThat(rocketMQTemplate.getProducer().getRetryTimesWhenSendAsyncFailed()).isEqualTo(3);
         assertThat(rocketMQTemplate.getProducer().getRetryTimesWhenSendFailed()).isEqualTo(3);
         assertThat(rocketMQTemplate.getProducer().getCompressMsgBodyOverHowmuch()).isEqualTo(1024 * 4);
+
+        assertThat(rocketMQTemplate.getConsumer().getNamesrvAddr()).isEqualTo("127.0.0.1:9876");
+        assertThat(rocketMQTemplate.getConsumer().getConsumerGroup()).isEqualTo("spring_rocketmq");
+        assertThat(rocketMQTemplate.getConsumer().getAccessChannel()).isEqualTo(AccessChannel.LOCAL);
     }
 
     @Test

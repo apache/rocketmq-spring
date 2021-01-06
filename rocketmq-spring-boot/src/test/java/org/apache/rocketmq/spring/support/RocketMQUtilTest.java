@@ -130,4 +130,11 @@ public class RocketMQUtilTest {
         assertEquals("tagA", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.TAGS)));
         assertEquals("key1", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.KEYS)));
     }
+    
+    @Test
+    public void testGetInstanceName() {
+        String nameServer = "127.0.0.1:9876";
+        String expected = "127.0.0.1:9876@";
+        assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(nameServer));
+    }
 }
