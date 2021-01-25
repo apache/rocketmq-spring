@@ -17,20 +17,21 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * OrderPaidEventConsumer
+ * The consumer that replying bytes
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
+@RocketMQMessageListener(topic = "${demo.rocketmq.bytesRequestTopic}", consumerGroup = "${demo.rocketmq.bytesRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
+public class ConsumerWithReplyBytes implements RocketMQReplyListener<MessageExt, byte[]> {
 
     @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
+    public byte[] onMessage(MessageExt message) {
+        System.out.printf("------- ConsumerWithReplyBytes received: %s \n", message);
+        return "reply message content".getBytes();
     }
 }

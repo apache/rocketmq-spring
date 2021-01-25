@@ -14,23 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.rocketmq.samples.springboot.consumer;
-
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.stereotype.Service;
+package org.apache.rocketmq.spring.core;
 
 /**
- * OrderPaidEventConsumer
+ * Classes implementing this interface are used for processing callback events after receiving
+ * reply messages from consumers.
+ *
+ * @param <T> the type of message that wanted to receive from consumer
  */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
+public interface RocketMQLocalRequestCallback<T> {
+    void onSuccess(final T message);
 
-    @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
-    }
+    void onException(final Throwable e);
 }

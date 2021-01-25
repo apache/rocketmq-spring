@@ -17,20 +17,24 @@
 
 package org.apache.rocketmq.samples.springboot.consumer;
 
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
+import org.apache.rocketmq.samples.springboot.domain.User;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.springframework.stereotype.Service;
 
 /**
- * OrderPaidEventConsumer
+ * The consumer that replying Object
  */
 @Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
+@RocketMQMessageListener(topic = "${demo.rocketmq.objectRequestTopic}", consumerGroup = "${demo.rocketmq.objectRequestConsumer}", selectorExpression = "${demo.rocketmq.tag}")
+public class ObjectConsumerWithReplyUser implements RocketMQReplyListener<User, User> {
 
     @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
+    public User onMessage(User user) {
+        System.out.printf("------- ObjectConsumerWithReplyUser received: %s \n", user);
+        User replyUser = new User();
+        replyUser.setUserAge((byte) 10);
+        replyUser.setUserName("replyUserName");
+        return replyUser;
     }
 }

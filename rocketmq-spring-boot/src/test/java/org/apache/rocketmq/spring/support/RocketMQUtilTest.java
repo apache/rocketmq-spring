@@ -16,13 +16,17 @@
  */
 package org.apache.rocketmq.spring.support;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
+import org.apache.rocketmq.common.UtilAll;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.apache.rocketmq.spring.support.RocketMQUtil.toRocketHeaderKey;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -54,8 +58,8 @@ public class RocketMQUtilTest {
         org.apache.rocketmq.common.message.Message rocketMsg2 = RocketMQUtil.convertToRocketMessage(objectMapper,
             charset, destination, msgWithBytePayload);
 
-        assertTrue(Arrays.equals(((String)msgWithStringPayload.getPayload()).getBytes(), rocketMsg1.getBody()));
-        assertTrue(Arrays.equals((byte[])msgWithBytePayload.getPayload(), rocketMsg2.getBody()));
+        assertTrue(Arrays.equals(((String) msgWithStringPayload.getPayload()).getBytes(), rocketMsg1.getBody()));
+        assertTrue(Arrays.equals((byte[]) msgWithBytePayload.getPayload(), rocketMsg2.getBody()));
     }
 
     @Test
@@ -88,6 +92,49 @@ public class RocketMQUtilTest {
         assertEquals(String.valueOf("1"), rocketMsg.getProperty("test"));
         assertEquals(String.valueOf("tags"), rocketMsg.getProperty(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
         assertNull(rocketMsg.getTags());
+
+        rmqMsg.putUserProperty(toRocketHeaderKey(RocketMQHeaders.TAGS), "tags2");
+        springMsg = RocketMQUtil.convertToSpringMessage(rmqMsg);
+        assertEquals("tags", springMsg.getHeaders().get(RocketMQHeaders.PREFIX + RocketMQHeaders.TAGS));
     }
 
+    @Test
+    public void testConvertToRocketMessageWithMessageConvert() {
+        Message msgWithStringPayload = MessageBuilder.withPayload("test body")
+            .setHeader("test", 1)
+            .setHeader(RocketMQHeaders.TAGS, "tags")
+            .setHeader(RocketMQHeaders.KEYS, "my_keys")
+            .build();
+        RocketMQMessageConverter messageConverter = new RocketMQMessageConverter();
+        org.apache.rocketmq.common.message.Message rocketMsg = RocketMQUtil.convertToRocketMessage(messageConverter.getMessageConverter(),
+            "UTF-8", "test-topic", msgWithStringPayload);
+        assertEquals("1", rocketMsg.getProperty("test"));
+        assertNull(rocketMsg.getProperty(RocketMQHeaders.TAGS));
+        assertEquals("my_keys", rocketMsg.getProperty(RocketMQHeaders.KEYS));
+
+        Message msgWithBytesPayload = MessageBuilder.withPayload("123".getBytes()).build();
+        org.apache.rocketmq.common.message.Message rocketMsgWithObj = RocketMQUtil.convertToRocketMessage(messageConverter.getMessageConverter(),
+            "UTF-8", "test-topic", msgWithBytesPayload);
+        assertEquals("123", new String(rocketMsgWithObj.getBody()));
+    }
+
+    @Test
+    public void testConvertToSpringMessage() {
+        org.apache.rocketmq.common.message.MessageExt rocketMsg = new org.apache.rocketmq.common.message.MessageExt();
+        rocketMsg.setTopic("test");
+        rocketMsg.setBody("test".getBytes());
+        rocketMsg.setTags("tagA");
+        rocketMsg.setKeys("key1");
+        Message message = RocketMQUtil.convertToSpringMessage(rocketMsg);
+        assertEquals("test", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.TOPIC)));
+        assertEquals("tagA", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.TAGS)));
+        assertEquals("key1", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.KEYS)));
+    }
+    
+    @Test
+    public void testGetInstanceName() {
+        String nameServer = "127.0.0.1:9876";
+        String expected = "127.0.0.1:9876@";
+        assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(nameServer));
+    }
 }

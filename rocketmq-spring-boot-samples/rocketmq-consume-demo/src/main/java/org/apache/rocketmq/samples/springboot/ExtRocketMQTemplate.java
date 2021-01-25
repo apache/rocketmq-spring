@@ -14,23 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.samples.springboot;
 
-package org.apache.rocketmq.samples.springboot.consumer;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
-import org.apache.rocketmq.samples.springboot.domain.OrderPaidEvent;
-import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.springframework.stereotype.Service;
-
-/**
- * OrderPaidEventConsumer
- */
-@Service
-@RocketMQMessageListener(topic = "${demo.rocketmq.orderTopic}", consumerGroup = "order-paid-consumer")
-public class OrderPaidEventConsumer implements RocketMQListener<OrderPaidEvent> {
-
-    @Override
-    public void onMessage(OrderPaidEvent orderPaidEvent) {
-        System.out.printf("------- OrderPaidEventConsumer received: %s [orderId : %s]\n", orderPaidEvent,orderPaidEvent.getOrderId());
-    }
+@ExtRocketMQConsumerConfiguration(topic = "${demo.rocketmq.topic}", group = "string_consumer")
+public class ExtRocketMQTemplate extends RocketMQTemplate {
 }

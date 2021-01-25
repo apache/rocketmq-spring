@@ -15,18 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.spring.config;
+package org.apache.rocketmq.samples.springboot.domain;
 
-public class RocketMQConfigUtils {
-    /**
-     * The bean name of the internally managed RocketMQ transaction annotation processor.
-     */
-    public static final String ROCKETMQ_TRANSACTION_ANNOTATION_PROCESSOR_BEAN_NAME =
-        "org.springframework.rocketmq.spring.starter.internalRocketMQTransAnnotationProcessor";
+public class User {
+    private String userName;
+    private Byte userAge;
 
-    public static final String ROCKETMQ_TRANSACTION_DEFAULT_GLOBAL_NAME =
-        "rocketmq_transaction_default_global_name";
+    public String getUserName() {
+        return userName;
+    }
 
-    public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME =
-            "rocketMQTemplate";
+    public User setUserName(String userName) {
+        this.userName = userName;
+        return this;
+    }
+
+    public Byte getUserAge() {
+        return userAge;
+    }
+
+    public User setUserAge(Byte userAge) {
+        this.userAge = userAge;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "userName='" + userName + '\'' +
+            ", userAge=" + userAge +
+            '}';
+    }
 }

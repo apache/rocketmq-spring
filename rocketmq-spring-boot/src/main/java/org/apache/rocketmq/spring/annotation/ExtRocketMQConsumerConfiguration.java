@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.spring.annotation;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,27 +28,45 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RocketMQMessageListener {
+@Component
+public @interface ExtRocketMQConsumerConfiguration {
 
     String NAME_SERVER_PLACEHOLDER = "${rocketmq.name-server:}";
+    String GROUP_PLACEHOLDER = "${rocketmq.consumer.group:}";
+    String TOPIC_PLACEHOLDER = "${rocketmq.consumer.topic:}";
+    String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
     String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
-    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
-    String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
 
     /**
-     * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve
-     * load balance. It's required and needs to be globally unique.
-     *
-     *
-     * See <a href="http://rocketmq.apache.org/docs/core-concept/">here</a> for further discussion.
+     * The component name of the Producer configuration.
      */
-    String consumerGroup();
+    String value() default "";
 
     /**
-     * Topic name.
+     * The property of "name-server".
      */
-    String topic();
+    String nameServer() default NAME_SERVER_PLACEHOLDER;
+
+    /**
+     * The property of "access-channel".
+     */
+    String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+
+    /**
+     * Group name of consumer.
+     */
+    String group() default GROUP_PLACEHOLDER;
+
+    /**
+     * Topic name of consumer.
+     */
+    String topic() default TOPIC_PLACEHOLDER;
+
+    /**
+     * Control message mode, if you want all subscribers receive message all message, broadcasting is a good choice.
+     */
+    MessageModel messageModel() default MessageModel.CLUSTERING;
 
     /**
      * Control how to selector message.
@@ -61,26 +81,6 @@ public @interface RocketMQMessageListener {
     String selectorExpression() default "*";
 
     /**
-     * Control consume mode, you can choice receive message concurrently or orderly.
-     */
-    ConsumeMode consumeMode() default ConsumeMode.CONCURRENTLY;
-
-    /**
-     * Control message mode, if you want all subscribers receive message all message, broadcasting is a good choice.
-     */
-    MessageModel messageModel() default MessageModel.CLUSTERING;
-
-    /**
-     * Max consumer thread number.
-     */
-    int consumeThreadMax() default 64;
-
-    /**
-     * Maximum amount of time in minutes a message may block the consuming thread.
-     */
-    long consumeTimeout() default 15L;
-
-    /**
      * The property of "access-key".
      */
     String accessKey() default ACCESS_KEY_PLACEHOLDER;
@@ -91,22 +91,7 @@ public @interface RocketMQMessageListener {
     String secretKey() default SECRET_KEY_PLACEHOLDER;
 
     /**
-     * Switch flag instance for message trace.
+     * Maximum number of messages pulled each time.
      */
-    boolean enableMsgTrace() default true;
-
-    /**
-     * The name value of message trace topic.If you don't config,you can use the default trace topic name.
-     */
-    String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
-
-    /**
-     * The property of "name-server".
-     */
-    String nameServer() default NAME_SERVER_PLACEHOLDER;
-
-    /**
-     * The property of "access-channel".
-     */
-    String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+    int pullBatchSize() default 10;
 }
