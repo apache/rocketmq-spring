@@ -99,4 +99,5 @@ public @interface ExtRocketMQConsumerConfiguration {
      * The property of "use-TLS".
      */
     String useTLS() default "false";
+
 }
