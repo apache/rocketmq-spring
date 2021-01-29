@@ -116,7 +116,9 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         boolean isEnableMsgTrace = annotation.enableMsgTrace();
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
         customizedTraceTopic = StringUtils.isEmpty(customizedTraceTopic) ? producerConfig.getCustomizedTraceTopic() : customizedTraceTopic;
-
+        String strUseTLS = environment.resolvePlaceholders(annotation.useTLS());
+        boolean useTLS = StringUtils.isEmpty(strUseTLS) ? false: new Boolean(strUseTLS);
+        
         DefaultMQProducer producer = RocketMQUtil.createDefaultMQProducer(groupName, ak, sk, isEnableMsgTrace, customizedTraceTopic);
 
         producer.setNamesrvAddr(nameServer);
@@ -126,6 +128,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         producer.setMaxMessageSize(annotation.maxMessageSize() == -1 ? producerConfig.getMaxMessageSize() : annotation.maxMessageSize());
         producer.setCompressMsgBodyOverHowmuch(annotation.compressMessageBodyThreshold() == -1 ? producerConfig.getCompressMessageBodyThreshold() : annotation.compressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(annotation.retryNextServer());
+        producer.setUseTLS(useTLS);
 
         return producer;
     }

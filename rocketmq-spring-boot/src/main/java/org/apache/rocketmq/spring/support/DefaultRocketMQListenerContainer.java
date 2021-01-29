@@ -121,6 +121,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private MessageModel messageModel;
     private long consumeTimeout;
 
+    private boolean useTLS;
+
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
     }
@@ -247,6 +249,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setConsumer(DefaultMQPushConsumer consumer) {
         this.consumer = consumer;
+    }
+
+    public boolean isUseTLS() {
+        return useTLS;
+    }
+
+    public void setUseTLS(boolean useTLS) {
+        this.useTLS = useTLS;
     }
 
     @Override
@@ -611,6 +621,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             default:
                 throw new IllegalArgumentException("Property 'consumeMode' was wrong.");
         }
+
+        consumer.setUseTLS(useTLS);
 
         if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
             ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(consumer);

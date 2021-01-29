@@ -153,7 +153,10 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         }
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);
-
+        String useTLS = environment.resolvePlaceholders(annotation.useTLS());
+        if (!StringUtils.isEmpty(useTLS)) {
+            container.setUseTLS(new Boolean(useTLS));
+        }
         return container;
     }
 
