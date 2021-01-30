@@ -117,7 +117,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
         customizedTraceTopic = StringUtils.isEmpty(customizedTraceTopic) ? producerConfig.getCustomizedTraceTopic() : customizedTraceTopic;
         String strUseTLS = environment.resolvePlaceholders(annotation.useTLS());
-        boolean useTLS = StringUtils.isEmpty(strUseTLS) ? false: new Boolean(strUseTLS);
+        boolean useTLS = new Boolean(strUseTLS);
         
         DefaultMQProducer producer = RocketMQUtil.createDefaultMQProducer(groupName, ak, sk, isEnableMsgTrace, customizedTraceTopic);
 
