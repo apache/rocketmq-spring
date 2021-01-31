@@ -705,23 +705,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
     }
 
-    private MessageBatch batch(Collection<org.apache.rocketmq.common.message.Message> msgs) throws MQClientException {
-        MessageBatch msgBatch;
-        try {
-            msgBatch = MessageBatch.generateFromList(msgs);
-            for (org.apache.rocketmq.common.message.Message message : msgBatch) {
-                Validators.checkMessage(message, producer);
-                MessageClientIDSetter.setUniqID(message);
-                message.setTopic(producer.withNamespace(message.getTopic()));
-            }
-            msgBatch.setBody(msgBatch.encode());
-        } catch (Exception e) {
-            throw new MQClientException("Failed to initiate the MessageBatch", e);
-        }
-        msgBatch.setTopic(producer.withNamespace(msgBatch.getTopic()));
-        return msgBatch;
-    }
-
     /**
      * Same to {@link #asyncSend(String, Message, SendCallback)} with send timeout and delay level specified in
      * addition.
@@ -1055,6 +1038,23 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             return actualTypeArguments[0];
         }
         return Object.class;
+    }
+
+    private MessageBatch batch(Collection<org.apache.rocketmq.common.message.Message> msgs) throws MQClientException {
+        MessageBatch msgBatch;
+        try {
+            msgBatch = MessageBatch.generateFromList(msgs);
+            for (org.apache.rocketmq.common.message.Message message : msgBatch) {
+                Validators.checkMessage(message, producer);
+                MessageClientIDSetter.setUniqID(message);
+                message.setTopic(producer.withNamespace(message.getTopic()));
+            }
+            msgBatch.setBody(msgBatch.encode());
+        } catch (Exception e) {
+            throw new MQClientException("Failed to initiate the MessageBatch", e);
+        }
+        msgBatch.setTopic(producer.withNamespace(msgBatch.getTopic()));
+        return msgBatch;
     }
 
     /**
