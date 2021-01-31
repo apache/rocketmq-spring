@@ -293,7 +293,7 @@ public class RocketMQUtil {
 
     public static DefaultLitePullConsumer createDefaultLitePullConsumer(String nameServer, String accessChannel,
             String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
-            String selectorExpression, String ak, String sk, int pullBatchSize,boolean useTLS)
+            String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
             throws MQClientException {
         DefaultLitePullConsumer litePullConsumer = null;
         if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {

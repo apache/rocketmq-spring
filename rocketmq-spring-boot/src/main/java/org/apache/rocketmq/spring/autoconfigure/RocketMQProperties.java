@@ -133,7 +133,7 @@ public class RocketMQProperties {
         private String customizedTraceTopic = TopicValidator.RMQ_SYS_TRACE_TOPIC;
 
         /**
-         * The property of "use-TLS".
+         * The property of "useTLS".
          */
         private boolean useTLS = false;
 
@@ -295,7 +295,7 @@ public class RocketMQProperties {
         private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
 
         /**
-         * The property of "use-TLS".
+         * The property of "useTLS".
          */
         private boolean useTLS = false;
 

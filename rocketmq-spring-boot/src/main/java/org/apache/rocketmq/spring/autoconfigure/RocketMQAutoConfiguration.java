@@ -143,7 +143,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         boolean useTLS = consumerConfig.isUseTLS();
 
         DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
-                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize,useTLS);
+                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
         return litePullConsumer;
     }
 
