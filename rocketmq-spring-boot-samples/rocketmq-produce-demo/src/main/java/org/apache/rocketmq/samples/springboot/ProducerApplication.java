@@ -194,8 +194,8 @@ public class ProducerApplication implements CommandLineRunner {
                 msgs.add(MessageBuilder.withPayload(msg).
                         setHeader(RocketMQHeaders.KEYS, "KEY_" + msgIndex).build());
             }
-            SendResult sr = rocketMQTemplate.syncSendOrderly(springTopic, msgs,  q+ "", 60000);
-            System.out.println("--- Batch messages orderly to queue :"+ sr.getMessageQueue().getQueueId() + " send result :" + sr);
+            SendResult sr = rocketMQTemplate.syncSendOrderly(springTopic, msgs, q + "", 60000);
+            System.out.println("--- Batch messages orderly to queue :" + sr.getMessageQueue().getQueueId() + " send result :" + sr);
         }
     }
 
