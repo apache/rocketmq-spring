@@ -94,7 +94,6 @@ public @interface ExtRocketMQConsumerConfiguration {
      * Maximum number of messages pulled each time.
      */
     int pullBatchSize() default 10;
-
     /**
      * The property of "tlsEnable" default false.
      */
