@@ -85,4 +85,9 @@ public @interface ExtRocketMQTemplateConfiguration {
      * The name value of message trace topic.If you don't config,you can use the default trace topic name.
      */
     String customizedTraceTopic() default "${rocketmq.producer.customized-trace-topic:}";
+
+    /**
+     * The property of "tlsEnable" default false.
+     */
+    String tlsEnable() default "false";
 }
