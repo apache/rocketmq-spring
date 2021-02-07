@@ -21,4 +21,5 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
 @ExtRocketMQTemplateConfiguration(nameServer = "${demo.rocketmq.extNameServer}", tlsEnable = "${demo.rocketmq.ext.useTLS}")
 public class ExtRocketMQTemplateTLS extends RocketMQTemplate {
+
 }
