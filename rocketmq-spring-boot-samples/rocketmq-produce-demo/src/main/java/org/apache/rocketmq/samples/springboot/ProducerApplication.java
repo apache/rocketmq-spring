@@ -123,6 +123,9 @@ public class ProducerApplication implements CommandLineRunner {
         // Send a batch of strings
         testBatchMessages();
 
+        // send a bath of strings orderly
+        testSendBatchMessageOrderly();
+
         // Send transactional messages using rocketMQTemplate
         testRocketMQTemplateTransaction();
 
@@ -179,6 +182,21 @@ public class ProducerApplication implements CommandLineRunner {
         SendResult sr = rocketMQTemplate.syncSend(springTopic, msgs, 60000);
 
         System.out.printf("--- Batch messages send result :" + sr);
+    }
+
+    private void testSendBatchMessageOrderly() {
+        for (int q = 0; q < 4; q++) {
+            // send to 4 queues
+            List<Message> msgs = new ArrayList<Message>();
+            for (int i = 0; i < 10; i++) {
+                int msgIndex = q * 10 + i;
+                String msg = String.format("Hello RocketMQ Batch Msg#%d to queue: %d", msgIndex, q);
+                msgs.add(MessageBuilder.withPayload(msg).
+                        setHeader(RocketMQHeaders.KEYS, "KEY_" + msgIndex).build());
+            }
+            SendResult sr = rocketMQTemplate.syncSendOrderly(springTopic, msgs, q + "", 60000);
+            System.out.println("--- Batch messages orderly to queue :" + sr.getMessageQueue().getQueueId() + " send result :" + sr);
+        }
     }
 
     private void testRocketMQTemplateTransaction() throws MessagingException {
