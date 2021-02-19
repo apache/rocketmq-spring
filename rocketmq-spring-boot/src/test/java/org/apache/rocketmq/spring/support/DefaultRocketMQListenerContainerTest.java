@@ -19,13 +19,14 @@ package org.apache.rocketmq.spring.support;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+
+import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -52,6 +53,15 @@ public class DefaultRocketMQListenerContainerTest {
         Class result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(String.class.getName()));
 
+        //support message
+        listenerContainer.setRocketMQListener(new RocketMQListener<Message>() {
+            @Override
+            public void onMessage(Message message) {
+            }
+        });
+        result = (Class) getMessageType.invoke(listenerContainer);
+        assertThat(result.getName().equals(Message.class.getName()));
+
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
             @Override
             public void onMessage(MessageExt message) {
@@ -59,6 +69,7 @@ public class DefaultRocketMQListenerContainerTest {
         });
         result = (Class) getMessageType.invoke(listenerContainer);
         assertThat(result.getName().equals(MessageExt.class.getName()));
+
 
         listenerContainer.setRocketMQReplyListener(new RocketMQReplyListener<MessageExt, String>() {
             @Override
@@ -111,6 +122,26 @@ public class DefaultRocketMQListenerContainerTest {
         messageExt.setBody("hello".getBytes());
         MessageExt result2 = (MessageExt) doConvertMessage.invoke(listenerContainer, messageExt);
         assertThat(result2).isEqualTo(messageExt);
+
+        //support message
+        listenerContainer.setRocketMQListener(new RocketMQListener<Message>() {
+            @Override
+            public void onMessage(Message message) {
+            }
+        });
+        Field messageType3 = DefaultRocketMQListenerContainer.class.getDeclaredField("messageType");
+        messageType3.setAccessible(true);
+        messageType3.set(listenerContainer, Message.class);
+        Message message = new MessageExt(0, System.currentTimeMillis(), null, System.currentTimeMillis(), null, null);
+        message.setBody("hello".getBytes());
+        Message result3 = (Message) doConvertMessage.invoke(listenerContainer, message);
+        assertThat(result3).isEqualTo(message);
+
+        listenerContainer.setRocketMQListener(new RocketMQListener<User>() {
+            @Override
+            public void onMessage(User message) {
+            }
+        });
 
         listenerContainer.setRocketMQListener(new RocketMQListener<User>() {
             @Override
