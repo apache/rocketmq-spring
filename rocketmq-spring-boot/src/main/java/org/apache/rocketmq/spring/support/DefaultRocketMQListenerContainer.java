@@ -315,8 +315,20 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     public void afterPropertiesSet() throws Exception {
         initRocketMQPushConsumer();
 
-        this.messageType = getMessageType();
-        this.methodParameter = getMethodParameter();
+        if (rocketMQListener != null) {
+            this.messageType = RocketMQUtil.getMessageType(rocketMQListener, RocketMQListener.class);
+        } else {
+            this.messageType = RocketMQUtil.getMessageType(rocketMQReplyListener, RocketMQReplyListener.class);
+        }
+
+        if (rocketMQListener != null) {
+            this.methodParameter = RocketMQUtil.getMethodParameter(messageType,
+                    rocketMQListener, "onMessage", messageConverter);
+        } else {
+            this.methodParameter = RocketMQUtil.getMethodParameter(messageType,
+                    rocketMQReplyListener, "onMessage", messageConverter);
+        }
+
         log.debug("RocketMQ messageType: {}", messageType);
     }
 
@@ -391,9 +403,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private void handleMessage(
         MessageExt messageExt) throws MQClientException, RemotingException, InterruptedException {
         if (rocketMQListener != null) {
-            rocketMQListener.onMessage(doConvertMessage(messageExt));
+            rocketMQListener.onMessage(RocketMQUtil.doConvertMessage(messageExt, messageType,
+                    methodParameter, messageConverter, charset));
         } else if (rocketMQReplyListener != null) {
-            Object replyContent = rocketMQReplyListener.onMessage(doConvertMessage(messageExt));
+            Object replyContent = rocketMQReplyListener.onMessage(RocketMQUtil.doConvertMessage(messageExt, messageType,
+                    methodParameter, messageConverter, charset));
             Message<?> message = MessageBuilder.withPayload(replyContent).build();
 
             org.apache.rocketmq.common.message.Message replyMessage = MessageUtil.createReplyMessage(messageExt, convertToBytes(message));
@@ -453,90 +467,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         MessageBuilder<?> builder = MessageBuilder.fromMessage(message);
         builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN);
         return builder.build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Object doConvertMessage(MessageExt messageExt) {
-        if (Objects.equals(messageType, MessageExt.class) || Objects.equals(messageType, org.apache.rocketmq.common.message.Message.class)) {
-            return messageExt;
-        } else {
-            String str = new String(messageExt.getBody(), Charset.forName(charset));
-            if (Objects.equals(messageType, String.class)) {
-                return str;
-            } else {
-                // If msgType not string, use objectMapper change it.
-                try {
-                    if (messageType instanceof Class) {
-                        //if the messageType has not Generic Parameter
-                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
-                    } else {
-                        //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
-                        //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
-                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
-                    }
-                } catch (Exception e) {
-                    log.info("convert failed. str:{}, msgType:{}", str, messageType);
-                    throw new RuntimeException("cannot convert message to " + messageType, e);
-                }
-            }
-        }
-    }
-
-    private MethodParameter getMethodParameter() {
-        Class<?> targetClass;
-        if (rocketMQListener != null) {
-            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
-        } else {
-            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQReplyListener);
-        }
-        Type messageType = this.getMessageType();
-        Class clazz = null;
-        if (messageType instanceof ParameterizedType && messageConverter instanceof SmartMessageConverter) {
-            clazz = (Class) ((ParameterizedType) messageType).getRawType();
-        } else if (messageType instanceof Class) {
-            clazz = (Class) messageType;
-        } else {
-            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
-        }
-        try {
-            final Method method = targetClass.getMethod("onMessage", clazz);
-            return new MethodParameter(method, 0);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException("parameterType:" + messageType + " of onMessage method is not supported");
-        }
-    }
-
-    private Type getMessageType() {
-        Class<?> targetClass;
-        if (rocketMQListener != null) {
-            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
-        } else {
-            targetClass = AopProxyUtils.ultimateTargetClass(rocketMQReplyListener);
-        }
-        Type matchedGenericInterface = null;
-        while (Objects.nonNull(targetClass)) {
-            Type[] interfaces = targetClass.getGenericInterfaces();
-            if (Objects.nonNull(interfaces)) {
-                for (Type type : interfaces) {
-                    if (type instanceof ParameterizedType &&
-                        (Objects.equals(((ParameterizedType) type).getRawType(), RocketMQListener.class) || Objects.equals(((ParameterizedType) type).getRawType(), RocketMQReplyListener.class))) {
-                        matchedGenericInterface = type;
-                        break;
-                    }
-                }
-            }
-            targetClass = targetClass.getSuperclass();
-        }
-        if (Objects.isNull(matchedGenericInterface)) {
-            return Object.class;
-        }
-
-        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
-        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-            return actualTypeArguments[0];
-        }
-        return Object.class;
     }
 
     private void initRocketMQPushConsumer() throws MQClientException {

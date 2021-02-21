@@ -41,15 +41,21 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Objects;
@@ -282,7 +288,7 @@ public class RocketMQUtil {
 
         return producer;
     }
-    
+
     public static String getInstanceName(String identify) {
         char separator = '@';
         StringBuilder instanceName = new StringBuilder();
@@ -333,4 +339,83 @@ public class RocketMQUtil {
 
         return litePullConsumer;
     }
+
+    public static MethodParameter getMethodParameter(Type messageType, Object interfaceImpl,
+            String methodName, MessageConverter messageConverter) {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(interfaceImpl);
+        Class clazz;
+        if (messageType instanceof ParameterizedType
+                && messageConverter instanceof SmartMessageConverter) {
+            clazz = (Class) ((ParameterizedType) messageType).getRawType();
+        } else if (messageType instanceof Class) {
+            clazz = (Class) messageType;
+        } else {
+            throw new RuntimeException("parameterType:" + messageType + " of "
+                    + methodName + " method is not supported");
+        }
+        try {
+            final Method method = targetClass.getMethod(methodName, clazz);
+            return new MethodParameter(method, 0);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("parameterType:" + messageType + " of "
+                    + methodName + " method is not supported", e);
+        }
+    }
+
+    public static Type getMessageType(Object interfaceImpl, Class<?> interfaceClass) {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(interfaceImpl);
+        Type matchedGenericInterface = null;
+        while (Objects.nonNull(targetClass)) {
+            Type[] interfaces = targetClass.getGenericInterfaces();
+            if (Objects.nonNull(interfaces)) {
+                for (Type type : interfaces) {
+                    if (type instanceof ParameterizedType
+                            && (Objects.equals(((ParameterizedType) type).getRawType(), interfaceClass))) {
+                        matchedGenericInterface = type;
+                        break;
+                    }
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+        }
+        if (Objects.isNull(matchedGenericInterface)) {
+            return Object.class;
+        }
+
+        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
+        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
+            return actualTypeArguments[0];
+        }
+        return Object.class;
+    }
+
+    public static Object doConvertMessage(MessageExt messageExt, Type messageType,
+            MethodParameter methodParameter, MessageConverter messageConverter, String charset) {
+        if (Objects.equals(messageType, MessageExt.class)
+                || Objects.equals(messageType, org.apache.rocketmq.common.message.Message.class)) {
+            return messageExt;
+        } else {
+            String str = new String(messageExt.getBody(), Charset.forName(charset));
+            if (Objects.equals(messageType, String.class)) {
+                return str;
+            } else {
+                // If msgType not string, use objectMapper change it.
+                try {
+                    if (messageType instanceof Class) {
+                        //if the messageType has not Generic Parameter
+                        return messageConverter.fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
+                    } else {
+                        //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
+                        //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
+                        return ((SmartMessageConverter) messageConverter).fromMessage(MessageBuilder.withPayload(str).build(),
+                                (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
+                    }
+                } catch (Exception e) {
+                    log.info("convert failed. str:{}, msgType:{}", str, messageType);
+                    throw new RuntimeException("cannot convert message to " + messageType, e);
+                }
+            }
+        }
+    }
+
 }

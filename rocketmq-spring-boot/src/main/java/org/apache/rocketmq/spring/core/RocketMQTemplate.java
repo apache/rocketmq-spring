@@ -246,7 +246,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             } else {
                 replyMessage = (MessageExt) producer.request(rocketMsg, messageQueueSelector, hashKey, timeout);
             }
-            return replyMessage != null ? (T) doConvertMessage(replyMessage, type) : null;
+            return replyMessage != null ? (T) RocketMQUtil.doConvertMessage(replyMessage, type, null,
+                    this.getMessageConverter(), charset) : null;
         } catch (Exception e) {
             log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
@@ -436,7 +437,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             if (rocketMQLocalRequestCallback != null) {
                 requestCallback = new RequestCallback() {
                     @Override public void onSuccess(org.apache.rocketmq.common.message.Message message) {
-                        rocketMQLocalRequestCallback.onSuccess(doConvertMessage((MessageExt) message, getMessageType(rocketMQLocalRequestCallback)));
+                        Type messageType = RocketMQUtil.getMessageType(rocketMQLocalRequestCallback, RocketMQLocalRequestCallback.class);
+                        rocketMQLocalRequestCallback.onSuccess(RocketMQUtil.doConvertMessage((MessageExt) message,
+                                messageType, null, getMessageConverter(), charset));
                     }
 
                     @Override public void onException(Throwable e) {
@@ -986,60 +989,6 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             destination, msg);
     }
 
-    private Object doConvertMessage(MessageExt messageExt, Type type) {
-        if (Objects.equals(type, MessageExt.class)) {
-            return messageExt;
-        } else if (Objects.equals(type, byte[].class)) {
-            return messageExt.getBody();
-        } else {
-            String str = new String(messageExt.getBody(), Charset.forName(charset));
-            if (Objects.equals(type, String.class)) {
-                return str;
-            } else {
-                // If msgType not string, use objectMapper change it.
-                try {
-                    if (type instanceof Class) {
-                        //if the messageType has not Generic Parameter
-                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) type);
-                    } else {
-                        //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
-                        //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
-                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) type).getRawType(), null);
-                    }
-                } catch (Exception e) {
-                    log.error("convert failed. str:{}, msgType:{}", str, type);
-                    throw new RuntimeException("cannot convert message to " + type, e);
-                }
-            }
-        }
-    }
-
-    private Type getMessageType(RocketMQLocalRequestCallback rocketMQLocalRequestCallback) {
-        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(rocketMQLocalRequestCallback);
-        Type matchedGenericInterface = null;
-        while (Objects.nonNull(targetClass)) {
-            Type[] interfaces = targetClass.getGenericInterfaces();
-            if (Objects.nonNull(interfaces)) {
-                for (Type type : interfaces) {
-                    if (type instanceof ParameterizedType && (Objects.equals(((ParameterizedType) type).getRawType(), RocketMQLocalRequestCallback.class))) {
-                        matchedGenericInterface = type;
-                        break;
-                    }
-                }
-            }
-            targetClass = targetClass.getSuperclass();
-        }
-        if (Objects.isNull(matchedGenericInterface)) {
-            return Object.class;
-        }
-
-        Type[] actualTypeArguments = ((ParameterizedType) matchedGenericInterface).getActualTypeArguments();
-        if (Objects.nonNull(actualTypeArguments) && actualTypeArguments.length > 0) {
-            return actualTypeArguments[0];
-        }
-        return Object.class;
-    }
-
     private MessageBatch batch(Collection<org.apache.rocketmq.common.message.Message> msgs) throws MQClientException {
         MessageBatch msgBatch;
         try {
@@ -1080,28 +1029,10 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         List<MessageExt> messageExts = this.consumer.poll(timeout);
         List<T> list = new ArrayList<>(messageExts.size());
         for (MessageExt messageExt : messageExts) {
-            list.add(doConvertMessage(messageExt, clazz));
+            list.add((T) RocketMQUtil.doConvertMessage(messageExt, clazz,
+                    null, getMessageConverter(), charset));
         }
         return list;
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T doConvertMessage(MessageExt messageExt, Class<T> messageType) {
-        if (Objects.equals(messageType, MessageExt.class)) {
-            return (T) messageExt;
-        } else {
-            String str = new String(messageExt.getBody(), Charset.forName(charset));
-            if (Objects.equals(messageType, String.class)) {
-                return (T) str;
-            } else {
-                // If msgType not string, use objectMapper change it.
-                try {
-                    return (T) this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), messageType);
-                } catch (Exception e) {
-                    log.info("convert failed. str:{}, msgType:{}", str, messageType);
-                    throw new RuntimeException("cannot convert message to " + messageType, e);
-                }
-            }
-        }
-    }
 }
