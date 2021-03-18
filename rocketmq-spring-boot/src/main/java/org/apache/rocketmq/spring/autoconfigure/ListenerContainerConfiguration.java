@@ -146,6 +146,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
+        container.setTlsEnable(environment.resolvePlaceholders(annotation.tlsEnable()));
         if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
             container.setRocketMQListener((RocketMQListener) bean);
         } else if (RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {

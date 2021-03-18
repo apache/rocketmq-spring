@@ -120,6 +120,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String selectorExpression;
     private MessageModel messageModel;
     private long consumeTimeout;
+    private String tlsEnable;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -219,6 +220,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.selectorType = anno.selectorType();
         this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
+        this.tlsEnable = anno.tlsEnable();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -239,6 +241,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public MessageModel getMessageModel() {
         return messageModel;
+    }
+
+    public String getTlsEnable() {
+        return tlsEnable;
+    }
+
+    public void setTlsEnable(String tlsEnable) {
+        this.tlsEnable = tlsEnable;
     }
 
     public DefaultMQPushConsumer getConsumer() {
@@ -328,14 +338,15 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     @Override
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
-            "consumerGroup='" + consumerGroup + '\'' +
-            ", nameServer='" + nameServer + '\'' +
-            ", topic='" + topic + '\'' +
-            ", consumeMode=" + consumeMode +
-            ", selectorType=" + selectorType +
-            ", selectorExpression='" + selectorExpression + '\'' +
-            ", messageModel=" + messageModel +
-            '}';
+                "consumerGroup='" + consumerGroup + '\'' +
+                ", nameServer='" + nameServer + '\'' +
+                ", topic='" + topic + '\'' +
+                ", consumeMode=" + consumeMode +
+                ", selectorType=" + selectorType +
+                ", selectorExpression='" + selectorExpression + '\'' +
+                ", messageModel=" + messageModel + '\'' +
+                ", tlsEnable=" + tlsEnable +
+                '}';
     }
 
     public void setName(String name) {
@@ -611,6 +622,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             default:
                 throw new IllegalArgumentException("Property 'consumeMode' was wrong.");
         }
+
+        //if String is not is equal "true" TLS mode will represent the as default value false
+        consumer.setUseTLS(new Boolean(tlsEnable));
 
         if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
             ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(consumer);

@@ -19,6 +19,6 @@ package org.apache.rocketmq.samples.springboot;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 
-@ExtRocketMQConsumerConfiguration(topic = "${demo.rocketmq.topic}", group = "string_consumer")
+@ExtRocketMQConsumerConfiguration(topic = "${demo.rocketmq.topic}", group = "string_consumer", tlsEnable = "${demo.ext.consumer.tlsEnable}")
 public class ExtRocketMQTemplate extends RocketMQTemplate {
 }

@@ -294,7 +294,7 @@ public class RocketMQUtil {
 
     public static DefaultLitePullConsumer createDefaultLitePullConsumer(String nameServer, String accessChannel,
             String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
-            String selectorExpression, String ak, String sk, int pullBatchSize)
+            String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
             throws MQClientException {
         DefaultLitePullConsumer litePullConsumer = null;
         if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
@@ -309,6 +309,7 @@ public class RocketMQUtil {
         if (accessChannel != null) {
             litePullConsumer.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
+        litePullConsumer.setUseTLS(useTLS);
 
         switch (messageModel) {
             case BROADCASTING:
