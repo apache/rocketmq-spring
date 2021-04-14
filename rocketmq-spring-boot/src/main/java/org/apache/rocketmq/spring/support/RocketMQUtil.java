@@ -287,7 +287,8 @@ public class RocketMQUtil {
         char separator = '@';
         StringBuilder instanceName = new StringBuilder();
         instanceName.append(identify)
-                .append(separator).append(UtilAll.getPid());
+                .append(separator).append(UtilAll.getPid())
+                .append(separator).append(System.nanoTime());
         return instanceName.toString();
     }
 

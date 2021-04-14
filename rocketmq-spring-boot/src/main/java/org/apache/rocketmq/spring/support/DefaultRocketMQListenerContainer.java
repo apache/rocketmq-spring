@@ -457,7 +457,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @SuppressWarnings("unchecked")
     private Object doConvertMessage(MessageExt messageExt) {
-        if (Objects.equals(messageType, MessageExt.class)) {
+        if (Objects.equals(messageType, MessageExt.class) || Objects.equals(messageType, org.apache.rocketmq.common.message.Message.class)) {
             return messageExt;
         } else {
             String str = new String(messageExt.getBody(), Charset.forName(charset));
