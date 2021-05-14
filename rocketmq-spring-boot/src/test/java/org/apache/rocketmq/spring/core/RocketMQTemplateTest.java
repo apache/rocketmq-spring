@@ -16,6 +16,8 @@
  */
 package org.apache.rocketmq.spring.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Resource;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -90,6 +92,26 @@ public class RocketMQTemplateTest {
 
         try {
             rocketMQTemplate.syncSendOrderly(topic, "payload", "hashkey");
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
+    }
+    @Test
+    public void testAsyncBatchSendMessage() {
+        List<Message> messages = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            messages.add(MessageBuilder.withPayload("payload" + i).build());
+        }
+        try {
+            rocketMQTemplate.asyncSend(topic, messages, new SendCallback() {
+                @Override public void onSuccess(SendResult sendResult) {
+
+                }
+
+                @Override public void onException(Throwable e) {
+
+                }
+            });
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
