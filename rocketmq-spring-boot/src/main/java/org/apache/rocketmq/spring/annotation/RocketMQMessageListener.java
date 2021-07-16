@@ -76,7 +76,10 @@ public @interface RocketMQMessageListener {
     int consumeThreadMax() default 64;
 
     /**
-     * Max re-consume times, -1 means 16 times.
+     * Max re-consume times.
+     *
+     * In concurrently mode, -1 means 16;
+     * In orderly mode, -1 means Integer.MAX_VALUE.
      */
     int maxReconsumeTimes() default -1;
 
