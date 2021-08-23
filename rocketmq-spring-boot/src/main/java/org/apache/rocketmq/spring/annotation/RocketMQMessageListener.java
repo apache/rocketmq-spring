@@ -89,6 +89,11 @@ public @interface RocketMQMessageListener {
     long consumeTimeout() default 15L;
 
     /**
+     * Timeout for sending reply messages.
+     */
+    int replyTimeout() default 3000;
+
+    /**
      * The property of "access-key".
      */
     String accessKey() default ACCESS_KEY_PLACEHOLDER;
