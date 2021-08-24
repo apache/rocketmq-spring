@@ -34,6 +34,7 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
@@ -121,6 +122,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private MessageModel messageModel;
     private long consumeTimeout;
     private int maxReconsumeTimes;
+    private int replyTimeout;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -221,6 +223,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
         this.maxReconsumeTimes = anno.maxReconsumeTimes();
+        this.replyTimeout = anno.replyTimeout();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -399,7 +402,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             Message<?> message = MessageBuilder.withPayload(replyContent).build();
 
             org.apache.rocketmq.common.message.Message replyMessage = MessageUtil.createReplyMessage(messageExt, convertToBytes(message));
-            consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer().send(replyMessage, new SendCallback() {
+            DefaultMQProducer producer = consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer();
+            producer.setSendMsgTimeout(replyTimeout);
+            producer.send(replyMessage, new SendCallback() {
                 @Override public void onSuccess(SendResult sendResult) {
                     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
                         log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
