@@ -272,6 +272,16 @@ public class RocketMQProperties {
         private int pullBatchSize = 10;
 
         /**
+         * Switch flag instance for message trace.
+         */
+        private boolean enableMsgTrace = false;
+
+        /**
+         * The name value of message trace topic.If you don't config,you can use the default trace topic name.
+         */
+        private String customizedTraceTopic = TopicValidator.RMQ_SYS_TRACE_TOPIC;
+
+        /**
          * listener configuration container
          * the pattern is like this:
          * group1.topic1 = false
@@ -350,6 +360,22 @@ public class RocketMQProperties {
 
         public void setListeners(Map<String, Map<String, Boolean>> listeners) {
             this.listeners = listeners;
+        }
+
+        public boolean isEnableMsgTrace() {
+            return enableMsgTrace;
+        }
+
+        public void setEnableMsgTrace(boolean enableMsgTrace) {
+            this.enableMsgTrace = enableMsgTrace;
+        }
+
+        public String getCustomizedTraceTopic() {
+            return customizedTraceTopic;
+        }
+
+        public void setCustomizedTraceTopic(String customizedTraceTopic) {
+            this.customizedTraceTopic = customizedTraceTopic;
         }
     }
 

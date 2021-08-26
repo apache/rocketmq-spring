@@ -126,9 +126,10 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         String ak = resolvePlaceholders(annotation.accessKey(), consumerConfig.getAccessKey());
         String sk = resolvePlaceholders(annotation.secretKey(), consumerConfig.getSecretKey());
         int pullBatchSize = annotation.pullBatchSize();
-
         DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
                 groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize);
+        litePullConsumer.setEnableMsgTrace(annotation.enableMsgTrace());
+        litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
         return litePullConsumer;
     }
 
