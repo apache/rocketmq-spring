@@ -34,6 +34,7 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
@@ -120,6 +121,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String selectorExpression;
     private MessageModel messageModel;
     private long consumeTimeout;
+    private int maxReconsumeTimes;
+    private int replyTimeout;
     private String tlsEnable;
 
     public long getSuspendCurrentQueueTimeMillis() {
@@ -220,6 +223,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.selectorType = anno.selectorType();
         this.selectorExpression = anno.selectorExpression();
         this.consumeTimeout = anno.consumeTimeout();
+        this.maxReconsumeTimes = anno.maxReconsumeTimes();
+        this.replyTimeout = anno.replyTimeout();
         this.tlsEnable = anno.tlsEnable();
     }
 
@@ -338,15 +343,15 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     @Override
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
-                "consumerGroup='" + consumerGroup + '\'' +
-                ", nameServer='" + nameServer + '\'' +
-                ", topic='" + topic + '\'' +
-                ", consumeMode=" + consumeMode +
-                ", selectorType=" + selectorType +
-                ", selectorExpression='" + selectorExpression + '\'' +
+            "consumerGroup='" + consumerGroup + '\'' +
+            ", nameServer='" + nameServer + '\'' +
+            ", topic='" + topic + '\'' +
+            ", consumeMode=" + consumeMode +
+            ", selectorType=" + selectorType +
+            ", selectorExpression='" + selectorExpression + '\'' +
                 ", messageModel=" + messageModel + '\'' +
                 ", tlsEnable=" + tlsEnable +
-                '}';
+            '}';
     }
 
     public void setName(String name) {
@@ -408,7 +413,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             Message<?> message = MessageBuilder.withPayload(replyContent).build();
 
             org.apache.rocketmq.common.message.Message replyMessage = MessageUtil.createReplyMessage(messageExt, convertToBytes(message));
-            consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer().send(replyMessage, new SendCallback() {
+            DefaultMQProducer producer = consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer();
+            producer.setSendMsgTimeout(replyTimeout);
+            producer.send(replyMessage, new SendCallback() {
                 @Override public void onSuccess(SendResult sendResult) {
                     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
                         log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
@@ -468,7 +475,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @SuppressWarnings("unchecked")
     private Object doConvertMessage(MessageExt messageExt) {
-        if (Objects.equals(messageType, MessageExt.class)) {
+        if (Objects.equals(messageType, MessageExt.class) || Objects.equals(messageType, org.apache.rocketmq.common.message.Message.class)) {
             return messageExt;
         } else {
             String str = new String(messageExt.getBody(), Charset.forName(charset));
@@ -589,7 +596,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             consumer.setConsumeThreadMin(consumeThreadMax);
         }
         consumer.setConsumeTimeout(consumeTimeout);
-
+        consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);

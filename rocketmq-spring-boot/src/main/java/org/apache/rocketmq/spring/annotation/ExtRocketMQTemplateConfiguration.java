@@ -80,7 +80,7 @@ public @interface ExtRocketMQTemplateConfiguration {
     /**
      * Switch flag instance for message trace.
      */
-    boolean enableMsgTrace() default true;
+    boolean enableMsgTrace() default false;
     /**
      * The name value of message trace topic.If you don't config,you can use the default trace topic name.
      */

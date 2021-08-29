@@ -135,6 +135,6 @@ public class RocketMQUtilTest {
     public void testGetInstanceName() {
         String nameServer = "127.0.0.1:9876";
         String expected = "127.0.0.1:9876@";
-        assertEquals(expected + UtilAll.getPid(), RocketMQUtil.getInstanceName(nameServer));
+        assertTrue(RocketMQUtil.getInstanceName(nameServer).startsWith(expected + UtilAll.getPid()));
     }
 }

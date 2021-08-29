@@ -144,6 +144,8 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
 
         DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
                 groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
+        litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
+        litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
         return litePullConsumer;
     }
 

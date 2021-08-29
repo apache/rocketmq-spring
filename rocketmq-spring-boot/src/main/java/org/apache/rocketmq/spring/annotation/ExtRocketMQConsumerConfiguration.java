@@ -37,6 +37,7 @@ public @interface ExtRocketMQConsumerConfiguration {
     String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
     String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
+    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
 
     /**
      * The component name of the Producer configuration.
@@ -94,8 +95,19 @@ public @interface ExtRocketMQConsumerConfiguration {
      * Maximum number of messages pulled each time.
      */
     int pullBatchSize() default 10;
+
     /**
      * The property of "tlsEnable" default false.
      */
     String tlsEnable() default "false";
+
+    /**
+     * Switch flag instance for message trace.
+     */
+    boolean enableMsgTrace() default false;
+
+    /**
+     * The name value of message trace topic.If you don't config,you can use the default trace topic name.
+     */
+    String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
 }
