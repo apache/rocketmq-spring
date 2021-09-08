@@ -126,8 +126,10 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         String ak = resolvePlaceholders(annotation.accessKey(), consumerConfig.getAccessKey());
         String sk = resolvePlaceholders(annotation.secretKey(), consumerConfig.getSecretKey());
         int pullBatchSize = annotation.pullBatchSize();
+        //if String is not is equal "true" TLS mode will represent the as default value false
+        boolean useTLS = new Boolean(environment.resolvePlaceholders(annotation.tlsEnable()));
         DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
-                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize);
+                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
         litePullConsumer.setEnableMsgTrace(annotation.enableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
         return litePullConsumer;

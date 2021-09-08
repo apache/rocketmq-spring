@@ -122,4 +122,9 @@ public @interface RocketMQMessageListener {
      * The property of "access-channel".
      */
     String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+ 
+    /**
+     * The property of "tlsEnable" default false.
+     */
+    String tlsEnable() default "false";
 }

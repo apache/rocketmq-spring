@@ -123,6 +123,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private long consumeTimeout;
     private int maxReconsumeTimes;
     private int replyTimeout;
+    private String tlsEnable;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -224,6 +225,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.consumeTimeout = anno.consumeTimeout();
         this.maxReconsumeTimes = anno.maxReconsumeTimes();
         this.replyTimeout = anno.replyTimeout();
+        this.tlsEnable = anno.tlsEnable();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -244,6 +246,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public MessageModel getMessageModel() {
         return messageModel;
+    }
+
+    public String getTlsEnable() {
+        return tlsEnable;
+    }
+
+    public void setTlsEnable(String tlsEnable) {
+        this.tlsEnable = tlsEnable;
     }
 
     public DefaultMQPushConsumer getConsumer() {
@@ -339,7 +349,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ", consumeMode=" + consumeMode +
             ", selectorType=" + selectorType +
             ", selectorExpression='" + selectorExpression + '\'' +
-            ", messageModel=" + messageModel +
+                ", messageModel=" + messageModel + '\'' +
+                ", tlsEnable=" + tlsEnable +
             '}';
     }
 
@@ -618,6 +629,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             default:
                 throw new IllegalArgumentException("Property 'consumeMode' was wrong.");
         }
+
+        //if String is not is equal "true" TLS mode will represent the as default value false
+        consumer.setUseTLS(new Boolean(tlsEnable));
 
         if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
             ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(consumer);

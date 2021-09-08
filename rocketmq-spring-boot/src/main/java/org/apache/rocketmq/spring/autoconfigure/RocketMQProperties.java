@@ -132,6 +132,11 @@ public class RocketMQProperties {
          */
         private String customizedTraceTopic = TopicValidator.RMQ_SYS_TRACE_TOPIC;
 
+        /**
+         * The property of "tlsEnable".
+         */
+        private boolean tlsEnable = false;
+
         public String getGroup() {
             return group;
         }
@@ -219,6 +224,14 @@ public class RocketMQProperties {
         public void setCustomizedTraceTopic(String customizedTraceTopic) {
             this.customizedTraceTopic = customizedTraceTopic;
         }
+
+        public boolean isTlsEnable() {
+            return tlsEnable;
+        }
+
+        public void setTlsEnable(boolean tlsEnable) {
+            this.tlsEnable = tlsEnable;
+        }
     }
 
     public Consumer getConsumer() {
@@ -289,6 +302,11 @@ public class RocketMQProperties {
          * group3.topic3 = false
          */
         private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
+
+        /**
+         * The property of "tlsEnable".
+         */
+        private boolean tlsEnable = false;
 
         public String getGroup() {
             return group;
@@ -376,6 +394,14 @@ public class RocketMQProperties {
 
         public void setCustomizedTraceTopic(String customizedTraceTopic) {
             this.customizedTraceTopic = customizedTraceTopic;
+        }
+
+        public boolean isTlsEnable() {
+            return tlsEnable;
+        }
+
+        public void setTlsEnable(boolean tlsEnable) {
+            this.tlsEnable = tlsEnable;
         }
     }
 

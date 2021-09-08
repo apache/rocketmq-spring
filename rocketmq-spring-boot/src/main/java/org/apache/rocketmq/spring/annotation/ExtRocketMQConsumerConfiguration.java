@@ -97,6 +97,11 @@ public @interface ExtRocketMQConsumerConfiguration {
     int pullBatchSize() default 10;
 
     /**
+     * The property of "tlsEnable" default false.
+     */
+    String tlsEnable() default "false";
+
+    /**
      * Switch flag instance for message trace.
      */
     boolean enableMsgTrace() default false;
