@@ -76,7 +76,10 @@ public @interface RocketMQMessageListener {
     int consumeThreadMax() default 64;
 
     /**
-     * Max re-consume times, -1 means 16 times.
+     * Max re-consume times.
+     *
+     * In concurrently mode, -1 means 16;
+     * In orderly mode, -1 means Integer.MAX_VALUE.
      */
     int maxReconsumeTimes() default -1;
 
@@ -84,6 +87,11 @@ public @interface RocketMQMessageListener {
      * Maximum amount of time in minutes a message may block the consuming thread.
      */
     long consumeTimeout() default 15L;
+
+    /**
+     * Timeout for sending reply messages.
+     */
+    int replyTimeout() default 3000;
 
     /**
      * The property of "access-key".
@@ -114,4 +122,9 @@ public @interface RocketMQMessageListener {
      * The property of "access-channel".
      */
     String accessChannel() default ACCESS_CHANNEL_PLACEHOLDER;
+ 
+    /**
+     * The property of "tlsEnable" default false.
+     */
+    String tlsEnable() default "false";
 }

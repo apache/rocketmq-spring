@@ -115,6 +115,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         producer.setMaxMessageSize(producerConfig.getMaxMessageSize());
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
+        producer.setUseTLS(producerConfig.isTlsEnable());
 
         return producer;
     }
@@ -139,9 +140,12 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         String ak = consumerConfig.getAccessKey();
         String sk = consumerConfig.getSecretKey();
         int pullBatchSize = consumerConfig.getPullBatchSize();
+        boolean useTLS = consumerConfig.isTlsEnable();
 
         DefaultLitePullConsumer litePullConsumer = RocketMQUtil.createDefaultLitePullConsumer(nameServer, accessChannel,
-                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize);
+                groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
+        litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
+        litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
         return litePullConsumer;
     }
 
