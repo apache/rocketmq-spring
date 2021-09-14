@@ -196,7 +196,7 @@ public class RocketMQUtil {
             }
             rocketMsg.setFlag(flag);
             Object waitStoreMsgOkObj = headers.getOrDefault("WAIT_STORE_MSG_OK", "true");
-            rocketMsg.setWaitStoreMsgOK(Boolean.TRUE.equals(waitStoreMsgOkObj));
+            rocketMsg.setWaitStoreMsgOK(!waitStoreMsgOkObj.equals("false"));
             headers.entrySet().stream()
                 .filter(entry -> !Objects.equals(entry.getKey(), "FLAG")
                     && !Objects.equals(entry.getKey(), "WAIT_STORE_MSG_OK")) // exclude "FLAG", "WAIT_STORE_MSG_OK"
