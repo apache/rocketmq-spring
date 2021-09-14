@@ -210,11 +210,6 @@ public class RocketMQUtil {
         return rocketMsg;
     }
 
-    public static void main(String[] args) {
-        Object xxx= "true";
-        System.out.println(!xxx.equals("false"));
-    }
-
     public static org.apache.rocketmq.common.message.Message convertToRocketMessage(
         MessageConverter messageConverter, String charset,
         String destination, org.springframework.messaging.Message<?> message) {
