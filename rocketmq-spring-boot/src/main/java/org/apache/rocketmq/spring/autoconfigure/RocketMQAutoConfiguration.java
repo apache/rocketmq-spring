@@ -116,7 +116,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
         producer.setUseTLS(producerConfig.isTlsEnable());
-
+        producer.setNamespace(producerConfig.getNamespace());
         return producer;
     }
 
@@ -146,6 +146,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
                 groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
         litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
+        litePullConsumer.setNamespace(consumerConfig.getNamespace());
         return litePullConsumer;
     }
 

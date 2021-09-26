@@ -81,6 +81,11 @@ public class RocketMQProperties {
         private String group;
 
         /**
+         * Namespace for this MQ Producer instance.
+         */
+        private String namespace;
+
+        /**
          * Millis of send message timeout.
          */
         private int sendMessageTimeout = 3000;
@@ -232,6 +237,14 @@ public class RocketMQProperties {
         public void setTlsEnable(boolean tlsEnable) {
             this.tlsEnable = tlsEnable;
         }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
     }
 
     public Consumer getConsumer() {
@@ -247,6 +260,11 @@ public class RocketMQProperties {
          * Group name of consumer.
          */
         private String group;
+
+        /**
+         * Namespace for this MQ Consumer instance.
+         */
+        private String namespace;
 
         /**
          * Topic name of consumer.
@@ -402,6 +420,14 @@ public class RocketMQProperties {
 
         public void setTlsEnable(boolean tlsEnable) {
             this.tlsEnable = tlsEnable;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
         }
     }
 
