@@ -124,6 +124,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private int maxReconsumeTimes;
     private int replyTimeout;
     private String tlsEnable;
+    private String namespace;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -226,6 +227,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.maxReconsumeTimes = anno.maxReconsumeTimes();
         this.replyTimeout = anno.replyTimeout();
         this.tlsEnable = anno.tlsEnable();
+        this.namespace = anno.namespace();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -254,6 +256,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setTlsEnable(String tlsEnable) {
         this.tlsEnable = tlsEnable;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public DefaultMQPushConsumer getConsumer() {
@@ -344,13 +354,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     public String toString() {
         return "DefaultRocketMQListenerContainer{" +
             "consumerGroup='" + consumerGroup + '\'' +
+            ", namespace='" + namespace + '\'' +
             ", nameServer='" + nameServer + '\'' +
             ", topic='" + topic + '\'' +
             ", consumeMode=" + consumeMode +
             ", selectorType=" + selectorType +
             ", selectorExpression='" + selectorExpression + '\'' +
-                ", messageModel=" + messageModel + '\'' +
-                ", tlsEnable=" + tlsEnable +
+            ", messageModel=" + messageModel + '\'' +
+            ", tlsEnable=" + tlsEnable +
             '}';
     }
 
@@ -579,7 +590,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 this.applicationContext.getEnvironment().
                     resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
-        
+        consumer.setNamespace(namespace);
         consumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());

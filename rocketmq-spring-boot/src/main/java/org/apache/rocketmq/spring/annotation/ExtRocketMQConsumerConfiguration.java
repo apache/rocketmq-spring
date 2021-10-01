@@ -110,4 +110,9 @@ public @interface ExtRocketMQConsumerConfiguration {
      * The name value of message trace topic.If you don't config,you can use the default trace topic name.
      */
     String customizedTraceTopic() default TRACE_TOPIC_PLACEHOLDER;
+
+    /**
+     * The namespace of consumer.
+     */
+    String namespace() default "";
 }
