@@ -127,4 +127,9 @@ public @interface RocketMQMessageListener {
      * The property of "tlsEnable" default false.
      */
     String tlsEnable() default "false";
+
+    /**
+     * The namespace of consumer.
+     */
+    String namespace() default "";
 }

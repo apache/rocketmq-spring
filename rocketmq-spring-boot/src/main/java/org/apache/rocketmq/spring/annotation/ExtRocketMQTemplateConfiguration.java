@@ -89,4 +89,8 @@ public @interface ExtRocketMQTemplateConfiguration {
      * The property of "tlsEnable" default false.
      */
     String tlsEnable() default "false";
+    /**
+     * The namespace of producer.
+     */
+    String namespace() default "";
 }
