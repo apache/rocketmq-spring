@@ -37,6 +37,8 @@ public class RocketMQProperties {
      */
     private String accessChannel;
 
+    private boolean enabled = true;
+
     private Producer producer;
 
     /**
@@ -63,6 +65,14 @@ public class RocketMQProperties {
 
     public void setAccessChannel(String accessChannel) {
         this.accessChannel = accessChannel;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public RocketMQProperties.Producer getProducer() {
