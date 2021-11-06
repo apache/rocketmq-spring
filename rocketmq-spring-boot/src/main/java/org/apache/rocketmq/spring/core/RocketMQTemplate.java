@@ -562,7 +562,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             }
             return sendResult;
         } catch (Exception e) {
-            log.error("syncSend failed. destination:{}, message:{} ", destination, message);
+            log.error("syncSend failed. destination:{}, message:{}, detail exception info: ", destination, message, e);
             throw new MessagingException(e.getMessage(), e);
         }
     }
