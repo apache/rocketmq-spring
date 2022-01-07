@@ -132,4 +132,20 @@ public @interface RocketMQMessageListener {
      * The namespace of consumer.
      */
     String namespace() default "";
+
+    /**
+     * Message consume retry strategy in concurrently mode.
+     *
+     * -1,no retry,put into DLQ directly
+     * 0,broker control retry frequency
+     * >0,client control retry frequency
+     */
+    int delayLevelWhenNextConsume() default 0;
+
+    /**
+     * The interval of suspending the pull in orderly mode, in milliseconds.
+     *
+     * The minimum value is 10 and the maximum is 30000.
+     */
+    int suspendCurrentQueueTimeMillis() default 1000;
 }

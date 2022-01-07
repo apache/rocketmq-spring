@@ -79,11 +79,19 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
      */
     private String name;
 
+    /**
+     * Suspending pulling time in orderly mode.
+     *
+     * The minimum value is 10 and the maximum is 30000.
+     */
     private long suspendCurrentQueueTimeMillis = 1000;
 
     /**
-     * Message consume retry strategy<br> -1,no retry,put into DLQ directly<br> 0,broker control retry frequency<br>
-     * >0,client control retry frequency.
+     * Message consume retry strategy in concurrently mode.
+     *
+     * -1,no retry,put into DLQ directly
+     * 0,broker control retry frequency
+     * >0,client control retry frequency
      */
     private int delayLevelWhenNextConsume = 0;
 
@@ -228,6 +236,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.replyTimeout = anno.replyTimeout();
         this.tlsEnable = anno.tlsEnable();
         this.namespace = anno.namespace();
+        this.delayLevelWhenNextConsume = anno.delayLevelWhenNextConsume();
+        this.suspendCurrentQueueTimeMillis = anno.suspendCurrentQueueTimeMillis();
     }
 
     public ConsumeMode getConsumeMode() {
