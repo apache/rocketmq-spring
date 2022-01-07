@@ -130,11 +130,23 @@ public class RocketMQUtilTest {
         assertEquals("tagA", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.TAGS)));
         assertEquals("key1", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.KEYS)));
     }
-    
+
     @Test
     public void testGetInstanceName() {
         String nameServer = "127.0.0.1:9876";
         String expected = "127.0.0.1:9876@";
-        assertTrue(RocketMQUtil.getInstanceName(nameServer).startsWith(expected + UtilAll.getPid()));
+        assertEquals(expected + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
+
+        nameServer = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-long-domain-name-3:9876";
+        expected = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-l-335144505@";
+        assertEquals(expected + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
+    }
+
+    private String removeNanoTime(String instanceName) {
+        int index = instanceName.lastIndexOf('@');
+        if (index < 0) {
+            return instanceName;
+        }
+        return instanceName.substring(0, index);
     }
 }

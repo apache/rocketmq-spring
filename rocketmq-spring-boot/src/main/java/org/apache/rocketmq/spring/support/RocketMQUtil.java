@@ -282,12 +282,18 @@ public class RocketMQUtil {
 
         return producer;
     }
-    
+
     public static String getInstanceName(String identify) {
         char separator = '@';
+        int maxLength = 100;
         StringBuilder instanceName = new StringBuilder();
-        instanceName.append(identify)
-                .append(separator).append(UtilAll.getPid())
+        if (identify.length() > maxLength) {
+            instanceName.append(identify, 0, maxLength)
+                    .append(identify.hashCode());
+        } else {
+            instanceName.append(identify);
+        }
+        instanceName.append(separator).append(UtilAll.getPid())
                 .append(separator).append(System.nanoTime());
         return instanceName.toString();
     }
