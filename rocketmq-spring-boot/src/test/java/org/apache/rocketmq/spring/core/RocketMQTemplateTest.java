@@ -95,6 +95,18 @@ public class RocketMQTemplateTest {
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
         }
+
+        try {
+            rocketMQTemplate.sendDelay(topic, "payload", 1);
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
+
+        try {
+            rocketMQTemplate.sendDelay(topic, "payload", "hashkey", 1);
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        }
     }
     @Test
     public void testAsyncBatchSendMessage() {

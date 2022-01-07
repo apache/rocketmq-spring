@@ -613,6 +613,20 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @return {@link SendResult}
      */
     public SendResult syncSendOrderly(String destination, Message<?> message, String hashKey, long timeout) {
+        return syncSendOrderly(destination, message, hashKey, timeout, 0);
+    }
+
+    /**
+     * Same to {@link #syncSendOrderly(String, Message, String, long)} with delay level specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param message {@link org.springframework.messaging.Message}
+     * @param hashKey use this key to select queue. for example: orderId, productId ...
+     * @param timeout send timeout with millis
+     * @param delayLevel level for the delay message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendOrderly(String destination, Message<?> message, String hashKey, long timeout, int delayLevel) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("syncSendOrderly failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
@@ -620,6 +634,9 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             long now = System.currentTimeMillis();
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            if (delayLevel > 0) {
+                rocketMsg.setDelayTimeLevel(delayLevel);
+            }
             SendResult sendResult = producer.send(rocketMsg, messageQueueSelector, hashKey, timeout);
             long costTime = System.currentTimeMillis() - now;
             if (log.isDebugEnabled()) {
@@ -1096,6 +1113,59 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
         msgBatch.setTopic(producer.withNamespace(msgBatch.getTopic()));
         return msgBatch;
+    }
+
+    /**
+     * Send delay message in synchronous mode.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param delayLevel level for the delay message
+     * @return {@link SendResult}
+     */
+    public SendResult sendDelay(String destination, Object payload, int delayLevel) {
+        return sendDelay(destination, payload, producer.getSendMsgTimeout(), delayLevel);
+    }
+
+    /**
+     * Same to {@link #sendDelay(String, Object, int)} with timeout specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param timeout send timeout with millis
+     * @param delayLevel level for the delay message
+     * @return {@link SendResult}
+     */
+    public SendResult sendDelay(String destination, Object payload, long timeout, int delayLevel) {
+        Message<?> message = MessageBuilder.withPayload(payload).build();
+        return syncSend(destination, message, timeout, delayLevel);
+    }
+
+    /**
+     * Send orderly and delay message in synchronous mode with hashKey by specified.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param hashKey use this key to select queue. for example: orderId, productId ...
+     * @param delayLevel level for the delay message
+     * @return {@link SendResult}
+     */
+    public SendResult sendDelay(String destination, Object payload, String hashKey, int delayLevel) {
+        return sendDelay(destination, payload, hashKey, producer.getSendMsgTimeout(), delayLevel);
+    }
+
+    /**
+     * Same to {@link #sendDelay(String, Object, String, int)} with timeout specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param hashKey use this key to select queue. for example: orderId, productId ...
+     * @param delayLevel level for the delay message
+     * @return {@link SendResult}
+     */
+    public SendResult sendDelay(String destination, Object payload, String hashKey, long timeout, int delayLevel) {
+        Message<?> message = MessageBuilder.withPayload(payload).build();
+        return syncSendOrderly(destination, message, hashKey, timeout, delayLevel);
     }
 
     /**
