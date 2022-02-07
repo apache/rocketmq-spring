@@ -105,7 +105,9 @@ public class RocketMQUtil {
                 setHeader(toRocketHeaderKey(RocketMQHeaders.FLAG), message.getFlag()).
                 setHeader(toRocketHeaderKey(RocketMQHeaders.QUEUE_ID), message.getQueueId()).
                 setHeader(toRocketHeaderKey(RocketMQHeaders.SYS_FLAG), message.getSysFlag()).
-                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId());
+                setHeader(toRocketHeaderKey(RocketMQHeaders.TRANSACTION_ID), message.getTransactionId()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.DELAY), message.getDelayTimeLevel()).
+                setHeader(toRocketHeaderKey(RocketMQHeaders.WAIT), message.isWaitStoreMsgOK());
         addUserProperties(message.getProperties(), messageBuilder);
         return messageBuilder.build();
     }
