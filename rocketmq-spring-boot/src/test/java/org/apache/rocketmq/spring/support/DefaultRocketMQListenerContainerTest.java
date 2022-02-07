@@ -29,6 +29,10 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageAccessor;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.annotation.ConsumeMode;
+import org.apache.rocketmq.spring.annotation.MessageModel;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.junit.Test;
@@ -42,6 +46,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -230,6 +235,37 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         handleMessage.invoke(listenerContainer, messageExt);
+    }
+
+    @Test
+    public void testSetRocketMQMessageListener() {
+        DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
+        RocketMQMessageListener anno = TestRocketMQMessageListener.class.getAnnotation(RocketMQMessageListener.class);
+        container.setRocketMQMessageListener(anno);
+
+        assertEquals(anno.consumeMode(), container.getConsumeMode());
+        assertEquals(anno.consumeThreadMax(), container.getConsumeThreadMax());
+        assertEquals(anno.messageModel(), container.getMessageModel());
+        assertEquals(anno.selectorType(), container.getSelectorType());
+        assertEquals(anno.selectorExpression(), container.getSelectorExpression());
+        assertEquals(anno.tlsEnable(), container.getTlsEnable());
+        assertEquals(anno.namespace(), container.getNamespace());
+        assertEquals(anno.delayLevelWhenNextConsume(), container.getDelayLevelWhenNextConsume());
+        assertEquals(anno.suspendCurrentQueueTimeMillis(), container.getSuspendCurrentQueueTimeMillis());
+    }
+
+    @RocketMQMessageListener(consumerGroup = "abc1", topic = "test",
+            consumeMode = ConsumeMode.ORDERLY,
+            consumeThreadMax = 3456,
+            messageModel = MessageModel.BROADCASTING,
+            selectorType = SelectorType.SQL92,
+            selectorExpression = "selectorExpression",
+            tlsEnable = "tlsEnable",
+            namespace = "namespace",
+            delayLevelWhenNextConsume = 1234,
+            suspendCurrentQueueTimeMillis = 2345
+    )
+    class TestRocketMQMessageListener {
     }
 
     class User {
