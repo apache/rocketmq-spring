@@ -105,6 +105,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private int consumeThreadMax = 64;
 
+    private int consumeThreadNumber = 20;
+
     private String charset = "UTF-8";
 
     private MessageConverter messageConverter;
@@ -186,6 +188,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         return consumeThreadMax;
     }
 
+    public int getConsumeThreadNumber() {
+        return consumeThreadNumber;
+    }
+
     public String getCharset() {
         return charset;
     }
@@ -227,7 +233,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.rocketMQMessageListener = anno;
 
         this.consumeMode = anno.consumeMode();
-        this.consumeThreadMax = anno.consumeThreadMax();
+        this.consumeThreadMax = anno.consumeThreadNumber();
+        this.consumeThreadNumber = anno.consumeThreadNumber();
         this.messageModel = anno.messageModel();
         this.selectorType = anno.selectorType();
         this.selectorExpression = anno.selectorExpression();
@@ -612,10 +619,9 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         if (accessChannel != null) {
             consumer.setAccessChannel(accessChannel);
         }
-        consumer.setConsumeThreadMax(consumeThreadMax);
-        if (consumeThreadMax < consumer.getConsumeThreadMin()) {
-            consumer.setConsumeThreadMin(consumeThreadMax);
-        }
+        //set the consumer core thread number and maximum thread number has the same value
+        consumer.setConsumeThreadMax(consumeThreadNumber);
+        consumer.setConsumeThreadMin(consumeThreadNumber);
         consumer.setConsumeTimeout(consumeTimeout);
         consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         switch (messageModel) {
