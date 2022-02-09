@@ -244,7 +244,8 @@ public class DefaultRocketMQListenerContainerTest {
         container.setRocketMQMessageListener(anno);
 
         assertEquals(anno.consumeMode(), container.getConsumeMode());
-        assertEquals(anno.consumeThreadMax(), container.getConsumeThreadMax());
+        assertEquals(anno.consumeThreadNumber(), container.getConsumeThreadMax());
+        assertEquals(anno.consumeThreadNumber(), container.getConsumeThreadNumber());
         assertEquals(anno.messageModel(), container.getMessageModel());
         assertEquals(anno.selectorType(), container.getSelectorType());
         assertEquals(anno.selectorExpression(), container.getSelectorExpression());
@@ -256,7 +257,7 @@ public class DefaultRocketMQListenerContainerTest {
 
     @RocketMQMessageListener(consumerGroup = "abc1", topic = "test",
             consumeMode = ConsumeMode.ORDERLY,
-            consumeThreadMax = 3456,
+            consumeThreadNumber = 3456,
             messageModel = MessageModel.BROADCASTING,
             selectorType = SelectorType.SQL92,
             selectorExpression = "selectorExpression",
