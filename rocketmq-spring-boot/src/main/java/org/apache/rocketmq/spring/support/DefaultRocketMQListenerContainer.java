@@ -135,6 +135,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private int replyTimeout;
     private String tlsEnable;
     private String namespace;
+    private long awaitTerminationMillisWhenShutdown;
 
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
@@ -245,6 +246,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.namespace = anno.namespace();
         this.delayLevelWhenNextConsume = anno.delayLevelWhenNextConsume();
         this.suspendCurrentQueueTimeMillis = anno.suspendCurrentQueueTimeMillis();
+        this.awaitTerminationMillisWhenShutdown = Math.max(0, anno.awaitTerminationMillisWhenShutdown());
     }
 
     public ConsumeMode getConsumeMode() {
@@ -289,6 +291,15 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setConsumer(DefaultMQPushConsumer consumer) {
         this.consumer = consumer;
+    }
+
+    public long getAwaitTerminationMillisWhenShutdown() {
+        return awaitTerminationMillisWhenShutdown;
+    }
+
+    public DefaultRocketMQListenerContainer setAwaitTerminationMillisWhenShutdown(long awaitTerminationMillisWhenShutdown) {
+        this.awaitTerminationMillisWhenShutdown = awaitTerminationMillisWhenShutdown;
+        return this;
     }
 
     @Override
@@ -624,6 +635,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         consumer.setConsumeThreadMin(consumeThreadNumber);
         consumer.setConsumeTimeout(consumeTimeout);
         consumer.setMaxReconsumeTimes(maxReconsumeTimes);
+        consumer.setAwaitTerminationMillisWhenShutdown(awaitTerminationMillisWhenShutdown);
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
