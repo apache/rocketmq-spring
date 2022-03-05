@@ -159,4 +159,10 @@ public @interface RocketMQMessageListener {
      * The minimum value is 10 and the maximum is 30000.
      */
     int suspendCurrentQueueTimeMillis() default 1000;
+
+    /**
+     * Maximum time to await message consuming when shutdown consumer, in milliseconds.
+     * The minimum value is 0
+     */
+    int awaitTerminationMillisWhenShutdown() default 1000;
 }
