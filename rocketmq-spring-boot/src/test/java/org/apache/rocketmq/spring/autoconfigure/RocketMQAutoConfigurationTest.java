@@ -20,9 +20,12 @@ package org.apache.rocketmq.spring.autoconfigure;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQConsumerConfiguration;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -168,6 +171,10 @@ public class RocketMQAutoConfigurationTest {
             withUserConfiguration(TestTransactionListenerConfig.class).
             run((context) -> {
                 assertThat(context).hasSingleBean(TestRocketMQLocalTransactionListener.class);
+                RocketMQTransactionListener annotation = TestRocketMQLocalTransactionListener.class.getAnnotation(RocketMQTransactionListener.class);
+                RocketMQTemplate rocketMQTemplate = (RocketMQTemplate) context.getBean(annotation.rocketMQTemplateBeanName());
+                ThreadPoolExecutor executor = (ThreadPoolExecutor) ((TransactionMQProducer) rocketMQTemplate.getProducer()).getExecutorService();
+                assertThat(executor.getKeepAliveTime(TimeUnit.SECONDS)).isEqualTo(50);
             });
     }
 
@@ -351,7 +358,7 @@ public class RocketMQAutoConfigurationTest {
 
     }
 
-    @RocketMQTransactionListener
+    @RocketMQTransactionListener(keepAliveTime = 50, keepAliveTimeUnit = TimeUnit.SECONDS)
     static class TestRocketMQLocalTransactionListener implements RocketMQLocalTransactionListener {
 
         @Override
