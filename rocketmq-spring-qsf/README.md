@@ -3,7 +3,7 @@
 ***
 
 ### QSF introduction
-+ With QSF we can produce/consume rocket-mq messages non-intrusively, and base QSF we can implement standard MQ eventual consistency, idempotency, flow control and so on.
++ With QSF we can produce & consume rocket-mq messages in the form of a method call, and base QSF we can implement standard MQ eventual consistency, idempotency, flow control and so on.
 
 ***
 
