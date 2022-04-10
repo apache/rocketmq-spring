@@ -20,7 +20,6 @@ package org.apache.rocketmq.spring.autoconfigure;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
