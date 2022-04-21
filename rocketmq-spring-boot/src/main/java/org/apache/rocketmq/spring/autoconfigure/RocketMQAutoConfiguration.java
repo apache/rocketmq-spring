@@ -147,6 +147,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
         litePullConsumer.setNamespace(consumerConfig.getNamespace());
+        log.info("Default lite pull consumer to topic {} in group {} has been created.", consumerConfig.getTopic(), consumerConfig.getGroup());
         return litePullConsumer;
     }
 
