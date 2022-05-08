@@ -138,6 +138,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         String accessChannel = environment.resolvePlaceholders(annotation.accessChannel());
         container.setNameServer(nameServer);
         if (!StringUtils.isEmpty(accessChannel)) {
+
             container.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
