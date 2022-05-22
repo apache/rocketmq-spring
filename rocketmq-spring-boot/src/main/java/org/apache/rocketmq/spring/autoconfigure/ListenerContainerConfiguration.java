@@ -96,7 +96,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         String topic = this.environment.resolvePlaceholders(annotation.topic());
 
         boolean listenerEnabled =
-            (boolean) rocketMQProperties.getConsumer().getListeners().getOrDefault(consumerGroup, Collections.EMPTY_MAP)
+            (boolean) rocketMQProperties.getPushConsumer().getListeners().getOrDefault(consumerGroup, Collections.EMPTY_MAP)
                 .getOrDefault(topic, true);
 
         if (!listenerEnabled) {
