@@ -23,7 +23,7 @@ public class ExtProducerHotfixConsumer implements RocketMQListener<String> {
     private ExtRocketMQProducerTemplate rocketMQTemplate;
 
     /**
-     * 模拟消费到消息马上发消息
+     * Simulate consumption and send a message as soon as the message arrives
      */
     @Override
     public void onMessage(String message) {
@@ -32,7 +32,7 @@ public class ExtProducerHotfixConsumer implements RocketMQListener<String> {
     }
 
     /**
-     * 模拟启动时 发消息 验证producer 是否为空
+     * Send message when startup
      */
     @PostConstruct
     public void init() {
