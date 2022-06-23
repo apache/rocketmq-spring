@@ -121,7 +121,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.68.noneautotype</version>
+                <version>1.2.69_noneautotype</version>
             </dependency>
 
             <!-- test -->
