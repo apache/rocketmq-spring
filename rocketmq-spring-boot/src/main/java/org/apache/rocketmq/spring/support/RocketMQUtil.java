@@ -293,7 +293,7 @@ public class RocketMQUtil {
             instanceName.append(identify, 0, maxLength)
                     .append(identify.hashCode());
         } else {
-            instanceName.append(identify);
+            instanceName.append(identify.hashCode());
         }
         instanceName.append(separator).append(UtilAll.getPid())
                 .append(separator).append(System.nanoTime());
@@ -312,7 +312,6 @@ public class RocketMQUtil {
             litePullConsumer = new DefaultLitePullConsumer(groupName);
         }
         litePullConsumer.setNamesrvAddr(nameServer);
-        litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
         litePullConsumer.setPullBatchSize(pullBatchSize);
         if (accessChannel != null) {
             litePullConsumer.setAccessChannel(AccessChannel.valueOf(accessChannel));
@@ -322,9 +321,11 @@ public class RocketMQUtil {
         switch (messageModel) {
             case BROADCASTING:
                 litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                litePullConsumer.setInstanceName(Long.toString(nameServer.hashCode()));
                 break;
             case CLUSTERING:
                 litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");

@@ -638,7 +638,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
-                consumer.setInstanceName(nameServer);
+                consumer.setInstanceName(Long.toString(nameServer.hashCode()));
                 break;
             case CLUSTERING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
