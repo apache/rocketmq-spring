@@ -148,8 +148,8 @@ public class RocketMQUtilTest {
     @Test
     public void testGetInstanceName() {
         String nameServer = "127.0.0.1:9876";
-        String expected = "127.0.0.1:9876@";
-        assertEquals(expected + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
+        String expected = "127.0.0.1:9876";
+        assertEquals(expected.hashCode() + "@" + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
 
         nameServer = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-long-domain-name-3:9876";
         expected = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-l-335144505@";
