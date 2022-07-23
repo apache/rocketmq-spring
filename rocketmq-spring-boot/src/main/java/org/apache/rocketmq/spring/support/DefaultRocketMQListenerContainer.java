@@ -619,7 +619,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     resolveRequiredPlaceholders(this.rocketMQMessageListener.customizedTraceTopic()));
         }
         consumer.setNamespace(namespace);
-        consumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
 
         String customizedNameServer = this.applicationContext.getEnvironment().resolveRequiredPlaceholders(this.rocketMQMessageListener.nameServer());
         if (customizedNameServer != null) {
@@ -639,9 +638,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                consumer.setInstanceName(Long.toString(nameServer.hashCode()));
                 break;
             case CLUSTERING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                consumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
