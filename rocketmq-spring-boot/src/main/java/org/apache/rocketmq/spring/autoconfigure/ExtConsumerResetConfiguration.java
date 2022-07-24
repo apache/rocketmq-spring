@@ -93,8 +93,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         DefaultLitePullConsumer consumer = null;
         try {
             consumer = createConsumer(annotation);
-            // Set instanceName same as the beanName
-            consumer.setInstanceName(beanName);
             consumer.start();
         } catch (Exception e) {
             log.error("Failed to startup PullConsumer for RocketMQTemplate {}", beanName, e);
@@ -133,6 +131,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         litePullConsumer.setEnableMsgTrace(annotation.enableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
         litePullConsumer.setNamespace(annotation.namespace());
+        litePullConsumer.setInstanceName(annotation.instanceName());
         return litePullConsumer;
     }
 

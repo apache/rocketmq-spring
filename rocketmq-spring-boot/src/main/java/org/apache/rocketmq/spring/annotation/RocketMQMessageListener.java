@@ -165,4 +165,9 @@ public @interface RocketMQMessageListener {
      * The minimum value is 0
      */
     int awaitTerminationMillisWhenShutdown() default 1000;
+
+    /**
+     * The property of "instanceName".
+     */
+    String instanceName() default "DEFAULT";
 }

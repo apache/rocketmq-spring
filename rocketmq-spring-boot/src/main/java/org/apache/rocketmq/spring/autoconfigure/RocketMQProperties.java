@@ -165,6 +165,11 @@ public class RocketMQProperties {
          */
         private boolean tlsEnable = false;
 
+        /**
+         * The property of "instanceName".
+         */
+        private String instanceName;
+
         public String getGroup() {
             return group;
         }
@@ -268,6 +273,14 @@ public class RocketMQProperties {
         public void setNamespace(String namespace) {
             this.namespace = namespace;
         }
+
+        public String getInstanceName() {
+            return instanceName;
+        }
+
+        public void setInstanceName(String instanceName) {
+            this.instanceName = instanceName;
+        }
     }
 
     public static class PullConsumer {
@@ -330,6 +343,11 @@ public class RocketMQProperties {
          * The property of "tlsEnable".
          */
         private boolean tlsEnable = false;
+
+        /**
+         * The property of "instanceName".
+         */
+        private String instanceName;
 
         public String getGroup() {
             return group;
@@ -425,6 +443,14 @@ public class RocketMQProperties {
 
         public void setNamespace(String namespace) {
             this.namespace = namespace;
+        }
+
+        public String getInstanceName() {
+            return instanceName;
+        }
+
+        public void setInstanceName(String instanceName) {
+            this.instanceName = instanceName;
         }
     }
 

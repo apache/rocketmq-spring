@@ -115,4 +115,9 @@ public @interface ExtRocketMQConsumerConfiguration {
      * The namespace of consumer.
      */
     String namespace() default "";
+
+    /**
+     * The property of "instanceName".
+     */
+    String instanceName() default "DEFAULT";
 }
