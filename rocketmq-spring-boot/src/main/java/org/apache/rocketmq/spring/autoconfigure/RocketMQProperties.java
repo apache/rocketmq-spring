@@ -168,7 +168,7 @@ public class RocketMQProperties {
         /**
          * The property of "instanceName".
          */
-        private String instanceName;
+        private String instanceName = "DEFAULT";
 
         public String getGroup() {
             return group;
@@ -347,7 +347,7 @@ public class RocketMQProperties {
         /**
          * The property of "instanceName".
          */
-        private String instanceName;
+        private String instanceName = "DEFAULT";
 
         public String getGroup() {
             return group;
