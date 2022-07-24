@@ -85,8 +85,6 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         validate(annotation, genericApplicationContext);
 
         DefaultMQProducer mqProducer = createProducer(annotation);
-        // Set instanceName same as the beanName
-        mqProducer.setInstanceName(beanName);
         try {
             mqProducer.start();
         } catch (MQClientException e) {
@@ -130,6 +128,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         producer.setRetryAnotherBrokerWhenNotStoreOK(annotation.retryNextServer());
         producer.setUseTLS(useTLS);
         producer.setNamespace(annotation.namespace());
+        producer.setInstanceName(annotation.instanceName());
         return producer;
     }
 

@@ -137,6 +137,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String namespace;
     private long awaitTerminationMillisWhenShutdown;
 
+    private String instanceName;
+
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
     }
@@ -247,6 +249,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.delayLevelWhenNextConsume = anno.delayLevelWhenNextConsume();
         this.suspendCurrentQueueTimeMillis = anno.suspendCurrentQueueTimeMillis();
         this.awaitTerminationMillisWhenShutdown = Math.max(0, anno.awaitTerminationMillisWhenShutdown());
+        this.instanceName = anno.instanceName();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -295,6 +298,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public long getAwaitTerminationMillisWhenShutdown() {
         return awaitTerminationMillisWhenShutdown;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public DefaultRocketMQListenerContainer setAwaitTerminationMillisWhenShutdown(long awaitTerminationMillisWhenShutdown) {
@@ -390,6 +401,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ", selectorExpression='" + selectorExpression + '\'' +
             ", messageModel=" + messageModel + '\'' +
             ", tlsEnable=" + tlsEnable +
+            ", instanceName=" + instanceName +
             '}';
     }
 
@@ -635,14 +647,13 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         consumer.setConsumeTimeout(consumeTimeout);
         consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         consumer.setAwaitTerminationMillisWhenShutdown(awaitTerminationMillisWhenShutdown);
+        consumer.setInstanceName(instanceName);
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
-                consumer.setInstanceName(Long.toString(nameServer.hashCode()));
                 break;
             case CLUSTERING:
                 consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
-                consumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
