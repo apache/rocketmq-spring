@@ -93,8 +93,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         DefaultLitePullConsumer consumer = null;
         try {
             consumer = createConsumer(annotation);
-            // Set instanceName same as the beanName
-            consumer.setInstanceName(beanName);
             consumer.start();
         } catch (Exception e) {
             log.error("Failed to startup PullConsumer for RocketMQTemplate {}", beanName, e);
@@ -108,9 +106,9 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     private DefaultLitePullConsumer createConsumer(ExtRocketMQConsumerConfiguration annotation)
             throws MQClientException {
 
-        RocketMQProperties.Consumer consumerConfig = rocketMQProperties.getConsumer();
+        RocketMQProperties.PullConsumer consumerConfig = rocketMQProperties.getPullConsumer();
         if (consumerConfig == null) {
-            consumerConfig = new RocketMQProperties.Consumer();
+            consumerConfig = new RocketMQProperties.PullConsumer();
         }
         String nameServer = resolvePlaceholders(annotation.nameServer(), rocketMQProperties.getNameServer());
         String groupName = resolvePlaceholders(annotation.group(), consumerConfig.getGroup());
@@ -133,6 +131,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         litePullConsumer.setEnableMsgTrace(annotation.enableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
         litePullConsumer.setNamespace(annotation.namespace());
+        litePullConsumer.setInstanceName(annotation.instanceName());
         return litePullConsumer;
     }
 

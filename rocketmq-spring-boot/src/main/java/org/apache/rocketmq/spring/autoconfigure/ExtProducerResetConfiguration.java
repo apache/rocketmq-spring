@@ -129,6 +129,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, B
         producer.setRetryAnotherBrokerWhenNotStoreOK(annotation.retryNextServer());
         producer.setUseTLS(useTLS);
         producer.setNamespace(annotation.namespace());
+        producer.setInstanceName(annotation.instanceName());
         return producer;
     }
 

@@ -22,6 +22,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,7 +52,12 @@ public @interface RocketMQTransactionListener {
     /**
      * Set ExecutorService params -- keepAliveTime
      */
-    long keepAliveTime() default 1000 * 60; //60ms
+    long keepAliveTime() default 1000 * 60;
+
+    /**
+     * Set ExecutorService params -- keepAliveTimeUnit
+     */
+    TimeUnit keepAliveTimeUnit() default TimeUnit.MILLISECONDS;
 
     /**
      * Set ExecutorService params -- blockingQueueSize

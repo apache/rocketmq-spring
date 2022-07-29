@@ -27,7 +27,7 @@
     
     <groupId>org.apache.rocketmq</groupId>
     <artifactId>rocketmq-spring-all</artifactId>
-    <version>2.2.2-SNAPSHOT</version>
+    <version>2.2.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache RocketMQ Spring Boot ${project.version}</name>

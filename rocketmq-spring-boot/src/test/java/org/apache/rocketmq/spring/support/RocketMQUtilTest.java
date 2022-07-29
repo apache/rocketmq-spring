@@ -16,12 +16,13 @@
  */
 package org.apache.rocketmq.spring.support;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import org.apache.rocketmq.acl.common.AclClientRPCHook;
-import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.common.UtilAll;
-import org.apache.rocketmq.remoting.RPCHook;
 import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -119,6 +120,19 @@ public class RocketMQUtilTest {
     }
 
     @Test
+    public void testConvertLocalDateTimeWithRocketMQMessageConverter() {
+        TestMessage message = new TestMessage("localDateTime test",
+            LocalDateTime.of(2022, 3, 7, 12, 0, 0));
+        String str = new String(JSON.toJSONString(message).getBytes(), Charset.forName("UTF-8"));
+        RocketMQMessageConverter messageConverter = new RocketMQMessageConverter();
+        Object obj = messageConverter.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), TestMessage.class);
+        assertEquals(true, obj instanceof TestMessage);
+        assertEquals("localDateTime test", ((TestMessage) obj).getBody());
+        assertEquals("2022-03-07 12:00:00",
+            ((TestMessage) obj).getTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    @Test
     public void testConvertToSpringMessage() {
         org.apache.rocketmq.common.message.MessageExt rocketMsg = new org.apache.rocketmq.common.message.MessageExt();
         rocketMsg.setTopic("test");
@@ -131,22 +145,33 @@ public class RocketMQUtilTest {
         assertEquals("key1", message.getHeaders().get(toRocketHeaderKey(RocketMQHeaders.KEYS)));
     }
 
-    @Test
-    public void testGetInstanceName() {
-        String nameServer = "127.0.0.1:9876";
-        String expected = "127.0.0.1:9876@";
-        assertEquals(expected + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
-
-        nameServer = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-long-domain-name-3:9876";
-        expected = "I-am-a-very-very-long-domain-name-1:9876;I-am-a-very-very-long-domain-name-2:9876;I-am-a-very-very-l-335144505@";
-        assertEquals(expected + UtilAll.getPid(), removeNanoTime(RocketMQUtil.getInstanceName(nameServer)));
-    }
-
     private String removeNanoTime(String instanceName) {
         int index = instanceName.lastIndexOf('@');
         if (index < 0) {
             return instanceName;
         }
         return instanceName.substring(0, index);
+    }
+
+    static class TestMessage {
+        private String body;
+        private LocalDateTime time;
+
+        public TestMessage() {
+
+        }
+
+        public TestMessage(String body, LocalDateTime time) {
+            this.body = body;
+            this.time = time;
+        }
+
+        public LocalDateTime getTime() {
+            return time;
+        }
+
+        public String getBody() {
+            return body;
+        }
     }
 }

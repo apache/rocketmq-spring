@@ -117,21 +117,23 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
         producer.setUseTLS(producerConfig.isTlsEnable());
         producer.setNamespace(producerConfig.getNamespace());
+        producer.setInstanceName(producerConfig.getInstanceName());
+        log.info(String.format("a producer (%s) init on namesrv %s",  groupName,nameServer));
         return producer;
     }
 
     @Bean(CONSUMER_BEAN_NAME)
     @ConditionalOnMissingBean(DefaultLitePullConsumer.class)
-    @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "consumer.group", "consumer.topic"})
+    @ConditionalOnProperty(prefix = "rocketmq", value = {"name-server", "pull-consumer.group", "pull-consumer.topic"})
     public DefaultLitePullConsumer defaultLitePullConsumer(RocketMQProperties rocketMQProperties)
             throws MQClientException {
-        RocketMQProperties.Consumer consumerConfig = rocketMQProperties.getConsumer();
+        RocketMQProperties.PullConsumer consumerConfig = rocketMQProperties.getPullConsumer();
         String nameServer = rocketMQProperties.getNameServer();
         String groupName = consumerConfig.getGroup();
         String topicName = consumerConfig.getTopic();
         Assert.hasText(nameServer, "[rocketmq.name-server] must not be null");
-        Assert.hasText(groupName, "[rocketmq.consumer.group] must not be null");
-        Assert.hasText(topicName, "[rocketmq.consumer.topic] must not be null");
+        Assert.hasText(groupName, "[rocketmq.pull-consumer.group] must not be null");
+        Assert.hasText(topicName, "[rocketmq.pull-consumer.topic] must not be null");
 
         String accessChannel = rocketMQProperties.getAccessChannel();
         MessageModel messageModel = MessageModel.valueOf(consumerConfig.getMessageModel());
@@ -147,6 +149,8 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
         litePullConsumer.setNamespace(consumerConfig.getNamespace());
+        litePullConsumer.setInstanceName(consumerConfig.getInstanceName());
+        log.info(String.format("a pull consumer(%s sub %s) init on namesrv %s",  groupName, topicName,nameServer));
         return litePullConsumer;
     }
 

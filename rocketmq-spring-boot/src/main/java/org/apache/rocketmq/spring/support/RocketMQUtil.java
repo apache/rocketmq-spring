@@ -30,7 +30,6 @@ import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
 import org.apache.rocketmq.client.trace.TraceDispatcher;
 import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
-import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -285,21 +284,6 @@ public class RocketMQUtil {
         return producer;
     }
 
-    public static String getInstanceName(String identify) {
-        char separator = '@';
-        int maxLength = 100;
-        StringBuilder instanceName = new StringBuilder();
-        if (identify.length() > maxLength) {
-            instanceName.append(identify, 0, maxLength)
-                    .append(identify.hashCode());
-        } else {
-            instanceName.append(identify);
-        }
-        instanceName.append(separator).append(UtilAll.getPid())
-                .append(separator).append(System.nanoTime());
-        return instanceName.toString();
-    }
-
     public static DefaultLitePullConsumer createDefaultLitePullConsumer(String nameServer, String accessChannel,
             String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
             String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
@@ -312,7 +296,6 @@ public class RocketMQUtil {
             litePullConsumer = new DefaultLitePullConsumer(groupName);
         }
         litePullConsumer.setNamesrvAddr(nameServer);
-        litePullConsumer.setInstanceName(RocketMQUtil.getInstanceName(nameServer));
         litePullConsumer.setPullBatchSize(pullBatchSize);
         if (accessChannel != null) {
             litePullConsumer.setAccessChannel(AccessChannel.valueOf(accessChannel));

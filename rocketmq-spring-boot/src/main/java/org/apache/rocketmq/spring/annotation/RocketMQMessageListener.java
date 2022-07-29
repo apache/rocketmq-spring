@@ -30,9 +30,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 public @interface RocketMQMessageListener {
 
     String NAME_SERVER_PLACEHOLDER = "${rocketmq.name-server:}";
-    String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
-    String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
-    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
+    String ACCESS_KEY_PLACEHOLDER = "${rocketmq.push-consumer.access-key:}";
+    String SECRET_KEY_PLACEHOLDER = "${rocketmq.push-consumer.secret-key:}";
+    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.push-consumer.customized-trace-topic:}";
     String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
 
     /**
@@ -159,4 +159,15 @@ public @interface RocketMQMessageListener {
      * The minimum value is 10 and the maximum is 30000.
      */
     int suspendCurrentQueueTimeMillis() default 1000;
+
+    /**
+     * Maximum time to await message consuming when shutdown consumer, in milliseconds.
+     * The minimum value is 0
+     */
+    int awaitTerminationMillisWhenShutdown() default 1000;
+
+    /**
+     * The property of "instanceName".
+     */
+    String instanceName() default "DEFAULT";
 }
