@@ -18,9 +18,7 @@
 package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -32,9 +30,7 @@ import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -45,7 +41,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
 @Configuration
-public class ListenerContainerConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
+public class ListenerContainerConfiguration implements ApplicationContextAware {
     private final static Logger log = LoggerFactory.getLogger(ListenerContainerConfiguration.class);
 
     private ConfigurableApplicationContext applicationContext;
@@ -70,16 +66,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
     }
 
-    @Override
-    public void afterSingletonsInstantiated() {
-        Map<String, Object> beans = this.applicationContext.getBeansWithAnnotation(RocketMQMessageListener.class)
-            .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        beans.forEach(this::registerContainer);
-    }
-
-    private void registerContainer(String beanName, Object bean) {
+    public void registerContainer(String beanName, Object bean, RocketMQMessageListener annotation) {
         Class<?> clazz = AopProxyUtils.ultimateTargetClass(bean);
 
         if (RocketMQListener.class.isAssignableFrom(bean.getClass()) && RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
@@ -89,8 +76,6 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         if (!RocketMQListener.class.isAssignableFrom(bean.getClass()) && !RocketMQReplyListener.class.isAssignableFrom(bean.getClass())) {
             throw new IllegalStateException(clazz + " is not instance of " + RocketMQListener.class.getName() + " or " + RocketMQReplyListener.class.getName());
         }
-
-        RocketMQMessageListener annotation = clazz.getAnnotation(RocketMQMessageListener.class);
 
         String consumerGroup = this.environment.resolvePlaceholders(annotation.consumerGroup());
         String topic = this.environment.resolvePlaceholders(annotation.topic());
