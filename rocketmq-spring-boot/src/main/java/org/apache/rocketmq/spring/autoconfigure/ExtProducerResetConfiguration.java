@@ -17,9 +17,6 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -30,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -41,7 +38,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
 @Configuration
-public class ExtProducerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
+public class ExtProducerResetConfiguration implements ApplicationContextAware, BeanPostProcessor {
     private final static Logger log = LoggerFactory.getLogger(ExtProducerResetConfiguration.class);
 
     private ConfigurableApplicationContext applicationContext;
@@ -65,12 +62,13 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     }
 
     @Override
-    public void afterSingletonsInstantiated() {
-        Map<String, Object> beans = this.applicationContext.getBeansWithAnnotation(ExtRocketMQTemplateConfiguration.class)
-            .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        beans.forEach(this::registerTemplate);
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        Class<?> clazz = AopProxyUtils.ultimateTargetClass(bean);
+        if (clazz.isAnnotationPresent(ExtRocketMQTemplateConfiguration.class)
+                && !ScopedProxyUtils.isScopedTarget(beanName)) {
+            this.registerTemplate(beanName, bean);
+        }
+        return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
     }
 
     private void registerTemplate(String beanName, Object bean) {
@@ -85,12 +83,15 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         validate(annotation, genericApplicationContext);
 
         DefaultMQProducer mqProducer = createProducer(annotation);
-        try {
-            mqProducer.start();
-        } catch (MQClientException e) {
-            throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",
-                beanName), e);
-        }
+        // Set instanceName same as the beanName
+        mqProducer.setInstanceName(beanName);
+        // rocketmqTemplate start at afterProperties
+        // try {
+        //     mqProducer.start();
+        // } catch (MQClientException e) {
+        //     throw new BeanDefinitionValidationException(String.format("Failed to startup MQProducer for RocketMQTemplate {}",
+        //         beanName), e);
+        // }
         RocketMQTemplate rocketMQTemplate = (RocketMQTemplate) bean;
         rocketMQTemplate.setProducer(mqProducer);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
