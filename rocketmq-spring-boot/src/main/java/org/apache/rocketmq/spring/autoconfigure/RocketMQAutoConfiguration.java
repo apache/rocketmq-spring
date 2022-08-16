@@ -54,7 +54,7 @@ import javax.annotation.PostConstruct;
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
-@ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "rocketmq", value = "enabled", havingValue = "true", matchIfMissing = true)
 @Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class, ExtConsumerResetConfiguration.class, RocketMQTransactionConfiguration.class})
 @AutoConfigureAfter({MessageConverterConfiguration.class})
 @AutoConfigureBefore({RocketMQTransactionConfiguration.class})
