@@ -155,6 +155,11 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);
 
+        // set default namespace
+        String namespace = rocketMQProperties.getConsumer().getNamespace();
+        if (StringUtils.isEmpty(container.getNamespace()) && !StringUtils.isEmpty(namespace)) {
+            container.setNamespace(namespace);
+        }
         return container;
     }
 
