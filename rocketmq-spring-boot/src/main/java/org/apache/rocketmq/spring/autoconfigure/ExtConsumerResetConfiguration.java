@@ -130,8 +130,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
                 groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
         litePullConsumer.setEnableMsgTrace(annotation.enableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
-        litePullConsumer.setNamespace(annotation.namespace());
-        litePullConsumer.setInstanceName(RocketMQUtil.getNamespace(annotation.namespace(), consumerConfig.getNamespace()));
+        litePullConsumer.setNamespace(RocketMQUtil.getNamespace(annotation.namespace(), consumerConfig.getNamespace()));
+        litePullConsumer.setInstanceName(annotation.instanceName());
         return litePullConsumer;
     }
 
