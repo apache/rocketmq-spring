@@ -326,4 +326,10 @@ public class RocketMQUtil {
 
         return litePullConsumer;
     }
+
+    public static String getNamespace(String specifiedNamespace, String defaultNamespace) {
+        // prefer to use annotation namespace
+        // if is empty a default namespace will be used
+        return !StringUtils.hasLength(specifiedNamespace) && StringUtils.hasLength(defaultNamespace) ? defaultNamespace : specifiedNamespace;
+    }
 }

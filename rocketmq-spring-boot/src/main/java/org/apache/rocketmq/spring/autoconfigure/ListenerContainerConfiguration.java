@@ -29,6 +29,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -155,11 +156,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware, 
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         container.setName(name);
 
-        // set default namespace
-        String namespace = rocketMQProperties.getConsumer().getNamespace();
-        if (StringUtils.isEmpty(container.getNamespace()) && !StringUtils.isEmpty(namespace)) {
-            container.setNamespace(namespace);
-        }
+        container.setNamespace(RocketMQUtil.getNamespace(container.getNamespace(),
+            rocketMQProperties.getPushConsumer().getNamespace()));
         return container;
     }
 
