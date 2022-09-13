@@ -127,7 +127,8 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         producer.setCompressMsgBodyOverHowmuch(annotation.compressMessageBodyThreshold() == -1 ? producerConfig.getCompressMessageBodyThreshold() : annotation.compressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(annotation.retryNextServer());
         producer.setUseTLS(useTLS);
-        producer.setNamespace(RocketMQUtil.getNamespace(annotation.namespace(), producerConfig.getNamespace()));
+        String namespace = environment.resolvePlaceholders(annotation.namespace());
+        producer.setNamespace(RocketMQUtil.getNamespace(namespace, producerConfig.getNamespace()));
         producer.setInstanceName(annotation.instanceName());
         return producer;
     }
