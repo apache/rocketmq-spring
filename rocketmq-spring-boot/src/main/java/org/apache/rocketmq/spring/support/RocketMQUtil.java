@@ -36,6 +36,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.SelectorType;
+import org.apache.rocketmq.spring.core.DefaultLitePullConsumerWithTopic;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionListener;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.slf4j.Logger;
@@ -288,13 +289,14 @@ public class RocketMQUtil {
             String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
             String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
             throws MQClientException {
-        DefaultLitePullConsumer litePullConsumer = null;
+        DefaultLitePullConsumerWithTopic litePullConsumer = null;
         if (!StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk)) {
-            litePullConsumer = new DefaultLitePullConsumer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
+            litePullConsumer = new DefaultLitePullConsumerWithTopic(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
             litePullConsumer.setVipChannelEnabled(false);
         } else {
-            litePullConsumer = new DefaultLitePullConsumer(groupName);
+            litePullConsumer = new DefaultLitePullConsumerWithTopic(groupName);
         }
+        litePullConsumer.setTopic(topicName);
         litePullConsumer.setNamesrvAddr(nameServer);
         litePullConsumer.setPullBatchSize(pullBatchSize);
         if (accessChannel != null) {
