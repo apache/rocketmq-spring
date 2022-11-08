@@ -170,6 +170,7 @@
                     <excludes>
                         <exclude>.gitignore</exclude>
                         <exclude>.travis.yml</exclude>
+                        <exclude>.asf.yaml</exclude>
                         <exclude>CONTRIBUTING.md</exclude>
                         <exclude>**/README.md</exclude>
                         <exclude>**/README_zh_CN.md</exclude>
