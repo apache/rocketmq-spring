@@ -138,7 +138,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
 
     private String resolvePlaceholders(String text, String defaultValue) {
         String value = environment.resolvePlaceholders(text);
-        return StringUtils.isEmpty(value) ? defaultValue : value;
+        return StringUtils.hasLength(value) ? value : defaultValue;
     }
 
     private void validate(ExtRocketMQConsumerConfiguration annotation,

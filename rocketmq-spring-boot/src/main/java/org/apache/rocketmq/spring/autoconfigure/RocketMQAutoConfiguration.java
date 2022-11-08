@@ -106,7 +106,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         DefaultMQProducer producer = RocketMQUtil.createDefaultMQProducer(groupName, ak, sk, isEnableMsgTrace, customizedTraceTopic);
 
         producer.setNamesrvAddr(nameServer);
-        if (!StringUtils.isEmpty(accessChannel)) {
+        if (StringUtils.hasLength(accessChannel)) {
             producer.setAccessChannel(AccessChannel.valueOf(accessChannel));
         }
         producer.setSendMsgTimeout(producerConfig.getSendMessageTimeout());

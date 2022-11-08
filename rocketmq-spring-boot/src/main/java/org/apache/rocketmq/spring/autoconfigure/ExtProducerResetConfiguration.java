@@ -105,15 +105,15 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         }
         String nameServer = environment.resolvePlaceholders(annotation.nameServer());
         String groupName = environment.resolvePlaceholders(annotation.group());
-        groupName = StringUtils.isEmpty(groupName) ? producerConfig.getGroup() : groupName;
+        groupName = !StringUtils.hasLength(groupName) ? producerConfig.getGroup() : groupName;
 
         String ak = environment.resolvePlaceholders(annotation.accessKey());
-        ak = StringUtils.isEmpty(ak) ? producerConfig.getAccessKey() : ak;
+        ak = StringUtils.hasLength(ak) ? ak : producerConfig.getAccessKey();
         String sk = environment.resolvePlaceholders(annotation.secretKey());
-        sk = StringUtils.isEmpty(sk) ? producerConfig.getSecretKey() : sk;
+        sk = StringUtils.hasLength(sk) ? sk : producerConfig.getSecretKey();
         boolean isEnableMsgTrace = annotation.enableMsgTrace();
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
-        customizedTraceTopic = StringUtils.isEmpty(customizedTraceTopic) ? producerConfig.getCustomizedTraceTopic() : customizedTraceTopic;
+        customizedTraceTopic = StringUtils.hasLength(customizedTraceTopic) ? customizedTraceTopic : producerConfig.getCustomizedTraceTopic();
         //if String is not is equal "true" TLS mode will represent the as default value false
         boolean useTLS = new Boolean(environment.resolvePlaceholders(annotation.tlsEnable()));
 
