@@ -40,7 +40,7 @@
 
         <rocketmq.spring.boot.version>2.2.3-SNAPSHOT</rocketmq.spring.boot.version>
 
-        <rocketmq.version>4.9.3</rocketmq.version>
+        <rocketmq.version>5.0.0</rocketmq.version>
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.11.1</jackson.version>
         <fastjson.version>1.2.83</fastjson.version>
