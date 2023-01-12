@@ -32,12 +32,12 @@ import java.lang.annotation.Target;
 public @interface ExtRocketMQConsumerConfiguration {
 
     String NAME_SERVER_PLACEHOLDER = "${rocketmq.name-server:}";
-    String GROUP_PLACEHOLDER = "${rocketmq.consumer.group:}";
-    String TOPIC_PLACEHOLDER = "${rocketmq.consumer.topic:}";
+    String GROUP_PLACEHOLDER = "${rocketmq.pull-consumer.group:}";
+    String TOPIC_PLACEHOLDER = "${rocketmq.pull-consumer.topic:}";
     String ACCESS_CHANNEL_PLACEHOLDER = "${rocketmq.access-channel:}";
-    String ACCESS_KEY_PLACEHOLDER = "${rocketmq.consumer.access-key:}";
-    String SECRET_KEY_PLACEHOLDER = "${rocketmq.consumer.secret-key:}";
-    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.consumer.customized-trace-topic:}";
+    String ACCESS_KEY_PLACEHOLDER = "${rocketmq.pull-consumer.access-key:}";
+    String SECRET_KEY_PLACEHOLDER = "${rocketmq.pull-consumer.secret-key:}";
+    String TRACE_TOPIC_PLACEHOLDER = "${rocketmq.pull-consumer.customized-trace-topic:}";
 
     /**
      * The component name of the Producer configuration.
