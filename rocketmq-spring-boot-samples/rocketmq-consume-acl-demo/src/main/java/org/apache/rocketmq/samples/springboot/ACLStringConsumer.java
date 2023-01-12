@@ -26,8 +26,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RocketMQMessageListener(
-    topic = "normal_topic_define_in_Aliware_MQ",
-    consumerGroup = "group_define_in_Aliware_MQ"
+    topic = "normal_topic_define_in_Cloud_MQ",
+    consumerGroup = "group_define_in_Cloud_MQ"
     //accessKey = "AK" // It will read by `rocketmq.push-consumer.access-key` key
     //secretKey = "SK" // It will read by `rocketmq.push-consumer.secret-key` key
     )
