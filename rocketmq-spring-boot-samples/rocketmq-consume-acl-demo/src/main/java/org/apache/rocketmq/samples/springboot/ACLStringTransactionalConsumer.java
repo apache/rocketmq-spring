@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RocketMQMessageListener(
     topic = "${demo.rocketmq.transTopic}",
-    consumerGroup = "group_define_in_Aliware_MQ",
+    consumerGroup = "group_define_in_cloud_MQ",
     accessKey = "AK", // if accessKey is empty, it will read by `rocketmq.consumer.access-key` key
     secretKey = "SK"  // if accessKey is empty, it will read by `rocketmq.consumer.secret-key` key
     )
