@@ -54,7 +54,7 @@ public class RocketMQProperties {
      * the listener is enabled by default.
      *
      */
-    private PushConsumer pushConsumer = new PushConsumer();
+    private PushConsumer consumer = new PushConsumer();
 
     public String getNameServer() {
         return nameServer;
@@ -88,12 +88,12 @@ public class RocketMQProperties {
         this.pullConsumer = pullConsumer;
     }
 
-    public PushConsumer getPushConsumer() {
-        return pushConsumer;
+    public PushConsumer getConsumer() {
+        return consumer;
     }
 
-    public void setPushConsumer(PushConsumer pushConsumer) {
-        this.pushConsumer = pushConsumer;
+    public void setConsumer(PushConsumer consumer) {
+        this.consumer = consumer;
     }
 
     public static class Producer {
