@@ -578,7 +578,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         try {
             long now = System.currentTimeMillis();
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
-            if (delayTime > 0) {
+            if (delayTime > 0 && Objects.nonNull(mode)) {
                 switch (mode) {
                     case DELAY_SECONDS:
                         rocketMsg.setDelayTimeSec(delayTime);
