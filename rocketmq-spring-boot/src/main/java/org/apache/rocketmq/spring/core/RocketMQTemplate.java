@@ -31,6 +31,7 @@ import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.MessageBatch;
 import org.apache.rocketmq.common.message.MessageClientIDSetter;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.support.DelayMode;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
@@ -534,6 +535,77 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             throw new MessagingException(e.getMessage(), e);
         }
     }
+
+    /**
+     * Same to {@link #syncSend(String, Message)} with send delay time specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param message {@link org.springframework.messaging.Message}
+     * @param delayTime delay time in seconds for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDelayTimeSeconds(String destination, Message<?> message, long delayTime) {
+        return syncSend(destination, message, producer.getSendMsgTimeout(), delayTime, DelayMode.DELAY_SECONDS);
+    }
+
+    /**
+     * Same to {@link #syncSend(String, Object)} with send delayTime specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param delayTime delay time in seconds for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDelayTimeSeconds(String destination, Object payload, long delayTime) {
+        Message<?> message = MessageBuilder.withPayload(payload).build();
+        return syncSend(destination, message, producer.getSendMsgTimeout(), delayTime, DelayMode.DELAY_SECONDS);
+    }
+
+    /**
+     * Same to {@link #syncSend(String, Message)} with send timeout and delay time specified in addition.
+     *
+     * @param destination formats: `topicName:tags`
+     * @param message {@link org.springframework.messaging.Message}
+     * @param timeout send timeout with millis
+     * @param delayTime delay time for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSend(String destination, Message<?> message, long timeout, long delayTime, DelayMode mode) {
+        if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
+            log.error("syncSend failed. destination:{}, message is null ", destination);
+            throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
+        }
+        try {
+            long now = System.currentTimeMillis();
+            org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
+            if (delayTime > 0) {
+                switch (mode) {
+                    case DELAY_SECONDS:
+                        rocketMsg.setDelayTimeSec(delayTime);
+                        break;
+                    case DELAY_MILLISECONDS:
+                        rocketMsg.setDelayTimeMs(delayTime);
+                        break;
+                    case DELIVER_TIME_MILLISECONDS:
+                        rocketMsg.setDeliverTimeMs(delayTime);
+                        break;
+                    default:
+                        log.warn("delay mode: {} not support", mode);
+                }
+            }
+            SendResult sendResult = producer.send(rocketMsg, timeout);
+            long costTime = System.currentTimeMillis() - now;
+            if (log.isDebugEnabled()) {
+                log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            }
+            return sendResult;
+        } catch (Exception e) {
+            log.error("syncSend failed. destination:{}, message:{}, detail exception info: ", destination, message, e);
+            throw new MessagingException(e.getMessage(), e);
+        }
+    }
+
+
 
     /**
      * Same to {@link #syncSend(String, Message)} with send timeout specified in addition.
