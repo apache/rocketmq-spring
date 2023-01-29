@@ -94,6 +94,12 @@ public class RocketMQTemplateTest {
         } catch (MessagingException e) {
             assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to null failed");
         }
+
+        try {
+            rocketMQTemplate.syncSendDelayTimeSeconds(topic, "payload", 10L);
+        } catch (MessagingException e) {
+            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to null failed");
+        }
     }
     @Test
     public void testAsyncBatchSendMessage() {
