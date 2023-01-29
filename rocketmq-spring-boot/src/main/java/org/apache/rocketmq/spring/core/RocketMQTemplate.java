@@ -538,6 +538,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     /**
      * Same to {@link #syncSend(String, Message)} with send delay time specified in addition.
+     * This function is only valid when the broker version is 5.0 or above
      *
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message}
@@ -550,6 +551,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     /**
      * Same to {@link #syncSend(String, Object)} with send delayTime specified in addition.
+     * This function is only valid when the broker version is 5.0 or above
      *
      * @param destination formats: `topicName:tags`
      * @param payload the Object to use as payload
@@ -562,7 +564,63 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     }
 
     /**
+     * Same to {@link #syncSend(String, Message)} with send delay time specified in addition.
+     * This function is only valid when the broker version is 5.0 or above
+     *
+     * @param destination formats: `topicName:tags`
+     * @param message {@link org.springframework.messaging.Message}
+     * @param delayTime delay time in millisecond for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDelayTimeMills(String destination, Message<?> message, long delayTime) {
+        return syncSend(destination, message, producer.getSendMsgTimeout(), delayTime, DelayMode.DELAY_MILLISECONDS);
+    }
+
+    /**
+     * Same to {@link #syncSend(String, Object)} with send delayTime specified in addition.
+     * This function is only valid when the broker version is 5.0 or above
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param delayTime delay time in millisecond for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDelayTimeMills(String destination, Object payload, long delayTime) {
+        Message<?> message = MessageBuilder.withPayload(payload).build();
+        return syncSend(destination, message, producer.getSendMsgTimeout(), delayTime, DelayMode.DELAY_MILLISECONDS);
+    }
+
+
+    /**
+     * Same to {@link #syncSend(String, Message)} with send in a delivered time.
+     * This function is only valid when the broker version is 5.0 or above
+     *
+     * @param destination formats: `topicName:tags`
+     * @param message {@link org.springframework.messaging.Message}
+     * @param deliverTimeMills delivered time in millisecond for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDeliverTimeMills(String destination, Message<?> message, long deliverTimeMills) {
+        return syncSend(destination, message, producer.getSendMsgTimeout(), deliverTimeMills, DelayMode.DELIVER_TIME_MILLISECONDS);
+    }
+
+    /**
+     * Same to {@link #syncSend(String, Object)} with send in a delivered time.
+     * This function is only valid when the broker version is 5.0 or above
+     *
+     * @param destination formats: `topicName:tags`
+     * @param payload the Object to use as payload
+     * @param deliverTimeMills delivered time in millisecond for message
+     * @return {@link SendResult}
+     */
+    public SendResult syncSendDeliverTimeMills(String destination, Object payload, long deliverTimeMills) {
+        Message<?> message = MessageBuilder.withPayload(payload).build();
+        return syncSend(destination, message, producer.getSendMsgTimeout(), deliverTimeMills, DelayMode.DELIVER_TIME_MILLISECONDS);
+    }
+
+    /**
      * Same to {@link #syncSend(String, Message)} with send timeout and delay time specified in addition.
+     * This function is only valid when the broker version is 5.0 or above
      *
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message}
@@ -570,7 +628,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      * @param delayTime delay time for message
      * @return {@link SendResult}
      */
-    public SendResult syncSend(String destination, Message<?> message, long timeout, long delayTime, DelayMode mode) {
+    private SendResult syncSend(String destination, Message<?> message, long timeout, long delayTime, DelayMode mode) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("syncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
