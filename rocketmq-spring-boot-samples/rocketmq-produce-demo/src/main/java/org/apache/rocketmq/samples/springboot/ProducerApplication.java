@@ -115,7 +115,8 @@ public class ProducerApplication implements CommandLineRunner {
         });
 
         // Send message with special tag
-        rocketMQTemplate.convertAndSend(msgExtTopic + ":tag0", "I'm from tag0");  // tag0 will not be consumer-selected
+        // tag0 will not be consumer-selected
+        rocketMQTemplate.convertAndSend(msgExtTopic + ":tag0", "I'm from tag0");
         System.out.printf("syncSend topic %s tag %s %n", msgExtTopic, "tag0");
         rocketMQTemplate.convertAndSend(msgExtTopic + ":tag1", "I'm from tag1");
         System.out.printf("syncSend topic %s tag %s %n", msgExtTopic, "tag1");
@@ -144,6 +145,7 @@ public class ProducerApplication implements CommandLineRunner {
         User requestUser = new User().setUserAge((byte) 9).setUserName("requestUserName");
         User replyUser = rocketMQTemplate.sendAndReceive(objectRequestTopic, requestUser, User.class, "order-id");
         System.out.printf("send %s and receive %s %n", requestUser, replyUser);
+
         // Send request in sync mode with timeout and delayLevel parameter parameter and receive a reply of generic type.
         ProductWithPayload<String> replyGenericObject = rocketMQTemplate.sendAndReceive(genericRequestTopic, "request generic",
             new TypeReference<ProductWithPayload<String>>() {
@@ -152,21 +154,26 @@ public class ProducerApplication implements CommandLineRunner {
 
         // Send request in async mode and receive a reply of String type.
         rocketMQTemplate.sendAndReceive(stringRequestTopic, "request string", new RocketMQLocalRequestCallback<String>() {
-            @Override public void onSuccess(String message) {
+            @Override
+            public void onSuccess(String message) {
                 System.out.printf("send %s and receive %s %n", "request string", message);
             }
 
-            @Override public void onException(Throwable e) {
+            @Override
+            public void onException(Throwable e) {
                 e.printStackTrace();
             }
         });
+
         // Send request in async mode and receive a reply of User type.
         rocketMQTemplate.sendAndReceive(objectRequestTopic, new User().setUserAge((byte) 9).setUserName("requestUserName"), new RocketMQLocalRequestCallback<User>() {
-            @Override public void onSuccess(User message) {
+            @Override
+            public void onSuccess(User message) {
                 System.out.printf("send user object and receive %s %n", message.toString());
             }
 
-            @Override public void onException(Throwable e) {
+            @Override
+            public void onException(Throwable e) {
                 e.printStackTrace();
             }
         }, 5000);
