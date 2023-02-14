@@ -17,16 +17,10 @@
 
 package org.apache.rocketmq.spring.autoconfigure;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.apache.rocketmq.acl.common.AclClientRPCHook;
-import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.client.trace.AsyncTraceDispatcher;
-import org.apache.rocketmq.client.trace.hook.SendMessageTraceHookImpl;
 import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
@@ -120,8 +114,6 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         boolean isEnableMsgTrace = annotation.enableMsgTrace();
         String customizedTraceTopic = environment.resolvePlaceholders(annotation.customizedTraceTopic());
         customizedTraceTopic = StringUtils.hasLength(customizedTraceTopic) ? customizedTraceTopic : producerConfig.getCustomizedTraceTopic();
-
-
         //if String is not is equal "true" TLS mode will represent the as default value false
         boolean useTLS = new Boolean(environment.resolvePlaceholders(annotation.tlsEnable()));
 
