@@ -23,6 +23,7 @@ import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQBatchListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
@@ -132,6 +133,12 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
+        if (bean instanceof RocketMQBatchListener) {
+            container.setRocketMQBatchListener((RocketMQBatchListener)bean);
+        }
+        else {
+            container.setRocketMQListener((RocketMQListener)bean);
+        }
         container.setTlsEnable(environment.resolvePlaceholders(annotation.tlsEnable()));
         if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
             container.setRocketMQListener((RocketMQListener) bean);
