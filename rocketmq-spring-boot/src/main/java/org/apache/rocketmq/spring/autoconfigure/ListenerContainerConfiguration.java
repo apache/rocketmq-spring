@@ -136,6 +136,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         if (bean instanceof RocketMQBatchListener) {
             container.setRocketMQBatchListener((RocketMQBatchListener) bean);
+        } else if (bean instanceof RocketMQReplyListener) {
+            container.setRocketMQReplyListener((RocketMQReplyListener) bean);
         } else {
             container.setRocketMQListener((RocketMQListener) bean);
         }
