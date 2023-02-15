@@ -19,6 +19,7 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -57,7 +58,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
     private RocketMQMessageConverter rocketMQMessageConverter;
 
     public ListenerContainerConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
-        ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
+                                          ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -115,7 +116,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
     }
 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
-        RocketMQMessageListener annotation) {
+                                                                             RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
         container.setRocketMQMessageListener(annotation);
@@ -134,10 +135,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
         if (bean instanceof RocketMQBatchListener) {
-            container.setRocketMQBatchListener((RocketMQBatchListener)bean);
-        }
-        else {
-            container.setRocketMQListener((RocketMQListener)bean);
+            container.setRocketMQBatchListener((RocketMQBatchListener) bean);
+        } else {
+            container.setRocketMQListener((RocketMQListener) bean);
         }
         container.setTlsEnable(environment.resolvePlaceholders(annotation.tlsEnable()));
         if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.rocketmq.spring.support;
 
 import java.io.UnsupportedEncodingException;
@@ -318,13 +319,12 @@ public class DefaultRocketMQListenerContainerTest {
 
                 MessageListener l = listenerContainer.getConsumer().getMessageListener();
                 if (l instanceof MessageListenerConcurrently) {
-                    ((MessageListenerConcurrently)l).consumeMessage(messages, new ConsumeConcurrentlyContext(new MessageQueue()));
+                    ((MessageListenerConcurrently) l).consumeMessage(messages, new ConsumeConcurrentlyContext(new MessageQueue()));
                 }
                 if (l instanceof MessageListenerOrderly) {
-                    ((MessageListenerOrderly)l).consumeMessage(messages, new ConsumeOrderlyContext(new MessageQueue()));
+                    ((MessageListenerOrderly) l).consumeMessage(messages, new ConsumeOrderlyContext(new MessageQueue()));
                 }
-            }
-            catch (UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         };
@@ -377,10 +377,11 @@ public class DefaultRocketMQListenerContainerTest {
         initConsumeMode.invoke(listenerContainer);
         scheduledExecutorService.schedule(r, 100, TimeUnit.MILLISECONDS);
         countDownLatch.await(1000, TimeUnit.MILLISECONDS);
-        if (exceptedTrueOrFalse)
+        if (exceptedTrueOrFalse) {
             assertThat(result[0]).isTrue(); // excepted
-        else
+        } else {
             assertThat(result[0]).isFalse(); // not excepted
+        }
     }
 
     private void tryRocketMQListener(DefaultRocketMQListenerContainer listenerContainer,
@@ -405,10 +406,11 @@ public class DefaultRocketMQListenerContainerTest {
         initConsumeMode.invoke(listenerContainer);
         scheduledExecutorService.schedule(r, 100, TimeUnit.MILLISECONDS);
         countDownLatch.await(1000, TimeUnit.MILLISECONDS);
-        if (exceptedTrueOrFalse)
+        if (exceptedTrueOrFalse) {
             assertThat(result[0]).isTrue(); // excepted
-        else
+        } else {
             assertThat(result[0]).isFalse(); // not excepted
+        }
     }
 
     @RocketMQMessageListener(consumerGroup = "consumerGroup1", topic = "test", selectorExpression = "*", selectorType = SelectorType.TAG)
@@ -428,18 +430,17 @@ public class DefaultRocketMQListenerContainerTest {
     }
 
 
-
     @RocketMQMessageListener(consumerGroup = "abc1", topic = "test",
-            consumeMode = ConsumeMode.ORDERLY,
-            consumeThreadNumber = 3456,
-            messageModel = MessageModel.BROADCASTING,
-            selectorType = SelectorType.SQL92,
-            selectorExpression = "selectorExpression",
-            tlsEnable = "tlsEnable",
-            namespace = "namespace",
-            delayLevelWhenNextConsume = 1234,
-            suspendCurrentQueueTimeMillis = 2345,
-            instanceName = "instanceName"
+        consumeMode = ConsumeMode.ORDERLY,
+        consumeThreadNumber = 3456,
+        messageModel = MessageModel.BROADCASTING,
+        selectorType = SelectorType.SQL92,
+        selectorExpression = "selectorExpression",
+        tlsEnable = "tlsEnable",
+        namespace = "namespace",
+        delayLevelWhenNextConsume = 1234,
+        suspendCurrentQueueTimeMillis = 2345,
+        instanceName = "instanceName"
     )
     class TestRocketMQMessageListener {
     }

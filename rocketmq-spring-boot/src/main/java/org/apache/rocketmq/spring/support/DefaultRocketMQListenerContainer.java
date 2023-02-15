@@ -85,14 +85,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     /**
      * Suspending pulling time in orderly mode.
-     *
+     * <p>
      * The minimum value is 10 and the maximum is 30000.
      */
     private long suspendCurrentQueueTimeMillis = 1000;
 
     /**
      * Message consume retry strategy in concurrently mode.
-     *
+     * <p>
      * -1,no retry,put into DLQ directly
      * 0,broker control retry frequency
      * >0,client control retry frequency
@@ -496,8 +496,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
             try {
                 batchConsumeMessages(msgs);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.warn("consume message failed. messageExt:{}", msgs, e);
                 context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
                 return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
@@ -514,8 +513,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         try {
             List messages = msgs.stream().map(DefaultRocketMQListenerContainer.this::doConvertMessage).collect(Collectors.toList());
             rocketMQBatchListener.onMessages(messages);
-        }
-        finally {
+        } finally {
             if (log.isDebugEnabled()) {
                 long costTime = System.currentTimeMillis() - now;
                 log.debug("batch consume {} cost: {} ms", msgs.stream().map(MessageExt::getMsgId).collect(Collectors.toList()), costTime);
@@ -536,7 +534,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             DefaultMQProducer producer = consumer.getDefaultMQPushConsumerImpl().getmQClientFactory().getDefaultMQProducer();
             producer.setSendMsgTimeout(replyTimeout);
             producer.send(replyMessage, new SendCallback() {
-                @Override public void onSuccess(SendResult sendResult) {
+                @Override
+                public void onSuccess(SendResult sendResult) {
                     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
                         log.error("Consumer replies message failed. SendStatus: {}", sendResult.getSendStatus());
                     } else {
@@ -544,7 +543,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     }
                 }
 
-                @Override public void onException(Throwable e) {
+                @Override
+                public void onException(Throwable e) {
                     log.error("Consumer replies message failed. error: {}", e.getLocalizedMessage());
                 }
             });
@@ -610,7 +610,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                     } else {
                         //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
                         //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
-                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
+                        return ((SmartMessageConverter) this.getMessageConverter())
+                            .fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
                     }
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
@@ -726,7 +727,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
         Object candidateRocketMQListener = getCandidateRocketMQListener();
         if (candidateRocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
-            ((RocketMQPushConsumerLifecycleListener)candidateRocketMQListener).prepareStart(consumer);
+            ((RocketMQPushConsumerLifecycleListener) candidateRocketMQListener).prepareStart(consumer);
         }
 
 
@@ -754,7 +755,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private void initSelectorType() throws MQClientException{
+    private void initSelectorType() throws MQClientException {
         switch (selectorType) {
             case TAG:
                 consumer.subscribe(topic, selectorExpression);
@@ -779,7 +780,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 throw new IllegalArgumentException("Property 'consumeMode' was wrong.");
         }
     }
-
 
 
 }
