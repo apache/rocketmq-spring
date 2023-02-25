@@ -157,7 +157,7 @@ public @interface RocketMQMessageListener {
      * 0,broker control retry frequency
      * >0,client control retry frequency
      */
-    int delayLevelWhenNextConsume() default 0;
+    int delayLevelWhenNextConsume() default 1024;
 
     /**
      * The interval of suspending the pull in orderly mode, in milliseconds.
