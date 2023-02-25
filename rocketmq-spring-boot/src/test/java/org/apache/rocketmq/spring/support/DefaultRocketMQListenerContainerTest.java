@@ -440,7 +440,8 @@ public class DefaultRocketMQListenerContainerTest {
         namespace = "namespace",
         delayLevelWhenNextConsume = 1234,
         suspendCurrentQueueTimeMillis = 2345,
-        instanceName = "instanceName"
+        instanceName = "instanceName",
+        consumeMessageBatchMaxSize = 1024
     )
     class TestRocketMQMessageListener {
     }

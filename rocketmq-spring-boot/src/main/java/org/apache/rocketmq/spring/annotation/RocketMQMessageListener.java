@@ -143,6 +143,12 @@ public @interface RocketMQMessageListener {
      * The namespace of consumer.
      */
     String namespace() default "";
+    
+    /**
+     * The consumeMessageBatchMaxSize of consumer.
+     * @return
+     */
+    int consumeMessageBatchMaxSize() default 0;
 
     /**
      * Message consume retry strategy in concurrently mode.

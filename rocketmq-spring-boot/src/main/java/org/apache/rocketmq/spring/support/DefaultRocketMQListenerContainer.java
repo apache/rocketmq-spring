@@ -140,6 +140,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private int maxReconsumeTimes;
     private int replyTimeout;
     private String tlsEnable;
+    private Integer consumeMessageBatchMaxSize;
     private String namespace;
     private long awaitTerminationMillisWhenShutdown;
 
@@ -266,6 +267,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.tlsEnable = anno.tlsEnable();
         this.namespace = anno.namespace();
         this.delayLevelWhenNextConsume = anno.delayLevelWhenNextConsume();
+        this.consumeMessageBatchMaxSize = anno.consumeMessageBatchMaxSize();
         this.suspendCurrentQueueTimeMillis = anno.suspendCurrentQueueTimeMillis();
         this.awaitTerminationMillisWhenShutdown = Math.max(0, anno.awaitTerminationMillisWhenShutdown());
         this.instanceName = anno.instanceName();
@@ -305,6 +307,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+    
+    public Integer getConsumeMessageBatchMaxSize() {
+        return consumeMessageBatchMaxSize;
+    }
+    
+    public void setConsumeMessageBatchMaxSize(Integer consumeMessageBatchMaxSize) {
+        this.consumeMessageBatchMaxSize = consumeMessageBatchMaxSize;
     }
 
     public DefaultMQPushConsumer getConsumer() {
@@ -730,6 +740,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
             ((RocketMQPushConsumerLifecycleListener) candidateRocketMQListener).prepareStart(consumer);
         }
 
+        consumer.setConsumeMessageBatchMaxSize(consumeMessageBatchMaxSize);
 
         //if String is not is equal "true" TLS mode will represent the as default value false
         consumer.setUseTLS(new Boolean(tlsEnable));
