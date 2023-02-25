@@ -19,10 +19,12 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.rocketmq.client.AccessChannel;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQBatchListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
@@ -56,7 +58,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
     private RocketMQMessageConverter rocketMQMessageConverter;
 
     public ListenerContainerConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
-        ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
+                                          ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -114,7 +116,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
     }
 
     private DefaultRocketMQListenerContainer createRocketMQListenerContainer(String name, Object bean,
-        RocketMQMessageListener annotation) {
+                                                                             RocketMQMessageListener annotation) {
         DefaultRocketMQListenerContainer container = new DefaultRocketMQListenerContainer();
 
         container.setRocketMQMessageListener(annotation);
@@ -132,6 +134,14 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
             container.setSelectorExpression(tags);
         }
         container.setConsumerGroup(environment.resolvePlaceholders(annotation.consumerGroup()));
+        if (bean instanceof RocketMQBatchListener) {
+            container.setConsumeMessageBatchMaxSize(annotation.consumeMessageBatchMaxSize());
+            container.setRocketMQBatchListener((RocketMQBatchListener) bean);
+        } else if (bean instanceof RocketMQReplyListener) {
+            container.setRocketMQReplyListener((RocketMQReplyListener) bean);
+        } else {
+            container.setRocketMQListener((RocketMQListener) bean);
+        }
         container.setTlsEnable(environment.resolvePlaceholders(annotation.tlsEnable()));
         if (RocketMQListener.class.isAssignableFrom(bean.getClass())) {
             container.setRocketMQListener((RocketMQListener) bean);

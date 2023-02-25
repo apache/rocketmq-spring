@@ -143,6 +143,12 @@ public @interface RocketMQMessageListener {
      * The namespace of consumer.
      */
     String namespace() default "";
+    
+    /**
+     * The consumeMessageBatchMaxSize of consumer.
+     * @return
+     */
+    int consumeMessageBatchMaxSize() default 0;
 
     /**
      * Message consume retry strategy in concurrently mode.
@@ -151,7 +157,7 @@ public @interface RocketMQMessageListener {
      * 0,broker control retry frequency
      * >0,client control retry frequency
      */
-    int delayLevelWhenNextConsume() default 0;
+    int delayLevelWhenNextConsume() default 1024;
 
     /**
      * The interval of suspending the pull in orderly mode, in milliseconds.
