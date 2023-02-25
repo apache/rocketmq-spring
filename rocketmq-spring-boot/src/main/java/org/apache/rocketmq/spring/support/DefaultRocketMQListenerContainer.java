@@ -650,10 +650,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         consumer.setInstanceName(instanceName);
         switch (messageModel) {
             case BROADCASTING:
-                consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                consumer.setMessageModel(org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel.BROADCASTING);
                 break;
             case CLUSTERING:
-                consumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                consumer.setMessageModel(org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel.CLUSTERING);
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");

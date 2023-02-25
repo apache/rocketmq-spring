@@ -304,10 +304,10 @@ public class RocketMQUtil {
 
         switch (messageModel) {
             case BROADCASTING:
-                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.BROADCASTING);
+                litePullConsumer.setMessageModel(org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel.BROADCASTING);
                 break;
             case CLUSTERING:
-                litePullConsumer.setMessageModel(org.apache.rocketmq.common.protocol.heartbeat.MessageModel.CLUSTERING);
+                litePullConsumer.setMessageModel(org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel.CLUSTERING);
                 break;
             default:
                 throw new IllegalArgumentException("Property 'messageModel' was wrong.");
