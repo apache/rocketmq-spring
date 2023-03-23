@@ -272,7 +272,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @return
      */
     public void sendAndReceive(String destination, Message<?> message,
@@ -283,7 +283,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @return
      */
     public void sendAndReceive(String destination, Object payload,
@@ -294,7 +294,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param timeout send timeout in millis
      * @return
      */
@@ -306,7 +306,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param timeout send timeout in millis
      * @return
      */
@@ -318,7 +318,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
@@ -331,7 +331,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @return
      */
@@ -343,7 +343,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @return
@@ -356,7 +356,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @return
@@ -369,7 +369,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @return
      */
@@ -381,7 +381,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
      * @return
@@ -394,7 +394,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
     /**
      * @param destination formats: `topicName:tags`
      * @param payload the payload to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
@@ -412,7 +412,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      *
      * @param destination formats: `topicName:tags`
      * @param message {@link org.springframework.messaging.Message} the message to be sent.
-     * @param rocketMQLocalRequestCallback callback that will invoked when reply message received.
+     * @param rocketMQLocalRequestCallback callback that will be invoked when reply message received.
      * @param hashKey needed when sending message orderly
      * @param timeout send timeout in millis
      * @param delayLevel message delay level(0 means no delay)
