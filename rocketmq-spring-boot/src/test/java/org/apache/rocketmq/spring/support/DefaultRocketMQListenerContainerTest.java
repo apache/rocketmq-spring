@@ -244,7 +244,7 @@ public class DefaultRocketMQListenerContainerTest {
         container.setRocketMQMessageListener(anno);
 
         assertEquals(anno.consumeMode(), container.getConsumeMode());
-        assertEquals(anno.consumeThreadNumber(), container.getConsumeThreadMax());
+        assertEquals(anno.consumeThreadMax(), container.getConsumeThreadMax());
         assertEquals(anno.consumeThreadNumber(), container.getConsumeThreadNumber());
         assertEquals(anno.messageModel(), container.getMessageModel());
         assertEquals(anno.selectorType(), container.getSelectorType());
