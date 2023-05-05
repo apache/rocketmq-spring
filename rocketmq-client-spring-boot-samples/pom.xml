@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.apache.rocketmq</groupId>
+	<artifactId>rocketmq-client-spring-boot-samples</artifactId>
+	<packaging>pom</packaging>
+	<version>2.2.3-SNAPSHOT</version>
+
+	<name>rocketmq-grpc-spring-boot-samples</name>
+	<description>rocketmq-client-spring-boot-samples</description>
+
+	<modules>
+		<module>rocketmq-client-producer-demo</module>
+		<module>rocketmq-client-consume-demo</module>
+	</modules>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<rocketmq-client-spring-boot-starter-version>2.2.4-SNAPSHOT</rocketmq-client-spring-boot-starter-version>
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.rocketmq</groupId>
+			<artifactId>rocketmq-client-spring-boot-starter</artifactId>
+			<version>${rocketmq-client-spring-boot-starter-version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.17</version>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+						<configuration>
+							<excludes>src/main/resources</excludes>
+							<configLocation>style/rmq_checkstyle.xml</configLocation>
+							<encoding>UTF-8</encoding>
+							<consoleOutput>true</consoleOutput>
+							<failsOnError>true</failsOnError>
+						</configuration>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.1.0.RELEASE</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
