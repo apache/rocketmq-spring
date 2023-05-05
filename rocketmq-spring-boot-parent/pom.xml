@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>rocketmq-spring-boot-parent</artifactId>
+    <version>2.2.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>RocketMQ Spring Boot Parent</name>
