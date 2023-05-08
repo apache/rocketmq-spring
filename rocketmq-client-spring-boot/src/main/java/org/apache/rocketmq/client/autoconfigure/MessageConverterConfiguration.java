@@ -14,11 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.samples.springboot;
+package org.apache.rocketmq.client.autoconfigure;
 
-import org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration;
-import org.apache.rocketmq.client.core.RocketMQClientTemplate;
 
-@ExtConsumerResetConfiguration(topic = "${ext.rocketmq.topic:}")
-public class ExtRocketMQTemplate extends RocketMQClientTemplate {
+import org.apache.rocketmq.client.support.RocketMQMessageConverter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @see RocketMQMessageConverter
+ */
+@Configuration
+@ConditionalOnMissingBean(RocketMQMessageConverter.class)
+class MessageConverterConfiguration {
+
+    @Bean
+    public RocketMQMessageConverter createMessageConverter() {
+        return new RocketMQMessageConverter();
+    }
+
 }

@@ -1,14 +1,30 @@
-package org.apache.rocketmq.client.client.autoconfigure;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.rocketmq.client.autoconfigure;
 
-import org.apache.rocketmq.client.client.support.RocketMQMessageConverter;
-import org.apache.rocketmq.client.client.support.RocketMQUtil;
+import org.apache.rocketmq.client.support.RocketMQMessageConverter;
+import org.apache.rocketmq.client.support.RocketMQUtil;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumer;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumerBuilder;
 
-import org.apache.rocketmq.client.client.core.RocketMQClientTemplate;
+import org.apache.rocketmq.client.core.RocketMQClientTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -31,9 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @author Akai
- */
+
 @Configuration
 public class ExtConsumerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(ExtConsumerResetConfiguration.class);
@@ -61,7 +75,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     @Override
     public void afterSingletonsInstantiated() {
         Map<String, Object> beans = this.applicationContext
-                .getBeansWithAnnotation(org.apache.rocketmq.client.client.annotation.ExtConsumerResetConfiguration.class)
+                .getBeansWithAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class)
                 .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         beans.forEach(this::registerTemplate);
@@ -73,7 +87,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         if (!RocketMQClientTemplate.class.isAssignableFrom(bean.getClass())) {
             throw new IllegalStateException(clazz + " is not instance of " + RocketMQClientTemplate.class.getName());
         }
-        org.apache.rocketmq.client.client.annotation.ExtConsumerResetConfiguration annotation = clazz.getAnnotation(org.apache.rocketmq.client.client.annotation.ExtConsumerResetConfiguration.class);
+        org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation = clazz.getAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class);
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
         validate(annotation, genericApplicationContext);
 
@@ -92,7 +106,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         log.info("Set real simpleConsumer to :{} {}", beanName, annotation.value());
     }
 
-    private SimpleConsumerBuilder createConsumer(org.apache.rocketmq.client.client.annotation.ExtConsumerResetConfiguration annotation) {
+    private SimpleConsumerBuilder createConsumer(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation) {
         RocketMQProperties.SimpleConsumer simpleConsumer = rocketMQProperties.getSimpleConsumer();
         String consumerGroupName = resolvePlaceholders(annotation.consumerGroup(), simpleConsumer.getConsumerGroup());
         String topicName = resolvePlaceholders(annotation.topic(), simpleConsumer.getTopic());
@@ -125,7 +139,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         return StringUtils.hasLength(value) ? value : defaultValue;
     }
 
-    private void validate(org.apache.rocketmq.client.client.annotation.ExtConsumerResetConfiguration annotation,
+    private void validate(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation,
                           GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
             throw new BeanDefinitionValidationException(

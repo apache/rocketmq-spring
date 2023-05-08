@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.samples.springboot;
+package org.apache.rocketmq.client.core;
 
-import org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration;
-import org.apache.rocketmq.client.core.RocketMQClientTemplate;
+import org.apache.rocketmq.client.apis.message.MessageView;
+import org.apache.rocketmq.client.apis.producer.TransactionChecker;
+import org.apache.rocketmq.client.apis.producer.TransactionResolution;
 
-@ExtConsumerResetConfiguration(topic = "${ext.rocketmq.topic:}")
-public class ExtRocketMQTemplate extends RocketMQClientTemplate {
+public interface RocketMQTransactionChecker extends TransactionChecker {
+    TransactionResolution check(MessageView var1);
 }

@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.rocketmq.samples.springboot;
 
 import org.apache.rocketmq.client.apis.ClientException;
@@ -6,10 +22,10 @@ import org.apache.rocketmq.client.apis.producer.SendReceipt;
 import org.apache.rocketmq.client.apis.producer.Transaction;
 import org.apache.rocketmq.client.apis.producer.TransactionResolution;
 
-import org.apache.rocketmq.client.client.annotation.RocketMQTransactionListener;
-import org.apache.rocketmq.client.client.common.Pair;
-import org.apache.rocketmq.client.client.core.RocketMQClientTemplate;
-import org.apache.rocketmq.client.client.core.RocketMQTransactionChecker;
+import org.apache.rocketmq.client.annotation.RocketMQTransactionListener;
+import org.apache.rocketmq.client.common.Pair;
+import org.apache.rocketmq.client.core.RocketMQClientTemplate;
+import org.apache.rocketmq.client.core.RocketMQTransactionChecker;
 import org.apache.rocketmq.samples.springboot.domain.UserMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,9 +152,9 @@ public class ClientProducerApplication implements CommandLineRunner {
         } catch (ClientException e) {
             throw new RuntimeException(e);
         }
-        sendReceipt = pair.getLeft();
+        sendReceipt = pair.getSendReceipt();
         System.out.printf("transactionSend to topic %s sendReceipt=%s %n", transTopic, sendReceipt);
-        Transaction transaction = pair.getRight();
+        Transaction transaction = pair.getTransaction();
         // executed local transaction
         if (doLocalTransaction(1)) {
             transaction.commit();

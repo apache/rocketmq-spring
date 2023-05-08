@@ -14,11 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.samples.springboot;
+package org.apache.rocketmq.client.support;
 
-import org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration;
-import org.apache.rocketmq.client.core.RocketMQClientTemplate;
+import org.springframework.beans.factory.DisposableBean;
 
-@ExtConsumerResetConfiguration(topic = "${ext.rocketmq.topic:}")
-public class ExtRocketMQTemplate extends RocketMQClientTemplate {
+public interface RocketMQListenerContainer extends DisposableBean {
 }

@@ -14,11 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.samples.springboot;
+package org.apache.rocketmq.client.common;
 
-import org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration;
-import org.apache.rocketmq.client.core.RocketMQClientTemplate;
+public class Pair<T1, T2> {
+    private T1 sendReceipt;
+    private T2 transaction;
 
-@ExtConsumerResetConfiguration(topic = "${ext.rocketmq.topic:}")
-public class ExtRocketMQTemplate extends RocketMQClientTemplate {
+    public Pair(T1 sendReceipt, T2 transaction) {
+        this.sendReceipt = sendReceipt;
+        this.transaction = transaction;
+    }
+
+    public T1 getSendReceipt() {
+        return sendReceipt;
+    }
+
+    public void setLeft(T1 sendReceipt) {
+        this.sendReceipt = sendReceipt;
+    }
+
+    public T2 getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(T2 transaction) {
+        this.transaction = transaction;
+    }
 }

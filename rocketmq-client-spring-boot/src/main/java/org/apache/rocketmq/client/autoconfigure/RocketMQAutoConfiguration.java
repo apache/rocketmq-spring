@@ -1,13 +1,29 @@
-package org.apache.rocketmq.client.client.autoconfigure;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.rocketmq.client.autoconfigure;
 
-import org.apache.rocketmq.client.client.support.RocketMQMessageConverter;
-import org.apache.rocketmq.client.client.support.RocketMQUtil;
+import org.apache.rocketmq.client.support.RocketMQMessageConverter;
+import org.apache.rocketmq.client.support.RocketMQUtil;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumerBuilder;
 import org.apache.rocketmq.client.apis.producer.ProducerBuilder;
-import org.apache.rocketmq.client.client.core.RocketMQClientTemplate;
+import org.apache.rocketmq.client.core.RocketMQClientTemplate;
 import org.apache.rocketmq.client.java.impl.producer.ProducerBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +48,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Objects;
 
-/**
- * @author Akai
- */
+
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtTemplateResetConfiguration.class,
@@ -86,7 +100,6 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
     @ConditionalOnMissingBean(SimpleConsumerBuilder.class)
     @ConditionalOnProperty(prefix = "rocketmq", value = {"simple-consumer.endpoints"})
     public SimpleConsumerBuilder simpleConsumerBuilder(RocketMQProperties rocketMQProperties) {
-        //此处getConsumer返回一个pushConsumer,getPullConsumer返回一个pullConsumer
         RocketMQProperties.SimpleConsumer simpleConsumer = rocketMQProperties.getSimpleConsumer();
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         String consumerGroup = simpleConsumer.getConsumerGroup();

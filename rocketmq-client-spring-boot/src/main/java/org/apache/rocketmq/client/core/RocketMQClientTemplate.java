@@ -1,8 +1,24 @@
-package org.apache.rocketmq.client.client.core;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.rocketmq.client.core;
 
-import org.apache.rocketmq.client.client.common.Pair;
-import org.apache.rocketmq.client.client.support.RocketMQMessageConverter;
-import org.apache.rocketmq.client.client.support.RocketMQUtil;
+import org.apache.rocketmq.client.common.Pair;
+import org.apache.rocketmq.client.support.RocketMQMessageConverter;
+import org.apache.rocketmq.client.support.RocketMQUtil;
 import org.apache.rocketmq.client.apis.ClientException;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumer;
 import org.apache.rocketmq.client.apis.consumer.SimpleConsumerBuilder;
@@ -25,9 +41,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * @author Akai
- */
+
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<String> implements DisposableBean {
 
@@ -108,9 +122,7 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         this.charset = charset;
     }
 
-    /**
-     * spring容器关闭时调用
-     */
+
     @Override
     public void destroy() throws Exception {
         if (Objects.nonNull(producer)) {
@@ -231,14 +243,11 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         return asyncSend(destination, message, messageDelayTime);
     }
 
-    public CompletableFuture<SendReceipt> asyncSend(String destination, byte[] payload, Duration messageDelayTime){
+    public CompletableFuture<SendReceipt> asyncSend(String destination, byte[] payload, Duration messageDelayTime) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
         return asyncSend(destination, message, messageDelayTime);
     }
 
-    /**
-     * 发送异步任务
-     */
     public CompletableFuture<SendReceipt> asyncSend(String destination, Message<?> message, Duration messageDelayTime) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("send request message failed. destination:{}, message is null ", destination);
@@ -298,14 +307,12 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
     }
 
 
-    //SimpleConsumer同步接收消息
     public List<MessageView> receive(int maxMessageNum, Duration invisibleDuration) throws ClientException {
         SimpleConsumer simpleConsumer = this.getSimpleConsumer();
         return simpleConsumer.receive(maxMessageNum, invisibleDuration);
     }
 
 
-    //SimpleConsumer异步接收消息
     public CompletableFuture<List<MessageView>> receiveAsync(int maxMessageNum, Duration invisibleDuration) throws ClientException, IOException {
         SimpleConsumer simpleConsumer = this.getSimpleConsumer();
         CompletableFuture<List<MessageView>> listCompletableFuture = simpleConsumer.receiveAsync(maxMessageNum, invisibleDuration);
@@ -314,7 +321,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
     }
 
 
-    //抛出异常，让用户捕获，自定义异常处理逻辑
     public void ack(MessageView message) throws ClientException {
         SimpleConsumer simpleConsumer = this.getSimpleConsumer();
         simpleConsumer.ack(message);

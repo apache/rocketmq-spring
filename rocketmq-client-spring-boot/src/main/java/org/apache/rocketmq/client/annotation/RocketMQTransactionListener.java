@@ -14,11 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.samples.springboot;
+package org.apache.rocketmq.client.annotation;
 
-import org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration;
-import org.apache.rocketmq.client.core.RocketMQClientTemplate;
+import org.springframework.stereotype.Component;
 
-@ExtConsumerResetConfiguration(topic = "${ext.rocketmq.topic:}")
-public class ExtRocketMQTemplate extends RocketMQClientTemplate {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.Documented;
+
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface RocketMQTransactionListener {
+    String rocketMQTemplateBeanName() default "rocketMQClientTemplate";
 }

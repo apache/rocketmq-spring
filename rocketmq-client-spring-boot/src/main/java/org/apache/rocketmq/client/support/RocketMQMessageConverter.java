@@ -1,9 +1,29 @@
-package org.apache.rocketmq.client.client.support;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.rocketmq.client.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.messaging.converter.*;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.util.ClassUtils;
 
 import java.util.ArrayList;
@@ -17,15 +37,11 @@ public class RocketMQMessageConverter {
     private static final boolean JACKSON_PRESENT;
     private static final boolean FASTJSON_PRESENT;
 
-    //用于检测当前项目中是否有使用到 Jackson 或 FastJson 这些 JSON 序列化/反序列化相关的类和配置
     static {
-        // 获取 RocketMQMessageConverter 类的类加载器，即用于加载 RocketMQMessageConverter 类的类加载器
         ClassLoader classLoader = RocketMQMessageConverter.class.getClassLoader();
-        // 判断是否存在 Jackson 相关的类和配置，包括 com.fasterxml.jackson.databind.ObjectMapper 和 com.fasterxml.jackson.core.JsonGenerator
         JACKSON_PRESENT =
                 ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
                         ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-        // 判断是否存在 FastJson 相关的类和配置，包括 com.alibaba.fastjson.JSON 和 com.alibaba.fastjson.support.config.FastJsonConfig
         FASTJSON_PRESENT = ClassUtils.isPresent("com.alibaba.fastjson.JSON", classLoader) &&
                 ClassUtils.isPresent("com.alibaba.fastjson.support.config.FastJsonConfig", classLoader);
     }
@@ -64,4 +80,4 @@ public class RocketMQMessageConverter {
     }
 
 
-    }
+}
