@@ -1,9 +1,12 @@
+<a name="qk9D5"></a>
+
 # Normal消息发送
+
+<a name="FRI7l"></a>
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。
-**demo.rocketmq.normal-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.normal-topic：**用户自定义消息发送的topic
 
 ```properties
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -14,11 +17,11 @@ demo.rocketmq.normal-topic=normalTopic
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
 
+<a name="BykT5"></a>
+
 ### 编写代码
 
-通过@Value注解引入配置文件参数，指定自定义topic
-通过@Resource注解引入RocketMQClientTemplate容器
-通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行normal消息的发送（消息的参数类型可选：Object、String、byte[]、Message）
+通过@Value注解引入配置文件参数，指定自定义topic<br />通过@Resource注解引入RocketMQClientTemplate容器<br />通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行normal消息的发送（消息的参数类型可选：Object、String、byte[]、Message）
 
 ```java
 @SpringBootApplication
@@ -69,13 +72,15 @@ public class ClientProducerApplication implements CommandLineRunner {
 }
 ```
 
+<a name="Rl1D7"></a>
+
 # FIFO消息发送
+
+<a name="XnRuP"></a>
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。
-**demo.rocketmq.fifo-topic：**用户自定义消息发送的topic
-**demo.rocketmq.message-group=group1：**顺序消息的顺序关系通过消息组（MessageGroup）判定和识别，发送顺序消息时需要为每条消息设置归属的消息组，相同消息组的多条消息之间遵循先进先出的顺序关系，不同消息组、无消息组的消息之间不涉及顺序性。
+**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.fifo-topic：**用户自定义消息发送的topic<br />**demo.rocketmq.message-group=group1：**顺序消息的顺序关系通过消息组（MessageGroup）判定和识别，发送顺序消息时需要为每条消息设置归属的消息组，相同消息组的多条消息之间遵循先进先出的顺序关系，不同消息组、无消息组的消息之间不涉及顺序性。
 
 ```properties
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -87,12 +92,11 @@ demo.rocketmq.message-group=group1
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
 
+<a name="QSR1T"></a>
+
 ### 编写代码
 
-通过@Value注解引入配置文件参数，指定自定义topic
-通过@Resource注解引入RocketMQClientTemplate容器
-通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行fifo消息的发送（参数类型可选：Object、String、byte[]、Message）
-发送fifo消息时需要设置参数：消费者组（MessageGroup）
+通过@Value注解引入配置文件参数，指定自定义topic<br />通过@Resource注解引入RocketMQClientTemplate容器<br />通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行fifo消息的发送（参数类型可选：Object、String、byte[]、Message）<br />发送fifo消息时需要设置参数：消费者组（MessageGroup）
 
 ```java
 @SpringBootApplication
@@ -146,12 +150,15 @@ public class ClientProducerApplication implements CommandLineRunner {
 }
 ```
 
+<a name="hn3Wn"></a>
+
 # Delay消息发送
+
+<a name="GvUOb"></a>
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。
-**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
 
 ```java
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -162,12 +169,11 @@ demo.rocketmq.fifo-topic=delayTopic
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
 
+<a name="QY1y9"></a>
+
 ### 编写代码
 
-通过@Value注解引入配置文件参数，指定自定义topic
-通过@Resource注解引入RocketMQClientTemplate容器
-通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行delay消息的发送（消息的参数类型可选：Object、String、byte[]、Message）
-发送delay消息时需要指定延迟时间：DeliveryTimestamp
+通过@Value注解引入配置文件参数，指定自定义topic<br />通过@Resource注解引入RocketMQClientTemplate容器<br />通过调用**RocketMQClientTemplate#syncSendNormalMessage**方法进行delay消息的发送（消息的参数类型可选：Object、String、byte[]、Message）<br />发送delay消息时需要指定延迟时间：DeliveryTimestamp
 
 ```java
 @SpringBootApplication
@@ -220,12 +226,15 @@ public class ClientProducerApplication implements CommandLineRunner {
 }
 ```
 
+<a name="znYRu"></a>
+
 # 事务消息发送
+
+<a name="PXCrp"></a>
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。
-**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
 
 ```java
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -236,13 +245,11 @@ demo.rocketmq.trans-topic=transTopic
 > 注意：
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
 
+<a name="LAdLL"></a>
+
 ### 编写代码
 
-通过@Value注解引入配置文件参数，指定自定义topic
-通过@Resource注解引入RocketMQClientTemplate容器
-通过调用**RocketMQClientTemplate#sendMessageInTransaction**方法进行事务消息的发送（消息的参数类型可选：Object、String、byte[]、Message）。
-发送成功后会收到Pair类型的返回值，其左值代表返回值SendReceipt；右值代表Transaction，可以让用户根据本地事务处理结果的业务逻辑来决定commit还是rollback。
-使用注解@RocketMQTransactionListener标记一个自定义类，该类必须实现RocketMQTransactionChecker接口，并重写TransactionResolution check(MessageView messageView)方法。
+通过@Value注解引入配置文件参数，指定自定义topic<br />通过@Resource注解引入RocketMQClientTemplate容器<br />通过调用**RocketMQClientTemplate#sendMessageInTransaction**方法进行事务消息的发送（消息的参数类型可选：Object、String、byte[]、Message）。<br />发送成功后会收到Pair类型的返回值，其左值代表返回值SendReceipt；右值代表Transaction，可以让用户根据本地事务处理结果的业务逻辑来决定commit还是rollback。<br />使用注解@RocketMQTransactionListener标记一个自定义类，该类必须实现RocketMQTransactionChecker接口，并重写TransactionResolution check(MessageView messageView)方法。
 
 ```java
     void testSendNormalMessage() {
@@ -301,12 +308,15 @@ demo.rocketmq.trans-topic=transTopic
     }
 ```
 
+<a name="PKExg"></a>
+
 # 异步消息发送
+
+<a name="sEJj9"></a>
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。
-**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
 
 ```java
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -318,6 +328,8 @@ demo.rocketmq.message-group=group1
 
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+
+<a name="r3tyX"></a>
 
 ### 编写代码
 
@@ -367,9 +379,15 @@ demo.rocketmq.message-group=group1
     }
 ```
 
+<a name="o8qgh"></a>
+
 # 接收消息
 
+<a name="H2Yct"></a>
+
 ### Push 模式
+
+<a name="FUGKu"></a>
 
 #### 修改application.properties
 
@@ -382,6 +400,8 @@ demo.rocketmq.tag=*
 
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+
+<a name="BENa4"></a>
 
 #### 编写代码
 
@@ -399,9 +419,15 @@ public class MyConsumer implements RocketMQListener {
 }
 ```
 
+<a name="a0aDC"></a>
+
 ### Simple 模式
 
+<a name="s9R23"></a>
+
 #### 同步订阅
+
+<a name="QGLUI"></a>
 
 ##### 修改application.properties
 
@@ -416,6 +442,8 @@ ext.rocketmq.topic=delayTopic
 
 > 注意:
 > 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+
+<a name="azBFZ"></a>
 
 ##### 编写代码
 
@@ -489,7 +517,11 @@ public class ClientConsumeApplication implements CommandLineRunner {
 }
 ```
 
+<a name="aW9hN"></a>
+
 #### 异步订阅
+
+<a name="jBBak"></a>
 
 ##### 修改application.properties
 
@@ -500,6 +532,8 @@ rocketmq.simple-consumer.topic=normalTopic
 rocketmq.simple-consumer.tag=*
 rocketmq.simple-consumer.filter-expression-type=tag
 ```
+
+<a name="mRlwB"></a>
 
 ##### 编写代码
 
@@ -545,4 +579,106 @@ rocketmq.simple-consumer.filter-expression-type=tag
             }), receiveCallbackExecutor);
         } while (true);
     }
+```
+
+<a name="GSP33"></a>
+
+# ACL功能
+
+<a name="PavXQ"></a>
+
+## Producer端
+
+<a name="k36vr"></a>
+
+### 修改application.properties
+
+```java
+rocketmq.producer.endpoints=localhost:8081
+rocketmq.producer.topic=normalTopic
+rocketmq.producer.access-key=yourAccessKey
+rocketmq.producer.secret-key=yourSecretKey
+```
+
+> 注意:
+> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+
+<a name="LE6va"></a>
+
+### 编写代码
+
+```java
+@SpringBootApplication
+public class ClientProducerACLApplication implements CommandLineRunner {
+
+    @Resource
+    private RocketMQClientTemplate rocketMQClientTemplate;
+
+    @Value("${demo.acl.rocketmq.normal-topic}")
+    private String normalTopic;
+
+
+    public static void main(String[] args) {
+        SpringApplication.run(ClientProducerACLApplication.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws ClientException {
+        testSendNormalMessage();
+    }
+
+    void testSendNormalMessage() {
+        SendReceipt sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, new UserMessage()
+                .setId(1).setUserName("name").setUserAge((byte) 3));
+        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
+
+        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, "normal message");
+        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
+
+        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, "byte message".getBytes(StandardCharsets.UTF_8));
+        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
+
+        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, MessageBuilder.
+                withPayload("test message".getBytes()).build());
+        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
+    }
+}
+
+```
+
+<a name="tqzsy"></a>
+
+## Consumer端
+
+<a name="BkI2m"></a>
+
+### 修改application.properties
+
+```java
+demo.acl.rocketmq.endpoints=localhost:8081
+demo.acl.rocketmq.topic=normalTopic
+demo.acl.rocketmq.consumer-group=normalGroup
+demo.acl.rocketmq.tag=*
+demo.acl.rocketmq.access-key=yourAccessKey
+demo.acl.rocketmq.secret-key=yourSecretKey
+```
+
+> 注意:
+> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+
+<a name="yiQdM"></a>
+
+### 编写代码
+
+```java
+@Service
+@RocketMQMessageListener(accessKey = "${demo.acl.rocketmq.access-key:}", secretKey = "${demo.acl.rocketmq.secret-key:}", endpoints = "${demo.acl.rocketmq.endpoints:}", topic = "${demo.acl.rocketmq.topic:}",
+        consumerGroup = "${demo.acl.rocketmq.consumer-group:}", tag = "${demo.acl.rocketmq.tag:}")
+public class ACLConsumer implements RocketMQListener {
+    @Override
+    public ConsumeResult consume(MessageView messageView) {
+        System.out.println("handle my acl message:" + messageView);
+        return ConsumeResult.SUCCESS;
+    }
+}
 ```

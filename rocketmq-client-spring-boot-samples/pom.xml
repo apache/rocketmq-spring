@@ -30,6 +30,8 @@
 	<modules>
 		<module>rocketmq-client-producer-demo</module>
 		<module>rocketmq-client-consume-demo</module>
+		<module>rocketmq-client-consume-acl-demo</module>
+		<module>rocketmq-client-producer-acl-demo</module>
 	</modules>
 
 	<properties>
