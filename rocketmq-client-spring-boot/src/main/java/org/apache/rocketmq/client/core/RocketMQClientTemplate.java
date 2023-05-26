@@ -233,30 +233,82 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         return sendReceipt;
     }
 
-    public CompletableFuture<SendReceipt> asyncSend(String destination, Object payload, Duration messageDelayTime) {
+
+    public CompletableFuture<SendReceipt> asyncSendWithObjectPayload(String destination, Object payload, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return asyncSend(destination, message, messageDelayTime);
+        return asyncSend(destination, message, messageDelayTime, messageGroup, future);
     }
 
-    public CompletableFuture<SendReceipt> asyncSend(String destination, String payload, Duration messageDelayTime) {
+    public CompletableFuture<SendReceipt> asyncSendWithStringPayload(String destination, String payload, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return asyncSend(destination, message, messageDelayTime);
+        return asyncSend(destination, message, messageDelayTime, messageGroup, future);
     }
 
-    public CompletableFuture<SendReceipt> asyncSend(String destination, byte[] payload, Duration messageDelayTime) {
+    public CompletableFuture<SendReceipt> asyncSendWithBytePayload(String destination, byte[] payload, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return asyncSend(destination, message, messageDelayTime);
+        return asyncSend(destination, message, messageDelayTime, messageGroup, future);
     }
 
-    public CompletableFuture<SendReceipt> asyncSend(String destination, Message<?> message, Duration messageDelayTime) {
+    public CompletableFuture<SendReceipt> asyncSendWithMessagePayload(String destination, Message<?> payload, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
+        return asyncSend(destination, payload, messageDelayTime, messageGroup, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendNormalMessage(String destination, Object payload, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithObjectPayload(destination, payload, null, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendNormalMessage(String destination, String payload, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithStringPayload(destination, payload, null, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendNormalMessage(String destination, byte[] payload, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithBytePayload(destination, payload, null, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendNormalMessage(String destination, Message<?> payload, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithMessagePayload(destination, payload, null, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendFifoMessage(String destination, Object payload, String messageGroup, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithObjectPayload(destination, payload, null, messageGroup, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendFifoMessage(String destination, String payload, String messageGroup, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithStringPayload(destination, payload, null, messageGroup, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendFifoMessage(String destination, byte[] payload, String messageGroup, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithBytePayload(destination, payload, null, messageGroup, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendFifoMessage(String destination, Message<?> payload, String messageGroup, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithMessagePayload(destination, payload, null, messageGroup, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendDelayMessage(String destination, Object payload, Duration messageDelayTime, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithObjectPayload(destination, payload, messageDelayTime, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendDelayMessage(String destination, String payload, Duration messageDelayTime, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithStringPayload(destination, payload, messageDelayTime, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendDelayMessage(String destination, byte[] payload, Duration messageDelayTime, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithBytePayload(destination, payload, messageDelayTime, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSendDelayMessage(String destination, Message<?> payload, Duration messageDelayTime, CompletableFuture<SendReceipt> future) {
+        return asyncSendWithMessagePayload(destination, payload, messageDelayTime, null, future);
+    }
+
+    public CompletableFuture<SendReceipt> asyncSend(String destination, Message<?> message, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
-        final CompletableFuture<SendReceipt> future;
         Producer grpcProducer = this.getProducer();
         try {
-            org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, null);
+            org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, messageGroup);
             future = grpcProducer.sendAsync(rocketMsg);
         } catch (Exception e) {
             log.error("send request message failed. destination:{}, message:{} ", destination, message);
@@ -265,35 +317,35 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         return future;
     }
 
-    public Pair<SendReceipt, Transaction> sendGRpcMessageInTransaction(String destination, Object payload, Duration messageDelayTime) throws ClientException {
+    public Pair<SendReceipt, Transaction> sendMessageInTransaction(String destination, Object payload) throws ClientException {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return sendTransactionMessage(destination, message, messageDelayTime);
+        return sendTransactionMessage(destination, message);
     }
 
-    public Pair<SendReceipt, Transaction> sendGRpcMessageInTransaction(String destination, String payload, Duration messageDelayTime) throws ClientException {
+    public Pair<SendReceipt, Transaction> sendMessageInTransaction(String destination, String payload) throws ClientException {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return sendTransactionMessage(destination, message, messageDelayTime);
+        return sendTransactionMessage(destination, message);
     }
 
-    public Pair<SendReceipt, Transaction> sendGRpcMessageInTransaction(String destination, byte[] payload, Duration messageDelayTime) throws ClientException {
+    public Pair<SendReceipt, Transaction> sendMessageInTransaction(String destination, byte[] payload) throws ClientException {
         Message<?> message = MessageBuilder.withPayload(payload).build();
-        return sendTransactionMessage(destination, message, messageDelayTime);
+        return sendTransactionMessage(destination, message);
     }
+
 
     /**
-     * @param destination      formats: `topicName:tags`
-     * @param message          {@link Message} the message to be sent.
-     * @param messageDelayTime Time for message delay
+     * @param destination formats: `topicName:tags`
+     * @param message     {@link Message} the message to be sent.
      * @return CompletableFuture<SendReceipt> Asynchronous Task Results
      */
-    public Pair<SendReceipt, Transaction> sendTransactionMessage(String destination, Message<?> message, Duration messageDelayTime) throws ClientException {
+    public Pair<SendReceipt, Transaction> sendTransactionMessage(String destination, Message<?> message) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
             log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
         final SendReceipt sendReceipt;
         Producer grpcProducer = this.getProducer();
-        org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, null);
+        org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, null, null);
         final Transaction transaction;
         try {
             transaction = grpcProducer.beginTransaction();

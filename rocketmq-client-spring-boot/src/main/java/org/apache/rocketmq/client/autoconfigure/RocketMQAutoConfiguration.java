@@ -78,7 +78,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         log.info("Init Producer Args: " + rocketMQProducer);
         String topic = rocketMQProducer.getTopic();
         String endPoints = rocketMQProducer.getEndpoints();
-        Assert.hasText(topic, "[rocketmq.producer.topic] must not be null");
+        Assert.hasText(endPoints, "[rocketmq.producer.endpoints] must not be null");
         ClientConfiguration clientConfiguration = RocketMQUtil.createProducerClientConfiguration(rocketMQProducer);
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         ProducerBuilder producerBuilder;
