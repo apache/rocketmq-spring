@@ -20,32 +20,32 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.apache.rocketmq</groupId>
-	<artifactId>rocketmq-client-spring-boot-samples</artifactId>
+	<artifactId>rocketmq-v5-client-spring-boot-samples</artifactId>
 	<packaging>pom</packaging>
 	<version>2.2.4-SNAPSHOT</version>
 
-	<name>rocketmq-client-spring-boot-samples</name>
-	<description>rocketmq-client-spring-boot-samples</description>
+	<name>rocketmq-v5-client-spring-boot-samples</name>
+	<description>rocketmq-v5-client-spring-boot-samples</description>
 
 	<modules>
-		<module>rocketmq-client-producer-demo</module>
-		<module>rocketmq-client-consume-demo</module>
-		<module>rocketmq-client-consume-acl-demo</module>
-		<module>rocketmq-client-producer-acl-demo</module>
+		<module>rocketmq-v5-client-producer-demo</module>
+		<module>rocketmq-v5-client-consume-demo</module>
+		<module>rocketmq-v5-client-consume-acl-demo</module>
+		<module>rocketmq-v5-client-producer-acl-demo</module>
 	</modules>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<rocketmq-client-spring-boot-starter-version>2.2.4-SNAPSHOT</rocketmq-client-spring-boot-starter-version>
+		<rocketmq-v5-client-spring-boot-starter-version>2.2.4-SNAPSHOT</rocketmq-v5-client-spring-boot-starter-version>
 	</properties>
 
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.rocketmq</groupId>
-			<artifactId>rocketmq-client-spring-boot-starter</artifactId>
-			<version>${rocketmq-client-spring-boot-starter-version}</version>
+			<artifactId>rocketmq-v5-client-spring-boot-starter</artifactId>
+			<version>${rocketmq-v5-client-spring-boot-starter-version}</version>
 		</dependency>
 	</dependencies>
 

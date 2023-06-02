@@ -6,7 +6,7 @@
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.normal-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：** 用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.normal-topic：** 用户自定义消息发送的topic
 
 ```properties
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -80,7 +80,7 @@ public class ClientProducerApplication implements CommandLineRunner {
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.fifo-topic：**用户自定义消息发送的topic<br />**demo.rocketmq.message-group=group1：**顺序消息的顺序关系通过消息组（MessageGroup）判定和识别，发送顺序消息时需要为每条消息设置归属的消息组，相同消息组的多条消息之间遵循先进先出的顺序关系，不同消息组、无消息组的消息之间不涉及顺序性。
+**rocketmq.producer.topic：** 用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.fifo-topic：** 用户自定义消息发送的topic<br />**demo.rocketmq.message-group=group1：** 顺序消息的顺序关系通过消息组（MessageGroup）判定和识别，发送顺序消息时需要为每条消息设置归属的消息组，相同消息组的多条消息之间遵循先进先出的顺序关系，不同消息组、无消息组的消息之间不涉及顺序性。
 
 ```properties
 rocketmq.producer.endpoints=127.0.0.1:8081
@@ -158,9 +158,9 @@ public class ClientProducerApplication implements CommandLineRunner {
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：** 用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：** 用户自定义消息发送的topic
 
-```java
+```class
 rocketmq.producer.endpoints=127.0.0.1:8081
 rocketmq.producer.topic=delayTopic
 demo.rocketmq.fifo-topic=delayTopic
@@ -234,9 +234,9 @@ public class ClientProducerApplication implements CommandLineRunner {
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：** 用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：** 用户自定义消息发送的topic
 
-```java
+```class
 rocketmq.producer.endpoints=127.0.0.1:8081
 rocketmq.producer.topic=transTopic
 demo.rocketmq.trans-topic=transTopic
@@ -251,23 +251,7 @@ demo.rocketmq.trans-topic=transTopic
 
 通过@Value注解引入配置文件参数，指定自定义topic<br />通过@Resource注解引入RocketMQClientTemplate容器<br />通过调用**RocketMQClientTemplate#sendMessageInTransaction**方法进行事务消息的发送（消息的参数类型可选：Object、String、byte[]、Message）。<br />发送成功后会收到Pair类型的返回值，其左值代表返回值SendReceipt；右值代表Transaction，可以让用户根据本地事务处理结果的业务逻辑来决定commit还是rollback。<br />使用注解@RocketMQTransactionListener标记一个自定义类，该类必须实现RocketMQTransactionChecker接口，并重写TransactionResolution check(MessageView messageView)方法。
 
-```java
-    void testSendNormalMessage() {
-        SendReceipt sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, new UserMessage()
-                .setId(1).setUserName("name").setUserAge((byte) 3));
-        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
-
-        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, "normal message");
-        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
-
-        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, "byte message".getBytes(StandardCharsets.UTF_8));
-        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
-
-        sendReceipt = rocketMQClientTemplate.syncSendNormalMessage(normalTopic, MessageBuilder.
-                withPayload("test message".getBytes()).build());
-        System.out.printf("normalSend to topic %s sendReceipt=%s %n", normalTopic, sendReceipt);
-    }
-
+```class
     void testSendTransactionMessage() throws ClientException {
         Pair<SendReceipt, Transaction> pair;
         SendReceipt sendReceipt;
@@ -316,9 +300,9 @@ demo.rocketmq.trans-topic=transTopic
 
 ### 修改application.properties
 
-**rocketmq.producer.topic：**用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：**用户自定义消息发送的topic
+**rocketmq.producer.topic：** 用于给生产者设置topic名称（可选，但建议使用），生产者可以在消息发布之前**预取**topic路由。<br />**demo.rocketmq.delay-topic：** 用户自定义消息发送的topic
 
-```java
+```class
 rocketmq.producer.endpoints=127.0.0.1:8081
 demo.rocketmq.fifo-topic=fifoTopic
 demo.rocketmq.delay-topic=delayTopic
@@ -333,7 +317,7 @@ demo.rocketmq.message-group=group1
 
 ### 编写代码
 
-```java
+```class
     void testASycSendMessage() {
 
         CompletableFuture<SendReceipt> future0 = new CompletableFuture<>();
@@ -391,7 +375,7 @@ demo.rocketmq.message-group=group1
 
 #### 修改application.properties
 
-```java
+```class
 demo.rocketmq.endpoints=localhost:8081
 demo.rocketmq.topic=normalTopic
 demo.rocketmq.consumer-group=normalGroup
@@ -431,7 +415,7 @@ public class MyConsumer implements RocketMQListener {
 
 ##### 修改application.properties
 
-```java
+```class
 rocketmq.simple-consumer.endpoints=localhost:8081
 rocketmq.simple-consumer.consumer-group=normalGroup
 rocketmq.simple-consumer.topic=normalTopic
@@ -525,7 +509,7 @@ public class ClientConsumeApplication implements CommandLineRunner {
 
 ##### 修改application.properties
 
-```java
+```class
 rocketmq.simple-consumer.endpoints=localhost:8081
 rocketmq.simple-consumer.consumer-group=normalGroup
 rocketmq.simple-consumer.topic=normalTopic
@@ -537,7 +521,7 @@ rocketmq.simple-consumer.filter-expression-type=tag
 
 ##### 编写代码
 
-```java
+```class
     public void receiveSimpleConsumerMessageAsynchronously() {
         do {
             int maxMessageNum = 16;
@@ -593,7 +577,7 @@ rocketmq.simple-consumer.filter-expression-type=tag
 
 ### 修改application.properties
 
-```java
+```class
 rocketmq.producer.endpoints=localhost:8081
 rocketmq.producer.topic=normalTopic
 rocketmq.producer.access-key=yourAccessKey
@@ -654,7 +638,7 @@ public class ClientProducerACLApplication implements CommandLineRunner {
 
 ### 修改application.properties
 
-```java
+```class
 demo.acl.rocketmq.endpoints=localhost:8081
 demo.acl.rocketmq.topic=normalTopic
 demo.acl.rocketmq.consumer-group=normalGroup

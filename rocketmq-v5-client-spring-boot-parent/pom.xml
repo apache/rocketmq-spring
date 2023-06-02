@@ -26,12 +26,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>rocketmq-client-spring-boot-parent</artifactId>
+    <artifactId>rocketmq-v5-client-spring-boot-parent</artifactId>
     <packaging>pom</packaging>
     <version>2.2.4-SNAPSHOT</version>
 
-    <name>rocketmq-client-spring-boot-parent</name>
-    <description>rocketmq-client-spring-boot-parent</description>
+    <name>rocketmq-v5-client-spring-boot-parent</name>
+    <description>rocketmq-v5-client-spring-boot-parent</description>
 
     <properties>
         <project.rootdir>${project.basedir}/..</project.rootdir>
@@ -106,7 +106,7 @@
 
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
-                <artifactId>rocketmq-client-spring-boot</artifactId>
+                <artifactId>rocketmq-v5-client-spring-boot</artifactId>
                 <version>${rocketmq.client.spring.boot.version}</version>
             </dependency>
 

@@ -20,16 +20,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.rocketmq</groupId>
-        <artifactId>rocketmq-client-spring-boot-parent</artifactId>
+        <artifactId>rocketmq-v5-client-spring-boot-parent</artifactId>
         <version>2.2.4-SNAPSHOT</version>
-        <relativePath>../rocketmq-client-spring-boot-parent/pom.xml</relativePath>
+        <relativePath>../rocketmq-v5-client-spring-boot-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>rocketmq-client-spring-boot</artifactId>
+    <artifactId>rocketmq-v5-client-spring-boot</artifactId>
     <packaging>jar</packaging>
 
-    <name>rocketmq-client-spring-boot</name>
-    <description>rocketmq-client-spring-boot</description>
+    <name>rocketmq-v5-client-spring-boot</name>
+    <description>rocketmq-v5-client-spring-boot</description>
 
     <dependencies>
         <dependency>
