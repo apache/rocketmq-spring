@@ -17,12 +17,12 @@
 
 package org.apache.rocketmq.spring.annotation;
 
+import org.apache.rocketmq.client.impl.consumer.ConsumeMessageService;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -73,12 +73,10 @@ public @interface RocketMQMessageListener {
 
     /**
      * Max consumer thread number.
-     * @deprecated This property is not work well, because the consumer thread pool executor use
-     * {@link LinkedBlockingQueue} with default capacity bound (Integer.MAX_VALUE), use
-     * {@link RocketMQMessageListener#consumeThreadNumber} .
-     * @see <a href="https://github.com/apache/rocketmq-spring/issues/429">issues#429</a>
+     * This property control consumer thread pool executor maximumPoolSize see
+     * {@link ConsumeMessageService#updateCorePoolSize(int)}
+     * @see <a href="https://github.com/apache/rocketmq-spring/issues/546">issues#546</a>
      */
-    @Deprecated
     int consumeThreadMax() default 64;
 
     /**

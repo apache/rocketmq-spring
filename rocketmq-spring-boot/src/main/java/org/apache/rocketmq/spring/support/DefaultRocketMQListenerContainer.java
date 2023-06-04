@@ -236,7 +236,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.rocketMQMessageListener = anno;
 
         this.consumeMode = anno.consumeMode();
-        this.consumeThreadMax = anno.consumeThreadNumber();
+        this.consumeThreadMax = anno.consumeThreadMax();
         this.consumeThreadNumber = anno.consumeThreadNumber();
         this.messageModel = anno.messageModel();
         this.selectorType = anno.selectorType();
@@ -641,8 +641,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         if (accessChannel != null) {
             consumer.setAccessChannel(accessChannel);
         }
-        //set the consumer core thread number and maximum thread number has the same value
-        consumer.setConsumeThreadMax(consumeThreadNumber);
+
+        consumer.setConsumeThreadMax(consumeThreadMax);
         consumer.setConsumeThreadMin(consumeThreadNumber);
         consumer.setConsumeTimeout(consumeTimeout);
         consumer.setMaxReconsumeTimes(maxReconsumeTimes);
