@@ -33,6 +33,7 @@ header:
     - 'src/test/**/*.log'
     - '*/src/test/resources/META-INF/service/*'
     - '*/src/main/resources/META-INF/service/*'
+    - '*/src/main/resources/META-INF/spring/*'
     - '**/*/spring.factories'
     - '**/target/**'
     - '**/*.iml'
