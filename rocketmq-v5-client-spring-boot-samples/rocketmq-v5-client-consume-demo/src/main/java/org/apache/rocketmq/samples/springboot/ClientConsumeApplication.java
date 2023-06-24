@@ -54,6 +54,7 @@ public class ClientConsumeApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         receiveSimpleConsumerMessage();
         receiveExtSimpleConsumerMessage();
+        //receiveSimpleConsumerMessageAsynchronously();
     }
 
     public void receiveSimpleConsumerMessage() throws ClientException {

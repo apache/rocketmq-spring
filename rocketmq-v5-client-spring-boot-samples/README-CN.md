@@ -203,15 +203,15 @@ public class ClientProducerApplication implements CommandLineRunner {
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, MessageBuilder.
-                withPayload("test message".getBytes()).build(), Duration.ofSeconds(20));
+                withPayload("test message".getBytes()).build(), Duration.ofSeconds(30));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, "this is my message",
-                Duration.ofSeconds(30));
+                Duration.ofSeconds(60));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, "byte messages".getBytes(StandardCharsets.UTF_8),
-                Duration.ofSeconds(40));
+                Duration.ofSeconds(90));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
     }
 
@@ -376,10 +376,10 @@ demo.rocketmq.message-group=group1
 #### 修改application.properties
 
 ```class
-demo.rocketmq.endpoints=localhost:8081
-demo.rocketmq.topic=normalTopic
-demo.rocketmq.consumer-group=normalGroup
-demo.rocketmq.tag=*
+demo.fifo.rocketmq.endpoints=localhost:8081
+demo.fifo.rocketmq.topic=fifoTopic
+demo.fifo.rocketmq.consumer-group=fifoGroup
+demo.fifo.rocketmq.tag=*
 ```
 
 > 注意:
@@ -391,13 +391,13 @@ demo.rocketmq.tag=*
 
 ```java
 @Service
-@RocketMQMessageListener(endpoints = "${demo.rocketmq.endpoints:}", topic = "${demo.rocketmq.topic:}",
-        consumerGroup = "${demo.rocketmq.consumer-group:}", tag = "${demo.rocketmq.tag:}")
-public class MyConsumer implements RocketMQListener {
+@RocketMQMessageListener(endpoints = "${demo.fifo.rocketmq.endpoints:}", topic = "${demo.fifo.rocketmq.topic:}",
+        consumerGroup = "${demo.fifo.rocketmq.consumer-group:}", tag = "${demo.fifo.rocketmq.tag:}")
+public class FifoConsumer implements RocketMQListener {
 
     @Override
     public ConsumeResult consume(MessageView messageView) {
-        System.out.println("handle my message:" + messageView);
+        System.out.println("handle my fifo message:" + messageView);
         return ConsumeResult.SUCCESS;
     }
 }
@@ -585,7 +585,7 @@ rocketmq.producer.secret-key=yourSecretKey
 ```
 
 > 注意:
-> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口，并修改AccessKey与SecretKey为真实数据
 
 <a name="LE6va"></a>
 
@@ -648,7 +648,7 @@ demo.acl.rocketmq.secret-key=yourSecretKey
 ```
 
 > 注意:
-> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口
+> 请将上述示例配置中的127.0.0.1:8081替换成真实RocketMQ的endpoints地址与端口，并修改AccessKey与SecretKey为真实数据
 
 <a name="yiQdM"></a>
 
