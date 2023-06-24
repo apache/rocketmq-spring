@@ -16,22 +16,20 @@
  */
 package org.apache.rocketmq.samples.springboot.consumer;
 
-
-import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
 import org.apache.rocketmq.client.apis.message.MessageView;
+import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.client.core.RocketMQListener;
 import org.springframework.stereotype.Service;
 
 @Service
-@RocketMQMessageListener(accessKey = "${demo.acl.rocketmq.access-key:}", secretKey = "${demo.acl.rocketmq.secret-key:}",
-        tag = "${demo.acl.rocketmq.tag:}", topic = "${demo.acl.rocketmq.topic:}",
-        endpoints = "${demo.acl.rocketmq.endpoints:}", consumerGroup = "${demo.acl.rocketmq.consumer-group:}")
-public class ACLConsumer implements RocketMQListener {
+@RocketMQMessageListener(endpoints = "${demo.fifo.rocketmq.endpoints:}", topic = "${demo.fifo.rocketmq.topic:}",
+        consumerGroup = "${demo.fifo.rocketmq.consumer-group:}", tag = "${demo.fifo.rocketmq.tag:}")
+public class FifoConsumer implements RocketMQListener {
+
     @Override
     public ConsumeResult consume(MessageView messageView) {
-        System.out.println("handle my acl message:" + messageView);
+        System.out.println("handle my fifo message:" + messageView);
         return ConsumeResult.SUCCESS;
     }
 }
-

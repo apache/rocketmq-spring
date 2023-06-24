@@ -86,8 +86,7 @@ public class RocketMQUtil {
             }
             messageBuilder.setBody(payloads);
             org.apache.rocketmq.client.apis.message.MessageBuilder builder = messageBuilder;
-            headers.entrySet().stream().forEach(entry -> builder.addProperty(entry.getKey(), String.valueOf(entry.getValue())));
-            messageBuilder = builder;
+            headers.forEach((key, value) -> builder.addProperty(key, String.valueOf(value)));
         }
         return messageBuilder.build();
     }

@@ -66,7 +66,7 @@ public @interface RocketMQMessageListener {
     /**
      * The load balancing group for the simple consumer.
      */
-    String consumerGroup();
+    String consumerGroup() default "";
 
     /**
      * The requestTimeout of client,it is 3s by default.

@@ -35,7 +35,7 @@ public class ClientProducerACLApplication implements CommandLineRunner {
     @Resource
     private RocketMQClientTemplate rocketMQClientTemplate;
 
-    @Value("${demo.acl.rocketmq.normal-topic}")
+    @Value("${rocketmq.producer.topic}")
     private String normalTopic;
 
 

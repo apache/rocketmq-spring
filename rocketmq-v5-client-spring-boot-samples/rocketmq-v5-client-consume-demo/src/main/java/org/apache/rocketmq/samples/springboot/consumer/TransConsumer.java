@@ -16,20 +16,19 @@
  */
 package org.apache.rocketmq.samples.springboot.consumer;
 
+
+import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
 import org.apache.rocketmq.client.apis.message.MessageView;
-import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.client.core.RocketMQListener;
 import org.springframework.stereotype.Service;
 
 @Service
-@RocketMQMessageListener(endpoints = "${demo.rocketmq.endpoints:}", topic = "${demo.rocketmq.topic:}",
-        consumerGroup = "${demo.rocketmq.consumer-group:}", tag = "${demo.rocketmq.tag:}")
-public class MyConsumer implements RocketMQListener {
-
-    @Override
+@RocketMQMessageListener(endpoints = "${demo.trans.rocketmq.endpoints:}", topic = "${demo.trans.rocketmq.topic:}",
+        consumerGroup = "${demo.trans.rocketmq.consumer-group:}", tag = "${demo.trans.rocketmq.tag:}")
+public class TransConsumer implements RocketMQListener {
     public ConsumeResult consume(MessageView messageView) {
-        System.out.println("handle my message:" + messageView);
+        System.out.println("handle my transaction message:" + messageView);
         return ConsumeResult.SUCCESS;
     }
 }

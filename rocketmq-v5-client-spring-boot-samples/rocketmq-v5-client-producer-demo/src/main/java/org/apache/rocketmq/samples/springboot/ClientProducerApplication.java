@@ -130,15 +130,15 @@ public class ClientProducerApplication implements CommandLineRunner {
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, MessageBuilder.
-                withPayload("test message".getBytes()).build(), Duration.ofSeconds(20));
+                withPayload("test message".getBytes()).build(), Duration.ofSeconds(30));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, "this is my message",
-                Duration.ofSeconds(30));
+                Duration.ofSeconds(60));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
 
         sendReceipt = rocketMQClientTemplate.syncSendDelayMessage(delayTopic, "byte messages".getBytes(StandardCharsets.UTF_8),
-                Duration.ofSeconds(40));
+                Duration.ofSeconds(90));
         System.out.printf("delaySend to topic %s sendReceipt=%s %n", delayTopic, sendReceipt);
     }
 
