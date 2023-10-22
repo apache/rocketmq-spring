@@ -62,7 +62,9 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
     public Producer getProducer() {
         if (Objects.isNull(producer)) {
             try {
-                return producerBuilder.build();
+                Producer  producer =  producerBuilder.build();
+                 this.setProducer(producer);
+                 return producer；
             } catch (ClientException e) {
                 throw new RuntimeException(e);
             }
