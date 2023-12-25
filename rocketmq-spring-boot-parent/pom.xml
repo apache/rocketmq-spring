@@ -37,7 +37,7 @@
     <properties>
         <project.rootdir>${project.basedir}/..</project.rootdir>
 
-        <spring.boot.version>2.5.9</spring.boot.version>
+        <spring.boot.version>2.7.18</spring.boot.version>
         <spring.version>5.3.27</spring.version>
 
         <rocketmq.spring.boot.version>2.2.4-SNAPSHOT</rocketmq.spring.boot.version>
