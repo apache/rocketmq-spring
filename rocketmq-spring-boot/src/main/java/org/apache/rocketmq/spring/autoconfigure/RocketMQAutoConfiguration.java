@@ -29,7 +29,6 @@ import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
@@ -48,8 +47,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-
 @Configuration
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
@@ -66,17 +63,20 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
     public static final String PRODUCER_BEAN_NAME = "defaultMQProducer";
     public static final String CONSUMER_BEAN_NAME = "defaultLitePullConsumer";
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
 
     private ApplicationContext applicationContext;
+
+    public RocketMQAutoConfiguration(Environment environment) {
+        this.environment = environment;
+        checkProperties();
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
-    @PostConstruct
     public void checkProperties() {
         String nameServer = environment.getProperty("rocketmq.name-server", String.class);
         log.debug("rocketmq.nameServer = {}", nameServer);
@@ -117,7 +117,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         producer.setUseTLS(producerConfig.isTlsEnable());
         producer.setNamespace(producerConfig.getNamespace());
         producer.setInstanceName(producerConfig.getInstanceName());
-        log.info(String.format("a producer (%s) init on namesrv %s",  groupName,nameServer));
+        log.info("a producer ({}) init on namesrv {}",  groupName, nameServer);
         return producer;
     }
 
@@ -149,7 +149,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
         litePullConsumer.setNamespace(consumerConfig.getNamespace());
         litePullConsumer.setInstanceName(consumerConfig.getInstanceName());
-        log.info(String.format("a pull consumer(%s sub %s) init on namesrv %s",  groupName, topicName,nameServer));
+        log.info("a pull consumer({} sub {}) init on namesrv {}",  groupName, topicName, nameServer);
         return litePullConsumer;
     }
 
