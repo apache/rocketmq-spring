@@ -455,7 +455,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private void handleMessage(
+    public void handleMessage(
         MessageExt messageExt) throws MQClientException, RemotingException, InterruptedException {
         if (rocketMQListener != null) {
             rocketMQListener.onMessage(doConvertMessage(messageExt));
