@@ -51,9 +51,9 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     private SimpleConsumerBuilder simpleConsumerBuilder;
 
-    private Producer producer;
+    private volatile Producer producer;
 
-    private SimpleConsumer simpleConsumer;
+    private volatile SimpleConsumer simpleConsumer;
 
     private RocketMQMessageConverter rocketMQMessageConverter = new RocketMQMessageConverter();
 
@@ -61,12 +61,14 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public Producer getProducer() {
         if (Objects.isNull(producer)) {
-            try {
-                Producer  producer =  producerBuilder.build();
-                 this.setProducer(producer);
-                 return producer；
-            } catch (ClientException e) {
-                throw new RuntimeException(e);
+            synchronized (RocketMQClientTemplate.class) {
+                if (Objects.isNull(producer)) {
+                    try {
+                        this.producer =  producerBuilder.build();
+                    } catch (ClientException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
         return producer;
@@ -79,10 +81,14 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public SimpleConsumer getSimpleConsumer() {
         if (Objects.isNull(simpleConsumer)) {
-            try {
-                return simpleConsumerBuilder.build();
-            } catch (ClientException e) {
-                throw new RuntimeException(e);
+            synchronized (RocketMQClientTemplate.class) {
+                if (Objects.isNull(simpleConsumer)) {
+                    try {
+                        this.simpleConsumer = simpleConsumerBuilder.build();
+                    } catch (ClientException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
         return simpleConsumer;
