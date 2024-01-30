@@ -115,7 +115,9 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMessageBodyThreshold());
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryNextServer());
         producer.setUseTLS(producerConfig.isTlsEnable());
-        producer.setNamespace(producerConfig.getNamespace());
+        if (StringUtils.hasText(producerConfig.getNamespace())) {
+            producer.setNamespace(producerConfig.getNamespace());
+        }
         producer.setInstanceName(producerConfig.getInstanceName());
         log.info("a producer ({}) init on namesrv {}",  groupName, nameServer);
         return producer;
@@ -147,7 +149,9 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
                 groupName, topicName, messageModel, selectorType, selectorExpression, ak, sk, pullBatchSize, useTLS);
         litePullConsumer.setEnableMsgTrace(consumerConfig.isEnableMsgTrace());
         litePullConsumer.setCustomizedTraceTopic(consumerConfig.getCustomizedTraceTopic());
-        litePullConsumer.setNamespace(consumerConfig.getNamespace());
+        if (StringUtils.hasText(consumerConfig.getNamespace())) {
+            litePullConsumer.setNamespace(consumerConfig.getNamespace());
+        }
         litePullConsumer.setInstanceName(consumerConfig.getInstanceName());
         log.info("a pull consumer({} sub {}) init on namesrv {}",  groupName, topicName, nameServer);
         return litePullConsumer;
