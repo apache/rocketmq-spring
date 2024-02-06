@@ -120,7 +120,7 @@ public class RocketMQUtil {
         String accessKey = rocketMQProducer.getAccessKey();
         String secretKey = rocketMQProducer.getSecretKey();
         String endPoints = rocketMQProducer.getEndpoints();
-        Duration requestTimeout = Duration.ofDays(rocketMQProducer.getRequestTimeout());
+        Duration requestTimeout = Duration.ofSeconds(rocketMQProducer.getRequestTimeout());
         // boolean sslEnabled = rocketMQProducer.isSslEnabled();
         return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout);
     }
@@ -129,7 +129,7 @@ public class RocketMQUtil {
         String accessKey = simpleConsumer.getAccessKey();
         String secretKey = simpleConsumer.getSecretKey();
         String endPoints = simpleConsumer.getEndpoints();
-        Duration requestTimeout = Duration.ofDays(simpleConsumer.getRequestTimeout());
+        Duration requestTimeout = Duration.ofSeconds(simpleConsumer.getRequestTimeout());
         // boolean sslEnabled = rocketMQProducer.isSslEnabled();
         return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout);
 
