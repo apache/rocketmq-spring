@@ -83,10 +83,12 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         ProducerBuilder producerBuilder;
         producerBuilder = provider.newProducerBuilder()
                 .setClientConfiguration(clientConfiguration)
-                // Set the topic name(s), which is optional but recommended. It makes producer could prefetch the topic
-                // route before message publishing.
-                .setTopics(rocketMQProducer.getTopic())
                 .setMaxAttempts(rocketMQProducer.getMaxAttempts());
+        if (StringUtils.hasLength(topic)) {
+            // Set the topic name(s), which is optional but recommended. It makes producer could prefetch the topic
+            // route before message publishing.
+            producerBuilder.setTopics(rocketMQProducer.getTopic());
+        }
         log.info(String.format("a producer init on proxy %s", endPoints));
         return producerBuilder;
     }
