@@ -121,8 +121,8 @@ public class RocketMQUtil {
         String secretKey = rocketMQProducer.getSecretKey();
         String endPoints = rocketMQProducer.getEndpoints();
         Duration requestTimeout = Duration.ofSeconds(rocketMQProducer.getRequestTimeout());
-        // boolean sslEnabled = rocketMQProducer.isSslEnabled();
-        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout);
+        boolean sslEnabled = rocketMQProducer.isSslEnabled();
+        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled);
     }
 
     public static ClientConfiguration createConsumerClientConfiguration(RocketMQProperties.SimpleConsumer simpleConsumer) {
@@ -130,12 +130,13 @@ public class RocketMQUtil {
         String secretKey = simpleConsumer.getSecretKey();
         String endPoints = simpleConsumer.getEndpoints();
         Duration requestTimeout = Duration.ofSeconds(simpleConsumer.getRequestTimeout());
-        // boolean sslEnabled = rocketMQProducer.isSslEnabled();
-        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout);
+        boolean sslEnabled = simpleConsumer.isSslEnabled();
+        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled);
 
     }
 
-    public static ClientConfiguration createClientConfiguration(String accessKey, String secretKey, String endPoints, Duration requestTimeout) {
+    public static ClientConfiguration createClientConfiguration(String accessKey, String secretKey, String endPoints,
+                                                                Duration requestTimeout, Boolean sslEnabled) {
 
         SessionCredentialsProvider sessionCredentialsProvider = null;
         if (StringUtils.hasLength(accessKey) && StringUtils.hasLength(secretKey)) {
@@ -149,6 +150,9 @@ public class RocketMQUtil {
         }
         if (Objects.nonNull(requestTimeout)) {
             clientConfigurationBuilder.setRequestTimeout(requestTimeout);
+        }
+        if (Objects.nonNull(sslEnabled)) {
+            clientConfigurationBuilder.enableSsl(sslEnabled);
         }
         return clientConfigurationBuilder.build();
     }

@@ -85,6 +85,8 @@ public class DefaultListenerContainer implements InitializingBean,
 
     int consumptionThreadCount = 20;
 
+    Boolean sslEnabled;
+
     public String getName() {
         return name;
     }
@@ -230,6 +232,14 @@ public class DefaultListenerContainer implements InitializingBean,
         this.type = type;
     }
 
+    public Boolean getSslEnabled() {
+        return sslEnabled;
+    }
+
+    public void setSslEnabled(Boolean sslEnabled) {
+        this.sslEnabled = sslEnabled;
+    }
+
     private void initRocketMQPushConsumer() {
         if (rocketMQMessageListener == null) {
             throw new IllegalArgumentException("Property 'rocketMQMessageListener' is required");
@@ -242,7 +252,8 @@ public class DefaultListenerContainer implements InitializingBean,
         if (StringUtils.hasLength(this.getTag())) {
             filterExpression = RocketMQUtil.createFilterExpression(this.getTag(),this.getType());
         }
-        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(this.getAccessKey(), this.getSecretKey(), this.getEndpoints(), this.getRequestTimeout());
+        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(this.getAccessKey(), this.getSecretKey(),
+                this.getEndpoints(), this.getRequestTimeout(), this.sslEnabled);
 
         PushConsumerBuilder pushConsumerBuilder = provider.newPushConsumerBuilder()
                 .setClientConfiguration(clientConfiguration);
