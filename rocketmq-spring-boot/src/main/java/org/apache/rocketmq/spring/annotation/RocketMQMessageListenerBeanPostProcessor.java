@@ -17,7 +17,7 @@
 package org.apache.rocketmq.spring.annotation;
 
 import org.apache.rocketmq.spring.autoconfigure.ListenerContainerConfiguration;
-import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
@@ -47,7 +48,10 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Class<?> targetClass = AopUtils.getTargetClass(bean);
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+        if (targetClass.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
+            targetClass = ClassUtils.getUserClass(bean);
+        }
         RocketMQMessageListener ann = targetClass.getAnnotation(RocketMQMessageListener.class);
         if (ann != null) {
             RocketMQMessageListener enhance = enhance(targetClass, ann);

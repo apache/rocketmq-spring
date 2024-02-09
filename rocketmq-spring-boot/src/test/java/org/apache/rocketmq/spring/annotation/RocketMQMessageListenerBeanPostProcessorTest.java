@@ -19,12 +19,19 @@ package org.apache.rocketmq.spring.annotation;
 
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cglib.proxy.Callback;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,6 +54,15 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
 
     }
 
+    @Test
+    public void testGetTargetClass() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
+                withUserConfiguration(TestAnnotationEnhancerConfig.class, TestGetTargetClassConfig.class).
+                run((context) -> {
+                    assertThat(context).getFailure().hasMessageContaining("connect to null failed");
+                });
+    }
+
     @Configuration
     static class TestAnnotationEnhancerConfig {
         @Bean
@@ -62,6 +78,17 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
                 }
                 return attrs;
             };
+        }
+    }
+
+    @Configuration
+    static class TestGetTargetClassConfig {
+        @Bean
+        public Receiver customEnhancer() {
+            Enhancer enhancer = new Enhancer();
+            enhancer.setSuperclass(Receiver.class);
+            enhancer.setCallback((MethodInterceptor) (o, method, objects, methodProxy) -> null);
+            return (Receiver) enhancer.create();
         }
     }
 
