@@ -450,8 +450,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             } else {
                 producer.request(rocketMsg, messageQueueSelector, hashKey, requestCallback, timeout);
             }
-        } catch (
-            Exception e) {
+        } catch (Exception e) {
             log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }

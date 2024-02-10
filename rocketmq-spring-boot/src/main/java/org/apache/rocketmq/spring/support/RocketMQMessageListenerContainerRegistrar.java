@@ -94,8 +94,7 @@ public class RocketMQMessageListenerContainerRegistrar implements ApplicationCon
                 counter.incrementAndGet());
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
-        genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class,
-                () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
+        genericApplicationContext.registerBean(containerBeanName, DefaultRocketMQListenerContainer.class, () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
         DefaultRocketMQListenerContainer container = genericApplicationContext.getBean(containerBeanName,
                 DefaultRocketMQListenerContainer.class);
         if (!container.isRunning()) {
