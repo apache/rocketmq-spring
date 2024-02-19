@@ -73,14 +73,14 @@ public class ClientProducerApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws ClientException {
-        testASycSendMessage();
+        testAsyncSendMessage();
         testSendDelayMessage();
         testSendFIFOMessage();
         testSendNormalMessage();
         testSendTransactionMessage();
     }
 
-    void testASycSendMessage() {
+    void testAsyncSendMessage() {
 
         CompletableFuture<SendReceipt> future0 = new CompletableFuture<>();
         CompletableFuture<SendReceipt> future1 = new CompletableFuture<>();
