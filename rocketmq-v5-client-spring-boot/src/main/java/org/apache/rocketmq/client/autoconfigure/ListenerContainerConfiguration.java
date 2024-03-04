@@ -32,6 +32,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
@@ -47,6 +49,8 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
     private RocketMQProperties rocketMQProperties;
 
     private RocketMQMessageConverter rocketMQMessageConverter;
+
+    private final List<DefaultListenerContainer> containers = new ArrayList<>();
 
     public ListenerContainerConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
                                           ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
@@ -68,15 +72,23 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         genericApplicationContext.registerBean(containerBeanName, DefaultListenerContainer.class, () -> createRocketMQListenerContainer(containerBeanName, bean, annotation));
         DefaultListenerContainer container = genericApplicationContext.getBean(containerBeanName,
                 DefaultListenerContainer.class);
-        if (!container.isRunning()) {
-            try {
-                container.start();
-            } catch (Exception e) {
-                log.error("Started container failed. {}", container, e);
-                throw new RuntimeException(e);
+
+        containers.add(container);
+
+        log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
+    }
+
+    public void startContainer() {
+        for (DefaultListenerContainer container : containers) {
+            if (!container.isRunning()) {
+                try {
+                    container.start();
+                } catch (Exception e) {
+                    log.error("Started container failed. {}", container, e);
+                    throw new RuntimeException(e);
+                }
             }
         }
-        log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
     }
 
     private DefaultListenerContainer createRocketMQListenerContainer(String name, Object bean, RocketMQMessageListener annotation) {
