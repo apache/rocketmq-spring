@@ -221,5 +221,10 @@
         <!-- Note: The samples need to mvn compiple in its own directory
                 <module>rocketmq-spring-boot-samples</module>
         -->
+
+        <!-- rocketmq-spring-qsf : using mq in the form of a method call.
+             see rocketmq-spring-qsf/README.md
+        -->
+        <module>rocketmq-spring-qsf</module>
     </modules>
 </project>
