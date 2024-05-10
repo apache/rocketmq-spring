@@ -40,7 +40,7 @@ public @interface RocketMQMessageListener {
      * load balance. It's required and needs to be globally unique.
      *
      *
-     * See <a href="http://rocketmq.apache.org/docs/core-concept/">here</a> for further discussion.
+     * See <a href="https://rocketmq.apache.org/docs/domainModel/07consumergroup">here</a> for further discussion.
      */
     String consumerGroup();
 
