@@ -102,6 +102,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         container.setTag(environment.resolvePlaceholders(annotation.tag()));
         container.setEndpoints(environment.resolvePlaceholders(annotation.endpoints()));
         container.setTopic(environment.resolvePlaceholders(annotation.topic()));
+        container.setNamespace(environment.resolvePlaceholders(annotation.namespace()));
         container.setRequestTimeout(Duration.ofSeconds(annotation.requestTimeout()));
         container.setMaxCachedMessageCount(annotation.maxCachedMessageCount());
         container.setConsumptionThreadCount(annotation.consumptionThreadCount());

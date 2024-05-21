@@ -110,9 +110,12 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : producerConfig.getAccessKey();
         String secretKey = environment.resolvePlaceholders(annotation.secretKey());
         secretKey = StringUtils.hasLength(secretKey) ? secretKey : producerConfig.getSecretKey();
+        String namespace = environment.resolvePlaceholders(annotation.namespace());
+        namespace = StringUtils.hasLength(namespace) ? namespace : producerConfig.getNamespace();
         int requestTimeout = annotation.requestTimeout();
         Boolean sslEnabled = producerConfig.isSslEnabled();
-        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey, endpoints, Duration.ofSeconds(requestTimeout), sslEnabled);
+        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey,
+            endpoints, Duration.ofSeconds(requestTimeout), sslEnabled, namespace);
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         ProducerBuilder producerBuilder = provider.newProducerBuilder()
                 .setClientConfiguration(clientConfiguration).setMaxAttempts(annotation.maxAttempts())

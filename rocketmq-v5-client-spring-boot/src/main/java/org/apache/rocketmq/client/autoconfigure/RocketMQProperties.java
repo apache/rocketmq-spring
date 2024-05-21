@@ -79,6 +79,8 @@ public class RocketMQProperties {
          */
         private int maxAttempts = 3;
 
+        private String namespace;
+
         public String getAccessKey() {
             return accessKey;
         }
@@ -133,6 +135,14 @@ public class RocketMQProperties {
 
         public void setMaxAttempts(int maxAttempts) {
             this.maxAttempts = maxAttempts;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
         }
 
         @Override
@@ -199,6 +209,8 @@ public class RocketMQProperties {
          * Enable or disable the use of Secure Sockets Layer (SSL) for network transport.
          */
         private boolean sslEnabled = true;
+
+        private String namespace = "";
 
         public String getAccessKey() {
             return accessKey;
@@ -278,6 +290,14 @@ public class RocketMQProperties {
 
         public void setFilterExpressionType(String filterExpressionType) {
             this.filterExpressionType = filterExpressionType;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
         }
 
         @Override

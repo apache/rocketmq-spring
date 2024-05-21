@@ -132,6 +132,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         litePullConsumer.setCustomizedTraceTopic(resolvePlaceholders(annotation.customizedTraceTopic(), consumerConfig.getCustomizedTraceTopic()));
         String namespace = environment.resolvePlaceholders(annotation.namespace());
         litePullConsumer.setNamespace(RocketMQUtil.getNamespace(namespace, consumerConfig.getNamespace()));
+        String namespaceV2 = environment.resolvePlaceholders(annotation.namespaceV2());
+        litePullConsumer.setNamespaceV2(RocketMQUtil.getNamespace(namespaceV2, consumerConfig.getNamespaceV2()));
         litePullConsumer.setInstanceName(annotation.instanceName());
         return litePullConsumer;
     }

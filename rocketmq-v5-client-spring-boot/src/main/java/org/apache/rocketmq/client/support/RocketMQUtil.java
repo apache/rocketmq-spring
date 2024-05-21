@@ -122,7 +122,8 @@ public class RocketMQUtil {
         String endPoints = rocketMQProducer.getEndpoints();
         Duration requestTimeout = Duration.ofSeconds(rocketMQProducer.getRequestTimeout());
         boolean sslEnabled = rocketMQProducer.isSslEnabled();
-        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled);
+        String namespace = rocketMQProducer.getNamespace();
+        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled, namespace);
     }
 
     public static ClientConfiguration createConsumerClientConfiguration(RocketMQProperties.SimpleConsumer simpleConsumer) {
@@ -131,12 +132,13 @@ public class RocketMQUtil {
         String endPoints = simpleConsumer.getEndpoints();
         Duration requestTimeout = Duration.ofSeconds(simpleConsumer.getRequestTimeout());
         boolean sslEnabled = simpleConsumer.isSslEnabled();
-        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled);
+        String namespace = simpleConsumer.getNamespace();
+        return createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled, namespace);
 
     }
 
     public static ClientConfiguration createClientConfiguration(String accessKey, String secretKey, String endPoints,
-                                                                Duration requestTimeout, Boolean sslEnabled) {
+                                                                Duration requestTimeout, Boolean sslEnabled, String namespace) {
 
         SessionCredentialsProvider sessionCredentialsProvider = null;
         if (StringUtils.hasLength(accessKey) && StringUtils.hasLength(secretKey)) {
@@ -153,6 +155,9 @@ public class RocketMQUtil {
         }
         if (Objects.nonNull(sslEnabled)) {
             clientConfigurationBuilder.enableSsl(sslEnabled);
+        }
+        if (StringUtils.hasLength(namespace)) {
+            clientConfigurationBuilder.setNamespace(namespace);
         }
         return clientConfigurationBuilder.build();
     }

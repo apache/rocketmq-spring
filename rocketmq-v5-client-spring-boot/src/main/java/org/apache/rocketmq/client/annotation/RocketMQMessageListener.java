@@ -82,5 +82,8 @@ public @interface RocketMQMessageListener {
 
     int consumptionThreadCount() default 20;
 
-
+    /**
+     * The namespace of listener.
+     */
+    String namespace() default "";
 }

@@ -113,13 +113,14 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         String accessKey = resolvePlaceholders(annotation.accessKey(), simpleConsumer.getAccessKey());
         String secretKey = resolvePlaceholders(annotation.secretKey(), simpleConsumer.getSecretKey());
         String endPoints = resolvePlaceholders(annotation.endpoints(), simpleConsumer.getEndpoints());
+        String namespace = resolvePlaceholders(annotation.namespace(), simpleConsumer.getNamespace());
         String tag = resolvePlaceholders(annotation.tag(), simpleConsumer.getTag());
         String filterExpressionType = resolvePlaceholders(annotation.filterExpressionType(), simpleConsumer.getFilterExpressionType());
         Duration requestTimeout = Duration.ofSeconds(annotation.requestTimeout());
         int awaitDuration = annotation.awaitDuration();
         Boolean sslEnabled = simpleConsumer.isSslEnabled();
         Assert.hasText(topicName, "[topic] must not be null");
-        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled);
+        ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled, namespace);
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         FilterExpression filterExpression = RocketMQUtil.createFilterExpression(tag, filterExpressionType);
         Duration duration = Duration.ofSeconds(awaitDuration);

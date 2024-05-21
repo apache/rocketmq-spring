@@ -151,6 +151,10 @@ public class RocketMQMessageListenerContainerRegistrar implements ApplicationCon
         String namespace = environment.resolvePlaceholders(annotation.namespace());
         container.setNamespace(RocketMQUtil.getNamespace(namespace,
                 rocketMQProperties.getConsumer().getNamespace()));
+
+        String namespaceV2 = environment.resolvePlaceholders(annotation.namespaceV2());
+        container.setNamespaceV2(RocketMQUtil.getNamespace(namespaceV2,
+            rocketMQProperties.getConsumer().getNamespaceV2()));
         return container;
     }
 
