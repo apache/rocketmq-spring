@@ -154,6 +154,7 @@ public class RocketMQProperties {
                     ", topic='" + topic + '\'' +
                     ", requestTimeout=" + requestTimeout +
                     ", sslEnabled=" + sslEnabled +
+                    ", namespace='" + namespace + '\'' +
                     '}';
         }
     }
@@ -313,6 +314,7 @@ public class RocketMQProperties {
                     ", requestTimeout=" + requestTimeout +
                     ", filterExpressionType='" + filterExpressionType + '\'' +
                     ", sslEnabled=" + sslEnabled +
+                    ", namespace='" + namespace + '\'' +
                     '}';
         }
     }

@@ -308,7 +308,7 @@ public class RocketMQProperties {
         private String namespace;
 
         /**
-         * The namespace v2 version of consumer.
+         * The namespace v2 version of consumer, it can not be used in combination with namespace.
          */
         private String namespaceV2;
 

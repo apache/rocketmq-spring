@@ -364,6 +364,7 @@ public class DefaultListenerContainer implements InitializingBean,
                 ", maxCachedMessageCount=" + maxCachedMessageCount +
                 ", maxCacheMessageSizeInBytes=" + maxCacheMessageSizeInBytes +
                 ", consumptionThreadCount=" + consumptionThreadCount +
+                ", namespace='" + namespace + '\'' +
                 '}';
     }
 }
