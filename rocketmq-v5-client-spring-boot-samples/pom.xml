@@ -32,12 +32,14 @@
 		<module>rocketmq-v5-client-consume-demo</module>
 		<module>rocketmq-v5-client-consume-acl-demo</module>
 		<module>rocketmq-v5-client-producer-acl-demo</module>
-	</modules>
+        <module>rocketmq-v5-client-producer-simple-demo</module>
+        <module>rocketmq-v5-client-consumer-simple-demo</module>
+        <module>rocketmq-v5-client-consumer-push-simple-demo</module>
+    </modules>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<rocketmq-v5-client-spring-boot-starter-version>2.2.4-SNAPSHOT</rocketmq-v5-client-spring-boot-starter-version>
 		<commons-logging-version>1.3.0</commons-logging-version>
 	</properties>
 
@@ -46,7 +48,7 @@
 		<dependency>
 			<groupId>org.apache.rocketmq</groupId>
 			<artifactId>rocketmq-v5-client-spring-boot-starter</artifactId>
-			<version>${rocketmq-v5-client-spring-boot-starter-version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
