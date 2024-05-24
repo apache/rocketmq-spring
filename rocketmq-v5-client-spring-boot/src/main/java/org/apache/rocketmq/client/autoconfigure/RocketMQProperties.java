@@ -173,7 +173,7 @@ public class RocketMQProperties {
         /**
          * The max await time when receive messages from the server.
          */
-        private int awaitDuration = 0;
+        private int awaitDuration = 5;
 
         /**
          * Tag of consumer.

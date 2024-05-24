@@ -85,6 +85,6 @@ public @interface ExtConsumerResetConfiguration {
     /**
      * The max await time when receive messages from the server.
      */
-    int awaitDuration() default 0;
+    int awaitDuration() default 5;
 
 }
