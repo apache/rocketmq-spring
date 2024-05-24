@@ -104,7 +104,7 @@ public class ProducerApplication implements CommandLineRunner {
         rocketMQTemplate.asyncSend(orderPaidTopic, new OrderPaidEvent("T_001", new BigDecimal("88.00")), new SendCallback() {
             @Override
             public void onSuccess(SendResult var1) {
-                System.out.printf("async onSucess SendResult=%s %n", var1);
+                System.out.printf("async onSuccess SendResult=%s %n", var1);
             }
 
             @Override
