@@ -109,6 +109,11 @@ public class RocketMQProperties {
         private String namespace;
 
         /**
+         * The namespace v2 version of producer, it can not be used in combination with namespace.
+         */
+        private String namespaceV2;
+
+        /**
          * Millis of send message timeout.
          */
         private int sendMessageTimeout = 3000;
@@ -274,6 +279,14 @@ public class RocketMQProperties {
             this.namespace = namespace;
         }
 
+        public String getNamespaceV2() {
+            return namespaceV2;
+        }
+
+        public void setNamespaceV2(String namespaceV2) {
+            this.namespaceV2 = namespaceV2;
+        }
+
         public String getInstanceName() {
             return instanceName;
         }
@@ -293,6 +306,11 @@ public class RocketMQProperties {
          * Namespace for this MQ Consumer instance.
          */
         private String namespace;
+
+        /**
+         * The namespace v2 version of consumer, it can not be used in combination with namespace.
+         */
+        private String namespaceV2;
 
         /**
          * Topic name of consumer.
@@ -443,6 +461,14 @@ public class RocketMQProperties {
 
         public void setNamespace(String namespace) {
             this.namespace = namespace;
+        }
+
+        public String getNamespaceV2() {
+            return namespaceV2;
+        }
+
+        public void setNamespaceV2(String namespaceV2) {
+            this.namespaceV2 = namespaceV2;
         }
 
         public String getInstanceName() {

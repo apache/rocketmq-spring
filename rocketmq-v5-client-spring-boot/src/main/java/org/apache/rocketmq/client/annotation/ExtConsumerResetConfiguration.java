@@ -87,4 +87,8 @@ public @interface ExtConsumerResetConfiguration {
      */
     int awaitDuration() default 5;
 
+    /**
+     * The namespace of consumer.
+     */
+    String namespace() default "";
 }

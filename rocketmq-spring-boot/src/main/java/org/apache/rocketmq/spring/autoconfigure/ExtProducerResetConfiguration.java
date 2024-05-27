@@ -129,6 +129,8 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         producer.setUseTLS(useTLS);
         String namespace = environment.resolvePlaceholders(annotation.namespace());
         producer.setNamespace(RocketMQUtil.getNamespace(namespace, producerConfig.getNamespace()));
+        String namespaceV2 = environment.resolvePlaceholders(annotation.namespaceV2());
+        producer.setNamespaceV2(RocketMQUtil.getNamespace(namespaceV2, producerConfig.getNamespaceV2()));
         producer.setInstanceName(annotation.instanceName());
         return producer;
     }

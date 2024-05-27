@@ -75,4 +75,8 @@ public @interface ExtProducerResetConfiguration {
      */
     int maxAttempts() default 3;
 
+    /**
+     * The namespace of producer.
+     */
+    String namespace() default "";
 }

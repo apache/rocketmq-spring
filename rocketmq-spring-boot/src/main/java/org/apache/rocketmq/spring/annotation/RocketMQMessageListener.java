@@ -143,6 +143,11 @@ public @interface RocketMQMessageListener {
     String namespace() default "";
 
     /**
+     * The namespace V2 version of listener, it can not be used in combination with namespace.
+     */
+    String namespaceV2() default "";
+
+    /**
      * Message consume retry strategy in concurrently mode.
      *
      * -1,no retry,put into DLQ directly

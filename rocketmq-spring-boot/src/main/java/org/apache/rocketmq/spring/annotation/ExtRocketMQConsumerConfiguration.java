@@ -117,6 +117,11 @@ public @interface ExtRocketMQConsumerConfiguration {
     String namespace() default "";
 
     /**
+     * The namespace v2 version of consumer, it can not be used in combination with namespace.
+     */
+    String namespaceV2() default "";
+
+    /**
      * The property of "instanceName".
      */
     String instanceName() default "DEFAULT";

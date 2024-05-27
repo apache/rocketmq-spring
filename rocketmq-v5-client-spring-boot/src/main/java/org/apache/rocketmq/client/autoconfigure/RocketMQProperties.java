@@ -79,6 +79,8 @@ public class RocketMQProperties {
          */
         private int maxAttempts = 3;
 
+        private String namespace;
+
         public String getAccessKey() {
             return accessKey;
         }
@@ -135,6 +137,14 @@ public class RocketMQProperties {
             this.maxAttempts = maxAttempts;
         }
 
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
+
         @Override
         public String toString() {
             return "Producer{" +
@@ -144,6 +154,7 @@ public class RocketMQProperties {
                     ", topic='" + topic + '\'' +
                     ", requestTimeout=" + requestTimeout +
                     ", sslEnabled=" + sslEnabled +
+                    ", namespace='" + namespace + '\'' +
                     '}';
         }
     }
@@ -199,6 +210,8 @@ public class RocketMQProperties {
          * Enable or disable the use of Secure Sockets Layer (SSL) for network transport.
          */
         private boolean sslEnabled = true;
+
+        private String namespace = "";
 
         public String getAccessKey() {
             return accessKey;
@@ -280,6 +293,14 @@ public class RocketMQProperties {
             this.filterExpressionType = filterExpressionType;
         }
 
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
+
         @Override
         public String toString() {
             return "SimpleConsumer{" +
@@ -293,6 +314,7 @@ public class RocketMQProperties {
                     ", requestTimeout=" + requestTimeout +
                     ", filterExpressionType='" + filterExpressionType + '\'' +
                     ", sslEnabled=" + sslEnabled +
+                    ", namespace='" + namespace + '\'' +
                     '}';
         }
     }

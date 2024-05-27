@@ -251,6 +251,7 @@ public class DefaultRocketMQListenerContainerTest {
         assertEquals(anno.selectorExpression(), container.getSelectorExpression());
         assertEquals(anno.tlsEnable(), container.getTlsEnable());
         assertEquals(anno.namespace(), container.getNamespace());
+        assertEquals(anno.namespaceV2(), container.getNamespaceV2());
         assertEquals(anno.delayLevelWhenNextConsume(), container.getDelayLevelWhenNextConsume());
         assertEquals(anno.suspendCurrentQueueTimeMillis(), container.getSuspendCurrentQueueTimeMillis());
         assertEquals(anno.instanceName(), container.getInstanceName());
@@ -264,6 +265,7 @@ public class DefaultRocketMQListenerContainerTest {
             selectorExpression = "selectorExpression",
             tlsEnable = "tlsEnable",
             namespace = "namespace",
+            namespaceV2 = "namespaceV2",
             delayLevelWhenNextConsume = 1234,
             suspendCurrentQueueTimeMillis = 2345,
             instanceName = "instanceName"
