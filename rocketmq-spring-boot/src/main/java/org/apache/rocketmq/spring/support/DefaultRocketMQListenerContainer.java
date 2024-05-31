@@ -587,7 +587,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         }
     }
 
-    private Type getMessageType() {
+    protected Type getMessageType() {
         Class<?> targetClass;
         if (rocketMQListener != null) {
             targetClass = AopProxyUtils.ultimateTargetClass(rocketMQListener);
