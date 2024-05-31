@@ -48,6 +48,7 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -65,7 +66,7 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         Class result = (Class) getMessageType.invoke(listenerContainer);
-        assertThat(result.getName().equals(String.class.getName()));
+        assertEquals(result, String.class);
 
         //support message
         listenerContainer.setRocketMQListener(new RocketMQListener<Message>() {
@@ -74,7 +75,7 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         result = (Class) getMessageType.invoke(listenerContainer);
-        assertThat(result.getName().equals(Message.class.getName()));
+        assertEquals(result, Message.class);
 
         listenerContainer.setRocketMQListener(new RocketMQListener<MessageExt>() {
             @Override
@@ -82,8 +83,9 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         result = (Class) getMessageType.invoke(listenerContainer);
-        assertThat(result.getName().equals(MessageExt.class.getName()));
+        assertEquals(result, MessageExt.class);
 
+        listenerContainer.setRocketMQListener(null);
 
         listenerContainer.setRocketMQReplyListener(new RocketMQReplyListener<MessageExt, String>() {
             @Override
@@ -92,7 +94,7 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         result = (Class) getMessageType.invoke(listenerContainer);
-        assertThat(result.getName().equals(MessageExt.class.getName()));
+        assertEquals(result, MessageExt.class);
 
         listenerContainer.setRocketMQReplyListener(new RocketMQReplyListener<String, String>() {
             @Override
@@ -101,7 +103,7 @@ public class DefaultRocketMQListenerContainerTest {
             }
         });
         result = (Class) getMessageType.invoke(listenerContainer);
-        assertThat(result.getName().equals(String.class.getName()));
+        assertEquals(result, String.class);
     }
 
     @Test
