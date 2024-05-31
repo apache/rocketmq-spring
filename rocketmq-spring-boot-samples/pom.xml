@@ -35,19 +35,21 @@
         <module>rocketmq-consume-demo</module>
         <module>rocketmq-produce-acl-demo</module>
         <module>rocketmq-consume-acl-demo</module>
+        <module>rocketmq-producer-simple-demo</module>
+        <module>rocketmq-consumer-pull-simple-demo</module>
+        <module>rocketmq-consumer-push-simple-demo</module>
     </modules>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <rocketmq-spring-boot-starter-version>2.3.1-SNAPSHOT</rocketmq-spring-boot-starter-version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-spring-boot-starter</artifactId>
-            <version>${rocketmq-spring-boot-starter-version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
