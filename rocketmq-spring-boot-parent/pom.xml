@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.apache.rocketmq</groupId>
         <artifactId>rocketmq-spring-all</artifactId>
-        <version>2.3.1-SNAPSHOT</version>
+        <version>2.3.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>rocketmq-spring-boot-parent</artifactId>
-    <version>2.3.1-SNAPSHOT</version>
+    <version>2.3.1</version>
     <packaging>pom</packaging>
 
     <name>RocketMQ Spring Boot Parent</name>
@@ -40,7 +40,7 @@
         <spring.boot.version>2.7.18</spring.boot.version>
         <spring.version>5.3.27</spring.version>
 
-        <rocketmq.spring.boot.version>2.3.1-SNAPSHOT</rocketmq.spring.boot.version>
+        <rocketmq.spring.boot.version>2.3.1</rocketmq.spring.boot.version>
 
         <rocketmq.version>5.3.0</rocketmq.version>
         <slf4j.version>1.7.25</slf4j.version>
