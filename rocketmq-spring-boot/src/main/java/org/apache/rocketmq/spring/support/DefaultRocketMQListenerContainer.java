@@ -429,7 +429,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 log.debug("received msg: {}", messageExt);
                 try {
                     long now = System.currentTimeMillis();
-                    handleMessage(messageExt);
+                    DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
+                    container.handleMessage(messageExt);
                     long costTime = System.currentTimeMillis() - now;
                     log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
@@ -452,7 +453,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 log.debug("received msg: {}", messageExt);
                 try {
                     long now = System.currentTimeMillis();
-                    handleMessage(messageExt);
+                    DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
+                    container.handleMessage(messageExt);
                     long costTime = System.currentTimeMillis() - now;
                     log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
