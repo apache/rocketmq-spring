@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class RocketMQMessageListenerBeanPostProcessor implements ApplicationContextAware, BeanPostProcessor, InitializingBean, SmartLifecycle {
+public class RocketMQMessageListenerBeanPostProcessor implements ApplicationContextAware, BeanPostProcessor, InitializingBean {
 
     private ApplicationContext applicationContext;
 
@@ -62,40 +62,12 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
     }
 
     @Override
-    public int getPhase() {
-        return Integer.MAX_VALUE - 2000;
-    }
-
-    @Override
-    public void start() {
-        if (!isRunning()) {
-            this.setRunning(true);
-            listenerContainerConfiguration.startContainer();
-        }
-    }
-
-    @Override
-    public void stop() {
-
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
-
-    @Override
-    public boolean isRunning() {
-        return running;
-    }
-
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         buildEnhancer();
         this.listenerContainerConfiguration = this.applicationContext.getBean(ListenerContainerConfiguration.class);
     }
