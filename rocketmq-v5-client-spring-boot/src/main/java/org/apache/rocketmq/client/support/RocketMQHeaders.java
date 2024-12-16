@@ -16,6 +16,9 @@
  */
 package org.apache.rocketmq.client.support;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RocketMQHeaders {
     public static final String PREFIX = "rocketmq_";
     public static final String KEYS = "KEYS";
@@ -30,4 +33,22 @@ public class RocketMQHeaders {
     public static final String TRANSACTION_ID = "TRANSACTION_ID";
     public static final String DELAY = "DELAY";
     public static final String WAIT = "WAIT";
+
+    public static final Set<String> SYSTEM_PROPERTY_SET = new HashSet<String>() {
+        {
+            add(KEYS);
+            add(TAGS);
+            add(KEYS);
+            add(TOPIC);
+            add(MESSAGE_ID);
+            add(BORN_TIMESTAMP);
+            add(BORN_HOST);
+            add(FLAG);
+            add(QUEUE_ID);
+            add(SYS_FLAG);
+            add(TRANSACTION_ID);
+            add(DELAY);
+            add(WAIT);
+        }
+    };
 }
