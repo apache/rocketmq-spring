@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.rocketmq</groupId>
         <artifactId>rocketmq-spring-boot-samples</artifactId>
-        <version>2.3.1-SNAPSHOT</version>
+        <version>2.3.2-SNAPSHOT</version>
     </parent>
     
     <artifactId>rocketmq-consume-demo</artifactId>
