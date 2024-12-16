@@ -28,12 +28,10 @@ import org.apache.rocketmq.client.java.impl.producer.ProducerBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -136,6 +134,13 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         }
         rocketMQClientTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
         return rocketMQClientTemplate;
+    }
+
+
+    @Bean
+    @ConditionalOnClass(value = SpringApplication.class)
+    public RocketMQSpringInitialization rocketMQSpringInitialization() {
+        return new RocketMQSpringInitialization();
     }
 
     /**
