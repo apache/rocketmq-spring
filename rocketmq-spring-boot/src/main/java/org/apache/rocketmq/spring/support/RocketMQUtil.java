@@ -269,7 +269,7 @@ public class RocketMQUtil {
 
         if (isEnableMsgTrace) {
             try {
-                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(groupName, TraceDispatcher.Type.PRODUCE, customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
+                AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(groupName, TraceDispatcher.Type.PRODUCE, 10, customizedTraceTopic, isEnableAcl ? new AclClientRPCHook(new SessionCredentials(ak, sk)) : null);
                 dispatcher.setHostProducer(producer.getDefaultMQProducerImpl());
                 Field field = DefaultMQProducer.class.getDeclaredField("traceDispatcher");
                 field.setAccessible(true);
@@ -285,9 +285,9 @@ public class RocketMQUtil {
     }
 
     public static DefaultLitePullConsumer createDefaultLitePullConsumer(String nameServer, String accessChannel,
-            String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
-            String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
-            throws MQClientException {
+        String groupName, String topicName, MessageModel messageModel, SelectorType selectorType,
+        String selectorExpression, String ak, String sk, int pullBatchSize, boolean useTLS)
+        throws MQClientException {
         DefaultLitePullConsumer litePullConsumer = null;
         if (StringUtils.hasLength(ak) && StringUtils.hasLength(sk)) {
             litePullConsumer = new DefaultLitePullConsumer(groupName, new AclClientRPCHook(new SessionCredentials(ak, sk)));
