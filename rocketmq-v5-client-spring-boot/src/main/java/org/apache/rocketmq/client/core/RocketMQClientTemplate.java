@@ -315,14 +315,24 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
         Producer grpcProducer = this.getProducer();
+        CompletableFuture<SendReceipt> future0;
         try {
             org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, messageGroup);
-            future = grpcProducer.sendAsync(rocketMsg);
+            future0 = grpcProducer.sendAsync(rocketMsg);
+            if (null != future) {
+                future0.whenComplete((sendReceipt, throwable) -> {
+                    if (null != throwable) {
+                        future.completeExceptionally(throwable);
+                    } else {
+                        future.complete(sendReceipt);
+                    }
+                });
+            }
         } catch (Exception e) {
             log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
-        return future;
+        return future0;
     }
 
     public Pair<SendReceipt, Transaction> sendMessageInTransaction(String destination, Object payload) throws ClientException {
