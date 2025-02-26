@@ -40,14 +40,21 @@ public class RocketMQProperties {
     private Producer producer;
 
     /**
+     * for pull consumer only
+     *
+     * @see org.apache.rocketmq.spring.annotation.RocketMQMessageListener for a push consumer
+     */
+    private PullConsumer pullConsumer = new PullConsumer();
+    /**
      * Configure enable listener or not.
      * In some particular cases, if you don't want the the listener is enabled when container startup,
      * the configuration pattern is like this :
-     * rocketmq.consumer.listeners.<group-name>.<topic-name>.enabled=<boolean value, true or false>
+     * rocketmq.push-consumer.listeners.<group-name>.<topic-name>.enabled=<boolean value, true or false>
      * <p>
      * the listener is enabled by default.
+     *
      */
-    private Consumer consumer = new Consumer();
+    private PushConsumer consumer = new PushConsumer();
 
     public String getNameServer() {
         return nameServer;
@@ -73,6 +80,22 @@ public class RocketMQProperties {
         this.producer = producer;
     }
 
+    public PullConsumer getPullConsumer() {
+        return pullConsumer;
+    }
+
+    public void setPullConsumer(PullConsumer pullConsumer) {
+        this.pullConsumer = pullConsumer;
+    }
+
+    public PushConsumer getConsumer() {
+        return consumer;
+    }
+
+    public void setConsumer(PushConsumer consumer) {
+        this.consumer = consumer;
+    }
+
     public static class Producer {
 
         /**
@@ -84,6 +107,11 @@ public class RocketMQProperties {
          * Namespace for this MQ Producer instance.
          */
         private String namespace;
+
+        /**
+         * The namespace v2 version of producer, it can not be used in combination with namespace.
+         */
+        private String namespaceV2;
 
         /**
          * Millis of send message timeout.
@@ -141,6 +169,11 @@ public class RocketMQProperties {
          * The property of "tlsEnable".
          */
         private boolean tlsEnable = false;
+
+        /**
+         * The property of "instanceName".
+         */
+        private String instanceName = "DEFAULT";
 
         public String getGroup() {
             return group;
@@ -245,17 +278,25 @@ public class RocketMQProperties {
         public void setNamespace(String namespace) {
             this.namespace = namespace;
         }
+
+        public String getNamespaceV2() {
+            return namespaceV2;
+        }
+
+        public void setNamespaceV2(String namespaceV2) {
+            this.namespaceV2 = namespaceV2;
+        }
+
+        public String getInstanceName() {
+            return instanceName;
+        }
+
+        public void setInstanceName(String instanceName) {
+            this.instanceName = instanceName;
+        }
     }
 
-    public Consumer getConsumer() {
-        return consumer;
-    }
-
-    public void setConsumer(Consumer consumer) {
-        this.consumer = consumer;
-    }
-
-    public static final class Consumer {
+    public static class PullConsumer {
         /**
          * Group name of consumer.
          */
@@ -267,6 +308,11 @@ public class RocketMQProperties {
         private String namespace;
 
         /**
+         * The namespace v2 version of consumer, it can not be used in combination with namespace.
+         */
+        private String namespaceV2;
+
+        /**
          * Topic name of consumer.
          */
         private String topic;
@@ -274,11 +320,10 @@ public class RocketMQProperties {
         /**
          * Control message mode, if you want all subscribers receive message all message, broadcasting is a good choice.
          */
-        private String  messageModel = "CLUSTERING";
+        private String messageModel = "CLUSTERING";
 
         /**
          * Control how to selector message.
-         *
          */
         private String selectorType = "TAG";
 
@@ -313,18 +358,14 @@ public class RocketMQProperties {
         private String customizedTraceTopic = TopicValidator.RMQ_SYS_TRACE_TOPIC;
 
         /**
-         * listener configuration container
-         * the pattern is like this:
-         * group1.topic1 = false
-         * group2.topic2 = true
-         * group3.topic3 = false
-         */
-        private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
-
-        /**
          * The property of "tlsEnable".
          */
         private boolean tlsEnable = false;
+
+        /**
+         * The property of "instanceName".
+         */
+        private String instanceName = "DEFAULT";
 
         public String getGroup() {
             return group;
@@ -390,14 +431,6 @@ public class RocketMQProperties {
             this.pullBatchSize = pullBatchSize;
         }
 
-        public Map<String, Map<String, Boolean>> getListeners() {
-            return listeners;
-        }
-
-        public void setListeners(Map<String, Map<String, Boolean>> listeners) {
-            this.listeners = listeners;
-        }
-
         public boolean isEnableMsgTrace() {
             return enableMsgTrace;
         }
@@ -428,6 +461,41 @@ public class RocketMQProperties {
 
         public void setNamespace(String namespace) {
             this.namespace = namespace;
+        }
+
+        public String getNamespaceV2() {
+            return namespaceV2;
+        }
+
+        public void setNamespaceV2(String namespaceV2) {
+            this.namespaceV2 = namespaceV2;
+        }
+
+        public String getInstanceName() {
+            return instanceName;
+        }
+
+        public void setInstanceName(String instanceName) {
+            this.instanceName = instanceName;
+        }
+    }
+
+    public static class PushConsumer extends PullConsumer {
+        /**
+         * listener configuration container
+         * the pattern is like this:
+         * group1.topic1 = false
+         * group2.topic2 = true
+         * group3.topic3 = false
+         */
+        private Map<String, Map<String, Boolean>> listeners = new HashMap<>();
+
+        public Map<String, Map<String, Boolean>> getListeners() {
+            return listeners;
+        }
+
+        public void setListeners(Map<String, Map<String, Boolean>> listeners) {
+            this.listeners = listeners;
         }
     }
 

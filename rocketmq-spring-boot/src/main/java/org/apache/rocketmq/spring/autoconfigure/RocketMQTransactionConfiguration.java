@@ -44,11 +44,13 @@ public class RocketMQTransactionConfiguration implements ApplicationContextAware
 
     private ConfigurableApplicationContext applicationContext;
 
-    @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
     }
 
-    @Override public void afterSingletonsInstantiated() {
+    @Override
+    public void afterSingletonsInstantiated() {
         Map<String, Object> beans = this.applicationContext.getBeansWithAnnotation(RocketMQTransactionListener.class)
             .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

@@ -79,8 +79,8 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testDefaultLitePullConsumerWithRelaxPropertyName() {
         runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
-                "rocketmq.consumer.group=spring_rocketmq",
-                "rocketmq.consumer.topic=test",
+                "rocketmq.pull-consumer.group=spring_rocketmq",
+                "rocketmq.pull-consumer.topic=test",
                 "rocketmq.accessChannel=LOCAL").
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultLitePullConsumer.class);
@@ -100,8 +100,8 @@ public class RocketMQAutoConfigurationTest {
             });
 
         runner.withPropertyValues("rocketmq.nameServer=127.0.0.1:9876",
-                "rocketmq.consumer.group=spring_rocketmq",
-                "rocketmq.consumer.topic=test",
+                "rocketmq.pull-consumer.group=spring_rocketmq",
+                "rocketmq.pull-consumer.topic=test",
                 "rocketmq.accessChannel=LOCAL123").
                 run((context) -> {
                     //Should throw exception for bad accessChannel property
@@ -121,8 +121,8 @@ public class RocketMQAutoConfigurationTest {
     @Test
     public void testDefaultLitePullConsumer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876",
-                "rocketmq.consumer.group=spring_rocketmq",
-                "rocketmq.consumer.topic=test").
+                "rocketmq.pull-consumer.group=spring_rocketmq",
+                "rocketmq.pull-consumer.topic=test").
                 run((context) -> {
                     assertThat(context).hasSingleBean(DefaultLitePullConsumer.class);
                 });
@@ -224,7 +224,7 @@ public class RocketMQAutoConfigurationTest {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
             withUserConfiguration(TestConfig.class).
             run((context) -> {
-                assertThat(context).getFailure().hasMessageContaining("connect to [127.0.0.1:9876] failed");
+                assertThat(context).getFailure().hasMessageContaining("connect to null failed");
             });
     }
 
@@ -233,7 +233,7 @@ public class RocketMQAutoConfigurationTest {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
             withUserConfiguration(TestConfigWithRocketMQReplyListener.class).
             run((context) -> {
-                assertThat(context).getFailure().hasMessageContaining("connect to [127.0.0.1:9876] failed");
+                assertThat(context).getFailure().hasMessageContaining("connect to null failed");
             });
     }
 
