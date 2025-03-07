@@ -632,23 +632,27 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
             log.error("syncSend failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
+        if (Objects.isNull(mode)) {
+            throw new IllegalArgumentException("`delay mode` can be null");
+        }
+        if (delayTime <= 0) {
+            throw new IllegalArgumentException("`delayTime` should be greater than 0");
+        }
         try {
             long now = System.currentTimeMillis();
             org.apache.rocketmq.common.message.Message rocketMsg = this.createRocketMqMessage(destination, message);
-            if (delayTime > 0 && Objects.nonNull(mode)) {
-                switch (mode) {
-                    case DELAY_SECONDS:
-                        rocketMsg.setDelayTimeSec(delayTime);
-                        break;
-                    case DELAY_MILLISECONDS:
-                        rocketMsg.setDelayTimeMs(delayTime);
-                        break;
-                    case DELIVER_TIME_MILLISECONDS:
-                        rocketMsg.setDeliverTimeMs(delayTime);
-                        break;
-                    default:
-                        log.warn("delay mode: {} not support", mode);
-                }
+            switch (mode) {
+                case DELAY_SECONDS:
+                    rocketMsg.setDelayTimeSec(delayTime);
+                    break;
+                case DELAY_MILLISECONDS:
+                    rocketMsg.setDelayTimeMs(delayTime);
+                    break;
+                case DELIVER_TIME_MILLISECONDS:
+                    rocketMsg.setDeliverTimeMs(delayTime);
+                    break;
+                default:
+                    log.warn("delay mode: {} not support", mode);
             }
             SendResult sendResult = producer.send(rocketMsg, timeout);
             long costTime = System.currentTimeMillis() - now;
