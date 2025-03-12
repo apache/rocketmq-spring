@@ -228,12 +228,7 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         try {
             org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, messageGroup);
             Producer grpcProducer = this.getProducer();
-            try {
-                sendReceipt = grpcProducer.send(rocketMsg);
-                log.info("Send message successfully, messageId={}", sendReceipt.getMessageId());
-            } catch (Throwable t) {
-                log.error("Failed to send message", t);
-            }
+            sendReceipt = grpcProducer.send(rocketMsg);
         } catch (Exception e) {
             log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
