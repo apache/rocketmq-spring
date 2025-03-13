@@ -221,7 +221,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
      */
     public SendReceipt syncSendGrpcMessage(String destination, Message<?> message, Duration messageDelayTime, String messageGroup) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
-            log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
         SendReceipt sendReceipt = null;
@@ -230,7 +229,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
             Producer grpcProducer = this.getProducer();
             sendReceipt = grpcProducer.send(rocketMsg);
         } catch (Exception e) {
-            log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
         return sendReceipt;
@@ -306,7 +304,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public CompletableFuture<SendReceipt> asyncSend(String destination, Message<?> message, Duration messageDelayTime, String messageGroup, CompletableFuture<SendReceipt> future) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
-            log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
         Producer grpcProducer = this.getProducer();
@@ -324,7 +321,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
                 });
             }
         } catch (Exception e) {
-            log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new MessagingException(e.getMessage(), e);
         }
         return future0;
@@ -353,7 +349,6 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
      */
     public Pair<SendReceipt, Transaction> sendTransactionMessage(String destination, Message<?> message) {
         if (Objects.isNull(message) || Objects.isNull(message.getPayload())) {
-            log.error("send request message failed. destination:{}, message is null ", destination);
             throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
         }
         final SendReceipt sendReceipt;
@@ -363,9 +358,7 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         try {
             transaction = grpcProducer.beginTransaction();
             sendReceipt = grpcProducer.send(rocketMsg, transaction);
-            log.info("Send transaction message successfully, messageId={}", sendReceipt.getMessageId());
         } catch (ClientException e) {
-            log.error("send request message failed. destination:{}, message:{} ", destination, message);
             throw new RuntimeException(e);
         }
         return new Pair<>(sendReceipt, transaction);
