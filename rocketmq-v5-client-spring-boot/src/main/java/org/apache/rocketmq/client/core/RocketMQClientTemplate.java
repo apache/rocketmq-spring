@@ -227,11 +227,10 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         try {
             org.apache.rocketmq.client.apis.message.Message rocketMsg = this.createRocketMQMessage(destination, message, messageDelayTime, messageGroup);
             Producer grpcProducer = this.getProducer();
-            sendReceipt = grpcProducer.send(rocketMsg);
+            return grpcProducer.send(rocketMsg);
         } catch (Exception e) {
             throw new MessagingException(e.getMessage(), e);
         }
-        return sendReceipt;
     }
 
 
