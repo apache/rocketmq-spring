@@ -194,7 +194,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
                 ", namespace='" + namespace + '\'' +
                 ", tag='" + tag + '\'' +
                 ", filterExpressionType='" + filterExpressionType + '\'' +
-                ", requestTimeout=" + requestTimeout +
+                ", requestTimeout(seconds)=" + requestTimeout.getSeconds() +
                 ", awaitDuration=" + awaitDuration +
                 ", sslEnabled=" + sslEnabled +
                 '}';
