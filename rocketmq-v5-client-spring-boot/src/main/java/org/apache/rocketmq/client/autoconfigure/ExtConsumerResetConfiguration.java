@@ -92,9 +92,12 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
 
         SimpleConsumerBuilder consumerBuilder = null;
         SimpleConsumer simpleConsumer = null;
+        SimpleConsumerInfo simpleConsumerInfo = null;
+
         try {
-            consumerBuilder = createConsumer(annotation);
-            simpleConsumer = consumerBuilder.build();
+            final ClientServiceProvider provider = ClientServiceProvider.loadService();
+            SimpleConsumerBuilder simpleConsumerBuilder = provider.newSimpleConsumerBuilder();
+            simpleConsumerInfo = createConsumer(annotation, simpleConsumerBuilder);
         } catch (Exception e) {
             log.error("Failed to startup SimpleConsumer for RocketMQTemplate {}", beanName, e);
         }
@@ -102,12 +105,12 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         rocketMQTemplate.setSimpleConsumerBuilder(consumerBuilder);
         rocketMQTemplate.setSimpleConsumer(simpleConsumer);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-        String topic = environment.resolvePlaceholders(annotation.topic());
-        log.info("Set real simpleConsumer to {} using {} topic", beanName, topic);
+        log.info("Set real simpleConsumer {} to {}", simpleConsumerInfo, beanName);
     }
 
-    private SimpleConsumerBuilder createConsumer(
-        org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation) {
+    private SimpleConsumerInfo createConsumer(
+        org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation,
+        SimpleConsumerBuilder simpleConsumerBuilder) {
         RocketMQProperties.SimpleConsumer simpleConsumer = rocketMQProperties.getSimpleConsumer();
         String consumerGroupName = resolvePlaceholders(annotation.consumerGroup(), simpleConsumer.getConsumerGroup());
         String topicName = resolvePlaceholders(annotation.topic(), simpleConsumer.getTopic());
@@ -122,10 +125,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         Boolean sslEnabled = simpleConsumer.isSslEnabled();
         Assert.hasText(topicName, "[topic] must not be null");
         ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey, endPoints, requestTimeout, sslEnabled, namespace);
-        final ClientServiceProvider provider = ClientServiceProvider.loadService();
         FilterExpression filterExpression = RocketMQUtil.createFilterExpression(tag, filterExpressionType);
         Duration duration = Duration.ofSeconds(awaitDuration);
-        SimpleConsumerBuilder simpleConsumerBuilder = provider.newSimpleConsumerBuilder();
         simpleConsumerBuilder.setClientConfiguration(clientConfiguration);
         if (StringUtils.hasLength(consumerGroupName)) {
             simpleConsumerBuilder.setConsumerGroup(consumerGroupName);
@@ -134,7 +135,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         if (Objects.nonNull(filterExpression)) {
             simpleConsumerBuilder.setSubscriptionExpressions(Collections.singletonMap(topicName, filterExpression));
         }
-        return simpleConsumerBuilder;
+
+        return new SimpleConsumerInfo(consumerGroupName, topicName, endPoints, namespace, tag, filterExpressionType, requestTimeout, awaitDuration, sslEnabled);
     }
 
     private String resolvePlaceholders(String text, String defaultValue) {
@@ -149,6 +151,53 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
                 String.format("Bean {} has been used in Spring Application Context, " +
                         "please check the @ExtRocketMQConsumerConfiguration",
                     annotation.value()));
+        }
+    }
+
+    static class SimpleConsumerInfo {
+        String consumerGroup;
+
+        String topicName;
+
+        String endPoints;
+
+        String namespace;
+
+        String tag;
+
+        String filterExpressionType;
+
+        Duration requestTimeout;
+
+        int awaitDuration;
+
+        Boolean sslEnabled;
+
+        public SimpleConsumerInfo(String consumerGroupName, String topicName, String endPoints, String namespace,
+            String tag, String filterExpressionType, Duration requestTimeout, int awaitDuration, Boolean sslEnabled) {
+            this.consumerGroup = consumerGroupName;
+            this.topicName = topicName;
+            this.endPoints = endPoints;
+            this.namespace = namespace;
+            this.tag = tag;
+            this.filterExpressionType = filterExpressionType;
+            this.requestTimeout = requestTimeout;
+            this.awaitDuration = awaitDuration;
+            this.sslEnabled = sslEnabled;
+        }
+
+        @Override public String toString() {
+            return "SimpleConsumerInfo{" +
+                "consumerGroup='" + consumerGroup + '\'' +
+                ", topicName='" + topicName + '\'' +
+                ", endPoints='" + endPoints + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", tag='" + tag + '\'' +
+                ", filterExpressionType='" + filterExpressionType + '\'' +
+                ", requestTimeout=" + requestTimeout +
+                ", awaitDuration=" + awaitDuration +
+                ", sslEnabled=" + sslEnabled +
+                '}';
         }
     }
 }
