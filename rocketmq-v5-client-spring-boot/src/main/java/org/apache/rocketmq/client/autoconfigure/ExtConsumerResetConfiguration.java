@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 @Configuration
 public class ExtConsumerResetConfiguration implements ApplicationContextAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(ExtConsumerResetConfiguration.class);
@@ -61,7 +60,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     private RocketMQMessageConverter rocketMQMessageConverter;
 
     public ExtConsumerResetConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
-                                         ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
+        ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
@@ -75,9 +74,9 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     @Override
     public void afterSingletonsInstantiated() {
         Map<String, Object> beans = this.applicationContext
-                .getBeansWithAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class)
-                .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .getBeansWithAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class)
+            .entrySet().stream().filter(entry -> !ScopedProxyUtils.isScopedTarget(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         beans.forEach(this::registerTemplate);
     }
 
@@ -103,10 +102,12 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         rocketMQTemplate.setSimpleConsumerBuilder(consumerBuilder);
         rocketMQTemplate.setSimpleConsumer(simpleConsumer);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
-        log.info("Set real simpleConsumer to :{} {}", beanName, annotation.value());
+        String topic = environment.resolvePlaceholders(annotation.topic());
+        log.info("Set real simpleConsumer to {} using {} topic", beanName, topic);
     }
 
-    private SimpleConsumerBuilder createConsumer(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation) {
+    private SimpleConsumerBuilder createConsumer(
+        org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation) {
         RocketMQProperties.SimpleConsumer simpleConsumer = rocketMQProperties.getSimpleConsumer();
         String consumerGroupName = resolvePlaceholders(annotation.consumerGroup(), simpleConsumer.getConsumerGroup());
         String topicName = resolvePlaceholders(annotation.topic(), simpleConsumer.getTopic());
@@ -142,12 +143,12 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     }
 
     private void validate(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation,
-                          GenericApplicationContext genericApplicationContext) {
+        GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
             throw new BeanDefinitionValidationException(
-                    String.format("Bean {} has been used in Spring Application Context, " +
-                                    "please check the @ExtRocketMQConsumerConfiguration",
-                            annotation.value()));
+                String.format("Bean {} has been used in Spring Application Context, " +
+                        "please check the @ExtRocketMQConsumerConfiguration",
+                    annotation.value()));
         }
     }
 }
