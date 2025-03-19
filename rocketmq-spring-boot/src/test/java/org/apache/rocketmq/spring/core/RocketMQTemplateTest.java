@@ -126,8 +126,8 @@ public class RocketMQTemplateTest {
     public void testReceiveMessage() {
         try {
             rocketMQTemplate.receive(String.class);
-        } catch (MessagingException e) {
-            assertThat(e).hasMessageContaining("org.apache.rocketmq.remoting.exception.RemotingConnectException: connect to [127.0.0.1:9876] failed");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessageContaining("The consumer not running, please start it first");
         }
     }
 
