@@ -78,17 +78,9 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         log.info("Register the listener to container, listenerBeanName:{}, containerBeanName:{}", beanName, containerBeanName);
     }
 
-    public void startContainer() {
-        for (DefaultListenerContainer container : containers) {
-            if (!container.isRunning()) {
-                try {
-                    container.start();
-                } catch (Exception e) {
-                    log.error("Started container failed. {}", container, e);
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+
+    public List<DefaultListenerContainer> getContainers() {
+        return containers;
     }
 
     private DefaultListenerContainer createRocketMQListenerContainer(String name, Object bean, RocketMQMessageListener annotation) {
