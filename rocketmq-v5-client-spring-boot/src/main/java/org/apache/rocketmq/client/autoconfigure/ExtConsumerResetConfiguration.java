@@ -96,8 +96,9 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
 
         try {
             final ClientServiceProvider provider = ClientServiceProvider.loadService();
-            SimpleConsumerBuilder simpleConsumerBuilder = provider.newSimpleConsumerBuilder();
-            simpleConsumerInfo = createConsumer(annotation, simpleConsumerBuilder);
+            consumerBuilder = provider.newSimpleConsumerBuilder();
+            simpleConsumerInfo = createConsumer(annotation, consumerBuilder);
+            simpleConsumer = consumerBuilder.build();
         } catch (Exception e) {
             log.error("Failed to startup SimpleConsumer for RocketMQTemplate {}", beanName, e);
         }
