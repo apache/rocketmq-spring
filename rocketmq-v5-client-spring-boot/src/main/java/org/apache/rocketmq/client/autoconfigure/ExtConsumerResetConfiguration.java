@@ -149,7 +149,7 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
             throw new BeanDefinitionValidationException(
-                String.format("Bean {} has been used in Spring Application Context, " +
+                String.format("Bean %s has been used in Spring Application Context, " +
                         "please check the @ExtRocketMQConsumerConfiguration",
                     annotation.value()));
         }

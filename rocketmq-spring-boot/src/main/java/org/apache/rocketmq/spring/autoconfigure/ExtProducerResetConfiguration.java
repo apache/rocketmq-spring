@@ -138,7 +138,7 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
     private void validate(ExtRocketMQTemplateConfiguration annotation,
         GenericApplicationContext genericApplicationContext) {
         if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(String.format("Bean {} has been used in Spring Application Context, " +
+            throw new BeanDefinitionValidationException(String.format("Bean %s has been used in Spring Application Context, " +
                     "please check the @ExtRocketMQTemplateConfiguration",
                 annotation.value()));
         }
