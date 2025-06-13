@@ -40,6 +40,8 @@ public class RocketMQUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RocketMQUtil.class);
 
+    private static final String KEY_SEPARATOR = " ";
+
     public static org.apache.rocketmq.client.apis.message.Message convertToClientMessage(
             MessageConverter messageConverter, String charset,
             String destination, org.springframework.messaging.Message<?> message, Duration messageDelayTime, String messageGroup) {
@@ -79,7 +81,7 @@ public class RocketMQUtil {
                 messageBuilder.setMessageGroup(messageGroup);
             }
             if (!ObjectUtils.isEmpty(keys)) {
-                messageBuilder.setKeys(keys.toString());
+                messageBuilder.setKeys(String.valueOf(keys).split(KEY_SEPARATOR));
             }
             if (Objects.nonNull(messageDelayTime)) {
                 messageBuilder.setDeliveryTimestamp(System.currentTimeMillis() + messageDelayTime.toMillis());
