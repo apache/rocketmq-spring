@@ -87,8 +87,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
             throw new IllegalStateException(clazz + " is not instance of " + RocketMQClientTemplate.class.getName());
         }
         org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation = clazz.getAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class);
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
-        validate(annotation, genericApplicationContext);
 
         SimpleConsumerBuilder consumerBuilder = null;
         SimpleConsumer simpleConsumer = null;
@@ -143,16 +141,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     private String resolvePlaceholders(String text, String defaultValue) {
         String value = environment.resolvePlaceholders(text);
         return StringUtils.hasLength(value) ? value : defaultValue;
-    }
-
-    private void validate(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation,
-        GenericApplicationContext genericApplicationContext) {
-        if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(
-                String.format("Bean %s has been used in Spring Application Context, " +
-                        "please check the @ExtRocketMQConsumerConfiguration",
-                    annotation.value()));
-        }
     }
 
     static class SimpleConsumerInfo {

@@ -87,8 +87,6 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
         }
 
         ExtProducerResetConfiguration annotation = clazz.getAnnotation(ExtProducerResetConfiguration.class);
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
-        validate(annotation, genericApplicationContext);
 
         ProducerBuilder producerBuilder = createProducer(annotation);
         RocketMQClientTemplate rocketMQTemplate = (RocketMQClientTemplate) bean;
@@ -122,15 +120,6 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
                 .setClientConfiguration(clientConfiguration).setMaxAttempts(annotation.maxAttempts())
                 .setTopics(topic);
         return producerBuilder;
-    }
-
-    private void validate(ExtProducerResetConfiguration annotation,
-                          GenericApplicationContext genericApplicationContext) {
-        if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(String.format("Bean %s has been used in Spring Application Context, " +
-                            "please check the @ExtTemplateConfiguration",
-                    annotation.value()));
-        }
     }
 
 }

@@ -87,8 +87,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         }
 
         ExtRocketMQConsumerConfiguration annotation = clazz.getAnnotation(ExtRocketMQConsumerConfiguration.class);
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
-        validate(annotation, genericApplicationContext);
 
         DefaultLitePullConsumer consumer = null;
         try {
@@ -141,15 +139,5 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     private String resolvePlaceholders(String text, String defaultValue) {
         String value = environment.resolvePlaceholders(text);
         return StringUtils.hasLength(value) ? value : defaultValue;
-    }
-
-    private void validate(ExtRocketMQConsumerConfiguration annotation,
-            GenericApplicationContext genericApplicationContext) {
-        if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(
-                    String.format("Bean {} has been used in Spring Application Context, " +
-                                    "please check the @ExtRocketMQConsumerConfiguration",
-                            annotation.value()));
-        }
     }
 }
