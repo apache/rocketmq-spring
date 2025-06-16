@@ -24,6 +24,7 @@ import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.consumer.PushConsumerBuilder;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
 import org.apache.rocketmq.client.core.RocketMQListener;
+import org.apache.rocketmq.client.core.RocketMQPushConsumerLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -251,8 +252,8 @@ public class DefaultListenerContainer implements InitializingBean,
     }
 
     private void initRocketMQPushConsumer() {
-        if (rocketMQMessageListener == null) {
-            throw new IllegalArgumentException("Property 'rocketMQMessageListener' is required");
+        if (rocketMQListener == null) {
+            throw new IllegalArgumentException("Property 'rocketMQListener' is required");
         }
         Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
         Assert.notNull(topic, "Property 'topic' is required");
@@ -280,6 +281,9 @@ public class DefaultListenerContainer implements InitializingBean,
                 .setMaxCacheMessageSizeInBytes(this.getMaxCacheMessageSizeInBytes())
                 .setMaxCacheMessageCount(this.getMaxCachedMessageCount())
                 .setMessageListener(rocketMQListener);
+        if (rocketMQListener instanceof RocketMQPushConsumerLifecycleListener) {
+            ((RocketMQPushConsumerLifecycleListener) rocketMQListener).prepareStart(pushConsumerBuilder);
+        }
         this.setPushConsumerBuilder(pushConsumerBuilder);
     }
 
