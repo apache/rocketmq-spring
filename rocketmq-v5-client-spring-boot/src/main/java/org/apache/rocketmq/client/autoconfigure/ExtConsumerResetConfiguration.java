@@ -31,12 +31,10 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -87,8 +85,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
             throw new IllegalStateException(clazz + " is not instance of " + RocketMQClientTemplate.class.getName());
         }
         org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation = clazz.getAnnotation(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration.class);
-        GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
-        validate(annotation, genericApplicationContext);
 
         SimpleConsumerBuilder consumerBuilder = null;
         SimpleConsumer simpleConsumer = null;
@@ -143,16 +139,6 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
     private String resolvePlaceholders(String text, String defaultValue) {
         String value = environment.resolvePlaceholders(text);
         return StringUtils.hasLength(value) ? value : defaultValue;
-    }
-
-    private void validate(org.apache.rocketmq.client.annotation.ExtConsumerResetConfiguration annotation,
-        GenericApplicationContext genericApplicationContext) {
-        if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(
-                String.format("Bean %s has been used in Spring Application Context, " +
-                        "please check the @ExtRocketMQConsumerConfiguration",
-                    annotation.value()));
-        }
     }
 
     static class SimpleConsumerInfo {
