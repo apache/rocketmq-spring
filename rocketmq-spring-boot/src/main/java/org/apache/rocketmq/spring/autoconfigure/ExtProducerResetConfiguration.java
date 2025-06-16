@@ -36,7 +36,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 
@@ -131,14 +130,5 @@ public class ExtProducerResetConfiguration implements ApplicationContextAware, S
         producer.setNamespaceV2(RocketMQUtil.getNamespace(namespaceV2, producerConfig.getNamespaceV2()));
         producer.setInstanceName(annotation.instanceName());
         return producer;
-    }
-
-    private void validate(ExtRocketMQTemplateConfiguration annotation,
-        GenericApplicationContext genericApplicationContext) {
-        if (genericApplicationContext.isBeanNameInUse(annotation.value())) {
-            throw new BeanDefinitionValidationException(String.format("Bean %s has been used in Spring Application Context, " +
-                    "please check the @ExtRocketMQTemplateConfiguration",
-                annotation.value()));
-        }
     }
 }
