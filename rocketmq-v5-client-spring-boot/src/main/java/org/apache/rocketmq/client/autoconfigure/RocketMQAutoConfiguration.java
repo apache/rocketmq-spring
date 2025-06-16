@@ -59,6 +59,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
     public static final String ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME = "rocketMQClientTemplate";
     public static final String PRODUCER_BUILDER_BEAN_NAME = "producerBuilder";
     public static final String SIMPLE_CONSUMER_BUILDER_BEAN_NAME = "simpleConsumerBuilder";
+    public static final String COMMA = ",";
     private ApplicationContext applicationContext;
 
     @Override
@@ -87,7 +88,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         if (StringUtils.hasLength(topic)) {
             // Set the topic name(s), which is optional but recommended. It makes producer could prefetch the topic
             // route before message publishing.
-            producerBuilder.setTopics(rocketMQProducer.getTopic());
+            producerBuilder.setTopics(rocketMQProducer.getTopic().split(COMMA));
         }
         log.info(String.format("a producer init on proxy %s", endPoints));
         return producerBuilder;
