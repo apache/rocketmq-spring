@@ -40,6 +40,8 @@ public class RocketMQUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RocketMQUtil.class);
 
+    private static final ClientServiceProvider PROVIDER = ClientServiceProvider.loadService();
+
     public static org.apache.rocketmq.client.apis.message.Message convertToClientMessage(
             MessageConverter messageConverter, String charset,
             String destination, org.springframework.messaging.Message<?> message, Duration messageDelayTime, String messageGroup) {
@@ -62,7 +64,7 @@ public class RocketMQUtil {
             return null;
         }
         String[] tempArr = destination.split(":", 2);
-        final ClientServiceProvider provider = ClientServiceProvider.loadService();
+
         org.apache.rocketmq.client.apis.message.MessageBuilder messageBuilder = null;
         // resolve header
         if (Objects.nonNull(headers) && !headers.isEmpty()) {
@@ -70,7 +72,7 @@ public class RocketMQUtil {
             if (ObjectUtils.isEmpty(keys)) {
                 keys = headers.get(toRocketHeaderKey(RocketMQHeaders.KEYS));
             }
-            messageBuilder = provider.newMessageBuilder()
+            messageBuilder = PROVIDER.newMessageBuilder()
                     .setTopic(tempArr[0]);
             if (tempArr.length > 1) {
                 messageBuilder.setTag(tempArr[1]);
