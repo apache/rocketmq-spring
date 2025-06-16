@@ -114,10 +114,9 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
         ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(accessKey, secretKey,
             endpoints, Duration.ofSeconds(requestTimeout), sslEnabled, namespace);
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
-        ProducerBuilder producerBuilder = provider.newProducerBuilder()
+        return provider.newProducerBuilder()
                 .setClientConfiguration(clientConfiguration).setMaxAttempts(annotation.maxAttempts())
-                .setTopics(topic);
-        return producerBuilder;
+                .setTopics(topic.split(RocketMQAutoConfiguration.COMMA));
     }
 
 }
