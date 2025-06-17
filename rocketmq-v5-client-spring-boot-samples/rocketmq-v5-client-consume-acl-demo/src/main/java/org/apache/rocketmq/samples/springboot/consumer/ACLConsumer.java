@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RocketMQMessageListener(
+@RocketMQMessageListener(accessKey = "${demo.acl.rocketmq.access-key:}", secretKey = "${demo.acl.rocketmq.secret-key:}",
         tag = "${demo.acl.rocketmq.tag:}", topic = "${demo.acl.rocketmq.topic:}",
         endpoints = "${demo.acl.rocketmq.endpoints:}", consumerGroup = "${demo.acl.rocketmq.consumer-group:}")
 public class ACLConsumer implements RocketMQListener, RocketMQPushConsumerLifecycleListener {
