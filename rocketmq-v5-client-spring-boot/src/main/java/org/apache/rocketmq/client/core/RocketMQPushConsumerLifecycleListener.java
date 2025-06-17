@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.rocketmq.client.core;
 
-import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
-import org.apache.rocketmq.client.apis.consumer.MessageListener;
-import org.apache.rocketmq.client.apis.message.MessageView;
+import org.apache.rocketmq.client.apis.consumer.PushConsumerBuilder;
+import org.apache.rocketmq.client.support.RocketMQConsumerLifecycleListener;
 
-public interface RocketMQListener extends MessageListener {
-    @Override
-    ConsumeResult consume(MessageView messageView);
+public interface RocketMQPushConsumerLifecycleListener extends RocketMQConsumerLifecycleListener<PushConsumerBuilder> {
 }
