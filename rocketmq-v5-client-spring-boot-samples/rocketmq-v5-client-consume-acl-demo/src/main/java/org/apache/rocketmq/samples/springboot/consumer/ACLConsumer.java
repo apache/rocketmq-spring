@@ -23,13 +23,17 @@ import org.apache.rocketmq.client.apis.consumer.PushConsumerBuilder;
 import org.apache.rocketmq.client.apis.message.MessageView;
 import org.apache.rocketmq.client.core.RocketMQListener;
 import org.apache.rocketmq.client.core.RocketMQPushConsumerLifecycleListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RocketMQMessageListener(accessKey = "${demo.acl.rocketmq.access-key:}", secretKey = "${demo.acl.rocketmq.secret-key:}",
+@RocketMQMessageListener(
         tag = "${demo.acl.rocketmq.tag:}", topic = "${demo.acl.rocketmq.topic:}",
         endpoints = "${demo.acl.rocketmq.endpoints:}", consumerGroup = "${demo.acl.rocketmq.consumer-group:}")
 public class ACLConsumer implements RocketMQListener, RocketMQPushConsumerLifecycleListener {
+
+    @Value("${demo.acl.rocketmq.consumptionThreadCount}")
+    private Integer consumptionThreadCount;
     @Override
     public ConsumeResult consume(MessageView messageView) {
         System.out.println("handle my acl message:" + messageView);
@@ -38,7 +42,7 @@ public class ACLConsumer implements RocketMQListener, RocketMQPushConsumerLifecy
 
     @Override
     public void prepareStart(PushConsumerBuilder consumerBuilder) {
-        consumerBuilder.setConsumptionThreadCount(16);
+        consumerBuilder.setConsumptionThreadCount(consumptionThreadCount);
     }
 }
 
