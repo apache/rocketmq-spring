@@ -33,6 +33,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
+import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 
 import java.io.IOException;
@@ -58,6 +59,8 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
     private RocketMQMessageConverter rocketMQMessageConverter = new RocketMQMessageConverter();
 
     private String charset = "UTF-8";
+
+    private MessagePostProcessor messagePostProcessor;
 
     public Producer getProducer() {
         if (Objects.isNull(producer)) {
@@ -130,6 +133,13 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
         this.charset = charset;
     }
 
+    public MessagePostProcessor getMessagePostProcessor() {
+        return messagePostProcessor;
+    }
+
+    public void setMessagePostProcessor(MessagePostProcessor messagePostProcessor) {
+        this.messagePostProcessor = messagePostProcessor;
+    }
 
     @Override
     public void destroy() throws Exception {
@@ -391,7 +401,7 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
 
     private org.apache.rocketmq.client.apis.message.Message createRocketMQMessage(String destination, Message<?> message, Duration messageDelayTime, String messageGroup) {
-        Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), null);
+        Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), messagePostProcessor);
         return RocketMQUtil.convertToClientMessage(getMessageConverter(), charset,
                 destination, msg, messageDelayTime, messageGroup);
     }
