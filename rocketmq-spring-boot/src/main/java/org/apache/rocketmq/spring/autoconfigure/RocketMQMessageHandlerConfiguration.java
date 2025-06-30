@@ -19,17 +19,20 @@ package org.apache.rocketmq.spring.autoconfigure;
 
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.apache.rocketmq.spring.support.RocketMQMessageHandler;
-import org.apache.rocketmq.spring.support.RocketMQMessageListenerContainerRegistrar;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 
+/**
+ * @see RocketMQMessageConverter
+ */
 @Configuration
-@ConditionalOnMissingBean(RocketMQMessageListenerContainerRegistrar.class)
-public class ListenerContainerConfiguration {
+@ConditionalOnMissingBean(RocketMQMessageHandler.class)
+class RocketMQMessageHandlerConfiguration {
+
     @Bean
-    public RocketMQMessageListenerContainerRegistrar rocketMQMessageListenerContainerRegistrar(RocketMQMessageConverter rocketMQMessageConverter, ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties, RocketMQMessageHandler rocketMQMessageHandler) {
-        return new RocketMQMessageListenerContainerRegistrar(rocketMQMessageConverter, environment, rocketMQProperties, rocketMQMessageHandler);
+    public RocketMQMessageHandler createRocketMQMessageHandler() {
+        return (message, consumer) -> consumer.doHandler(message);
     }
+
 }

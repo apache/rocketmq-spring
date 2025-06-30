@@ -25,6 +25,7 @@ import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+import org.apache.rocketmq.spring.support.RocketMQMessagePostProcessor;
 import org.apache.rocketmq.spring.support.RocketMQUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +52,10 @@ import org.springframework.util.StringUtils;
 @EnableConfigurationProperties(RocketMQProperties.class)
 @ConditionalOnClass({MQAdmin.class})
 @ConditionalOnProperty(prefix = "rocketmq", value = "name-server", matchIfMissing = true)
-@Import({MessageConverterConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class,
-        ExtConsumerResetConfiguration.class, RocketMQTransactionConfiguration.class, RocketMQListenerConfiguration.class})
-@AutoConfigureAfter({MessageConverterConfiguration.class})
+@Import({MessageConverterConfiguration.class, RocketMQMessageHandlerConfiguration.class, ListenerContainerConfiguration.class, ExtProducerResetConfiguration.class,
+        ExtConsumerResetConfiguration.class, RocketMQTransactionConfiguration.class, RocketMQListenerConfiguration.class,
+        MessagePostProcessorConfiguration.class})
+@AutoConfigureAfter({MessageConverterConfiguration.class, MessagePostProcessorConfiguration.class, RocketMQMessageHandlerConfiguration.class})
 @AutoConfigureBefore({RocketMQTransactionConfiguration.class})
 public class RocketMQAutoConfiguration implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(RocketMQAutoConfiguration.class);
@@ -166,7 +168,8 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
     @Bean(destroyMethod = "destroy")
     @Conditional(ProducerOrConsumerPropertyCondition.class)
     @ConditionalOnMissingBean(name = ROCKETMQ_TEMPLATE_DEFAULT_GLOBAL_NAME)
-    public RocketMQTemplate rocketMQTemplate(RocketMQMessageConverter rocketMQMessageConverter) {
+    public RocketMQTemplate rocketMQTemplate(RocketMQMessageConverter rocketMQMessageConverter,
+                                             RocketMQMessagePostProcessor rocketMQMessagePostProcessor) {
         RocketMQTemplate rocketMQTemplate = new RocketMQTemplate();
         if (applicationContext.containsBean(PRODUCER_BEAN_NAME)) {
             rocketMQTemplate.setProducer((DefaultMQProducer) applicationContext.getBean(PRODUCER_BEAN_NAME));
@@ -175,6 +178,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
             rocketMQTemplate.setConsumer((DefaultLitePullConsumer) applicationContext.getBean(CONSUMER_BEAN_NAME));
         }
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
+        rocketMQTemplate.setMessagePostProcessor(rocketMQMessagePostProcessor.getMessagePostProcessor());
         return rocketMQTemplate;
     }
 

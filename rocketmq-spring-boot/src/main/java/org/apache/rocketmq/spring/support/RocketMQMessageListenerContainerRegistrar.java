@@ -56,11 +56,15 @@ public class RocketMQMessageListenerContainerRegistrar implements ApplicationCon
 
     private final List<DefaultRocketMQListenerContainer> containers = new ArrayList<>();
 
+    private final RocketMQMessageHandler rocketMQMessageHandler;
+
     public RocketMQMessageListenerContainerRegistrar(RocketMQMessageConverter rocketMQMessageConverter,
-                                                     ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
+                                                     ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties,
+                                                     RocketMQMessageHandler rocketMQMessageHandler) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
+        this.rocketMQMessageHandler = rocketMQMessageHandler;
     }
 
     @Override
@@ -146,6 +150,7 @@ public class RocketMQMessageListenerContainerRegistrar implements ApplicationCon
             container.setRocketMQReplyListener((RocketMQReplyListener) bean);
         }
         container.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
+        container.setRocketMQMessageHandler(rocketMQMessageHandler);
         container.setName(name);
 
         String namespace = environment.resolvePlaceholders(annotation.namespace());

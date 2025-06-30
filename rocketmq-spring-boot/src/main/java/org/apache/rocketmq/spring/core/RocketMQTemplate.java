@@ -72,6 +72,8 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     private RocketMQMessageConverter rocketMQMessageConverter = new RocketMQMessageConverter();
 
+    private MessagePostProcessor messagePostProcessor;
+
     public DefaultMQProducer getProducer() {
         return producer;
     }
@@ -102,6 +104,14 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     public void setMessageQueueSelector(MessageQueueSelector messageQueueSelector) {
         this.messageQueueSelector = messageQueueSelector;
+    }
+
+    public MessagePostProcessor getMessagePostProcessor() {
+        return messagePostProcessor;
+    }
+
+    public void setMessagePostProcessor(MessagePostProcessor messagePostProcessor) {
+        this.messagePostProcessor = messagePostProcessor;
     }
 
     public void setAsyncSenderExecutor(ExecutorService asyncSenderExecutor) {
@@ -1191,7 +1201,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
 
     private org.apache.rocketmq.common.message.Message createRocketMqMessage(
         String destination, Message<?> message) {
-        Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), null);
+        Message<?> msg = this.doConvert(message.getPayload(), message.getHeaders(), messagePostProcessor);
         return RocketMQUtil.convertToRocketMessage(getMessageConverter(), charset,
             destination, msg);
     }
