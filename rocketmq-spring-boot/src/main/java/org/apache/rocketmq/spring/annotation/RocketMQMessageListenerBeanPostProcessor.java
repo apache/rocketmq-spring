@@ -62,7 +62,7 @@ public class RocketMQMessageListenerBeanPostProcessor implements BeanPostProcess
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
-        RocketMQMessageListener ann = targetClass.getAnnotation(RocketMQMessageListener.class);
+        RocketMQMessageListener ann = AnnotationUtils.findAnnotation(targetClass, RocketMQMessageListener.class);
         if (ann != null) {
             RocketMQMessageListener enhance = enhance(targetClass, ann);
             registrarObjectProvider.ifAvailable(registrar -> registrar.registerContainer(beanName, bean, enhance));
