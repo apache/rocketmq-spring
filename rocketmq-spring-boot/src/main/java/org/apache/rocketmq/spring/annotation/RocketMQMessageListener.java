@@ -18,6 +18,8 @@
 package org.apache.rocketmq.spring.annotation;
 
 import org.apache.rocketmq.client.impl.consumer.ConsumeMessageService;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -173,4 +175,24 @@ public @interface RocketMQMessageListener {
      * The property of "instanceName".
      */
     String instanceName() default "DEFAULT";
+
+    /**
+     * Message pull Interval.
+     */
+    long pullInterval() default 0;
+
+    /**
+     * Batch pull size.
+     */
+    int pullBatchSize() default 32;
+
+    /**
+     * Batch consumption size.
+     */
+    int consumeMessageBatchMaxSize() default 1;
+
+    /**
+     * Consuming point on consumer booting.
+     */
+    ConsumeFromWhere consumeFromWhere() default ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET;
 }
