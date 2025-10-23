@@ -16,6 +16,11 @@
  */
 package org.apache.rocketmq.client.annotation;
 
+import java.lang.reflect.AnnotatedElement;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import org.apache.rocketmq.client.autoconfigure.ListenerContainerConfiguration;
 import org.apache.rocketmq.shaded.org.slf4j.Logger;
 import org.apache.rocketmq.shaded.org.slf4j.LoggerFactory;
@@ -31,12 +36,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
-
-import java.lang.reflect.AnnotatedElement;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 public class RocketMQMessageListenerBeanPostProcessor implements ApplicationContextAware, BeanPostProcessor, InitializingBean, SmartLifecycle {
 
@@ -79,11 +78,11 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
 
         if (likelyListener && (isAopProxy || isScopedTarget || hasRefreshScope)) {
             log.warn("[RocketMQ] Bean '{}' (class={}) appears to be proxied or annotated with @RefreshScope. "
-                            + "@RocketMQMessageListener on proxied beans may not be detected or registered. "
-                            + "Recommended: do NOT put @RefreshScope on listener classes. "
-                            + "Instead, extract refreshable configs to a separate @RefreshScope bean and inject it. "
-                            + "See: https://github.com/apache/rocketmq/issues/9564",
-                    beanName, bean.getClass().getName());
+                    + "@RocketMQMessageListener on proxied beans may not be detected or registered. "
+                    + "Recommended: do NOT put @RefreshScope on listener classes. "
+                    + "Instead, extract refreshable configs to a separate @RefreshScope bean and inject it. "
+                    + "See: https://github.com/apache/rocketmq/issues/9564",
+                beanName, bean.getClass().getName());
         }
 
         return bean;
@@ -92,14 +91,15 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
     private boolean hasRefreshScopeAnnotation(Class<?> proxyClass, Class<?> targetClass) {
         try {
             if (ClassUtils.isPresent("org.springframework.cloud.context.config.annotation.RefreshScope",
-                    proxyClass.getClassLoader())) {
+                proxyClass.getClassLoader())) {
                 Class<?> refreshScopeClass = ClassUtils.forName(
-                        "org.springframework.cloud.context.config.annotation.RefreshScope",
-                        proxyClass.getClassLoader());
-                return AnnotationUtils.findAnnotation(targetClass, (Class) refreshScopeClass) != null
-                        || AnnotationUtils.findAnnotation(proxyClass, (Class) refreshScopeClass) != null;
+                    "org.springframework.cloud.context.config.annotation.RefreshScope",
+                    proxyClass.getClassLoader());
+                return AnnotationUtils.findAnnotation(targetClass, (Class)refreshScopeClass) != null
+                    || AnnotationUtils.findAnnotation(proxyClass, (Class)refreshScopeClass) != null;
             }
-        } catch (Throwable ignored) {
+        }
+        catch (Throwable ignored) {
             // ignore
         }
         return false;
@@ -108,18 +108,22 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
     private boolean isLikelyListenerBean(Class<?> proxyClass, Class<?> targetClass) {
         try {
             Class<?> listener = ClassUtils.forName(
-                    "org.apache.rocketmq.spring.core.RocketMQListener", proxyClass.getClassLoader());
+                "org.apache.rocketmq.spring.core.RocketMQListener", proxyClass.getClassLoader());
             if (listener.isAssignableFrom(proxyClass) || listener.isAssignableFrom(targetClass)) {
                 return true;
             }
-        } catch (Throwable ignored) { }
+        }
+        catch (Throwable ignored) {
+        }
         try {
             Class<?> replyListener = ClassUtils.forName(
-                    "org.apache.rocketmq.spring.core.RocketMQReplyListener", proxyClass.getClassLoader());
+                "org.apache.rocketmq.spring.core.RocketMQReplyListener", proxyClass.getClassLoader());
             if (replyListener.isAssignableFrom(proxyClass) || replyListener.isAssignableFrom(targetClass)) {
                 return true;
             }
-        } catch (Throwable ignored) { }
+        }
+        catch (Throwable ignored) {
+        }
 
         return false;
     }
@@ -142,14 +146,13 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
 
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
-
     @Override
     public boolean isRunning() {
         return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 
     @Override
@@ -166,12 +169,12 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
     private void buildEnhancer() {
         if (this.applicationContext != null) {
             Map<String, AnnotationEnhancer> enhancersMap =
-                    this.applicationContext.getBeansOfType(AnnotationEnhancer.class, false, false);
+                this.applicationContext.getBeansOfType(AnnotationEnhancer.class, false, false);
             if (enhancersMap.size() > 0) {
                 List<AnnotationEnhancer> enhancers = enhancersMap.values()
-                        .stream()
-                        .sorted(new OrderComparator())
-                        .collect(Collectors.toList());
+                    .stream()
+                    .sorted(new OrderComparator())
+                    .collect(Collectors.toList());
                 this.enhancer = (attrs, element) -> {
                     Map<String, Object> newAttrs = attrs;
                     for (AnnotationEnhancer enh : enhancers) {
@@ -186,9 +189,10 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
     private RocketMQMessageListener enhance(AnnotatedElement element, RocketMQMessageListener ann) {
         if (this.enhancer == null) {
             return ann;
-        } else {
+        }
+        else {
             return AnnotationUtils.synthesizeAnnotation(
-                    this.enhancer.apply(AnnotationUtils.getAnnotationAttributes(ann), element), RocketMQMessageListener.class, null);
+                this.enhancer.apply(AnnotationUtils.getAnnotationAttributes(ann), element), RocketMQMessageListener.class, null);
         }
     }
 

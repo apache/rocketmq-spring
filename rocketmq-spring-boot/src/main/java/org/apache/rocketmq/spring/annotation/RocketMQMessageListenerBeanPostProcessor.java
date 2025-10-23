@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
 import org.apache.rocketmq.logging.org.slf4j.Logger;
 import org.apache.rocketmq.logging.org.slf4j.LoggerFactory;
 import org.apache.rocketmq.spring.support.RocketMQMessageListenerContainerRegistrar;
@@ -89,11 +88,11 @@ public class RocketMQMessageListenerBeanPostProcessor implements BeanPostProcess
 
         if (likelyListener && (isAopProxy || isScopedTarget || hasRefreshScope)) {
             log.warn("[RocketMQ] Bean '{}' (class={}) appears to be proxied or annotated with @RefreshScope. "
-                            + "@RocketMQMessageListener on proxied beans may not be detected or registered. "
-                            + "Recommended: do NOT put @RefreshScope on listener classes. "
-                            + "Instead, extract refreshable configs to a separate @RefreshScope bean and inject it. "
-                            + "See: https://github.com/apache/rocketmq/issues/9564",
-                    beanName, bean.getClass().getName());
+                    + "@RocketMQMessageListener on proxied beans may not be detected or registered. "
+                    + "Recommended: do NOT put @RefreshScope on listener classes. "
+                    + "Instead, extract refreshable configs to a separate @RefreshScope bean and inject it. "
+                    + "See: https://github.com/apache/rocketmq/issues/9564",
+                beanName, bean.getClass().getName());
         }
 
         return bean;
@@ -102,14 +101,15 @@ public class RocketMQMessageListenerBeanPostProcessor implements BeanPostProcess
     private boolean hasRefreshScopeAnnotation(Class<?> proxyClass, Class<?> targetClass) {
         try {
             if (ClassUtils.isPresent("org.springframework.cloud.context.config.annotation.RefreshScope",
-                    proxyClass.getClassLoader())) {
+                proxyClass.getClassLoader())) {
                 Class<?> refreshScopeClass = ClassUtils.forName(
-                        "org.springframework.cloud.context.config.annotation.RefreshScope",
-                        proxyClass.getClassLoader());
-                return AnnotationUtils.findAnnotation(targetClass, (Class) refreshScopeClass) != null
-                        || AnnotationUtils.findAnnotation(proxyClass, (Class) refreshScopeClass) != null;
+                    "org.springframework.cloud.context.config.annotation.RefreshScope",
+                    proxyClass.getClassLoader());
+                return AnnotationUtils.findAnnotation(targetClass, (Class)refreshScopeClass) != null
+                    || AnnotationUtils.findAnnotation(proxyClass, (Class)refreshScopeClass) != null;
             }
-        } catch (Throwable ignored) {
+        }
+        catch (Throwable ignored) {
             // ignore
         }
         return false;
@@ -118,18 +118,22 @@ public class RocketMQMessageListenerBeanPostProcessor implements BeanPostProcess
     private boolean isLikelyListenerBean(Class<?> proxyClass, Class<?> targetClass) {
         try {
             Class<?> listener = ClassUtils.forName(
-                    "org.apache.rocketmq.spring.core.RocketMQListener", proxyClass.getClassLoader());
+                "org.apache.rocketmq.spring.core.RocketMQListener", proxyClass.getClassLoader());
             if (listener.isAssignableFrom(proxyClass) || listener.isAssignableFrom(targetClass)) {
                 return true;
             }
-        } catch (Throwable ignored) { }
+        }
+        catch (Throwable ignored) {
+        }
         try {
             Class<?> replyListener = ClassUtils.forName(
-                    "org.apache.rocketmq.spring.core.RocketMQReplyListener", proxyClass.getClassLoader());
+                "org.apache.rocketmq.spring.core.RocketMQReplyListener", proxyClass.getClassLoader());
             if (replyListener.isAssignableFrom(proxyClass) || replyListener.isAssignableFrom(targetClass)) {
                 return true;
             }
-        } catch (Throwable ignored) { }
+        }
+        catch (Throwable ignored) {
+        }
 
         return false;
     }
@@ -152,13 +156,13 @@ public class RocketMQMessageListenerBeanPostProcessor implements BeanPostProcess
 
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
     @Override
     public boolean isRunning() {
         return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 
     private RocketMQMessageListener enhance(AnnotatedElement element, RocketMQMessageListener ann) {

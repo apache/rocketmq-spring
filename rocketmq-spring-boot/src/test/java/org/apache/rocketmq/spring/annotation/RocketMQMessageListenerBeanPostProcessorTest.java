@@ -36,17 +36,26 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
     private static final String TEST_CLASS_SIMPLE_NAME = "Receiver";
 
     private ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
+        .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
 
     @Test
     public void testAnnotationEnhancer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-                withUserConfiguration(TestAnnotationEnhancerConfig.class, TestReceiverConfig.class).
-                run((context) -> {
-                    // Started container failed. DefaultRocketMQListenerContainer{consumerGroup='Receiver-Custom-Consumer-Group' **
-                    assertThat(context).getFailure().hasMessageContaining("connect to null failed");
-                });
+            withUserConfiguration(TestAnnotationEnhancerConfig.class, TestReceiverConfig.class).
+            run((context) -> {
+                // Started container failed. DefaultRocketMQListenerContainer{consumerGroup='Receiver-Custom-Consumer-Group' **
+                assertThat(context).getFailure().hasMessageContaining("connect to null failed");
+            });
 
+    }
+
+    @Test
+    public void testProxiedListenerAnnotationDetected() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876")
+            .withUserConfiguration(TestProxyConfig.class)
+            .run((context) -> {
+                assertThat(context).getFailure().hasMessageContaining("connect to");
+            });
     }
 
     @Configuration
@@ -55,7 +64,7 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
         public RocketMQMessageListenerBeanPostProcessor.AnnotationEnhancer consumeContainerEnhancer() {
             return (attrs, element) -> {
                 if (element instanceof Class) {
-                    Class targetClass = (Class) element;
+                    Class targetClass = (Class)element;
                     String classSimpleName = targetClass.getSimpleName();
                     if (TEST_CLASS_SIMPLE_NAME.equals(classSimpleName)) {
                         String consumerGroup = "Receiver-Custom-Consumer-Group";
@@ -82,15 +91,6 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
         public void onMessage(Object message) {
 
         }
-    }
-
-    @Test
-    public void testProxiedListenerAnnotationDetected() {
-        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876")
-                .withUserConfiguration(TestProxyConfig.class)
-                .run((context) -> {
-                    assertThat(context).getFailure().hasMessageContaining("connect to");
-                });
     }
 
     @Configuration
