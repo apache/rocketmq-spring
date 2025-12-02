@@ -255,9 +255,9 @@ public class DefaultListenerContainer implements InitializingBean,
         if (rocketMQListener == null) {
             throw new IllegalArgumentException("Property 'rocketMQListener' is required");
         }
-        Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
-        Assert.notNull(topic, "Property 'topic' is required");
-        Assert.notNull(tag, "Property 'tag' is required");
+        Assert.hasText(consumerGroup, "Property 'consumerGroup' is required");
+        Assert.hasText(topic, "Property 'topic' is required");
+        Assert.hasText(tag, "Property 'tag' is required");
         FilterExpression filterExpression = null;
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         if (StringUtils.hasLength(this.getTag())) {
