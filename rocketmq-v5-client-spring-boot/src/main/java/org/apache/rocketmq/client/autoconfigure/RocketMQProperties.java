@@ -148,9 +148,7 @@ public class RocketMQProperties {
         @Override
         public String toString() {
             return "Producer{" +
-                    "accessKey='" + accessKey + '\'' +
-                    ", secretKey='" + secretKey + '\'' +
-                    ", endpoints='" + endpoints + '\'' +
+                    "endpoints='" + endpoints + '\'' +
                     ", topic='" + topic + '\'' +
                     ", requestTimeout=" + requestTimeout +
                     ", sslEnabled=" + sslEnabled +
@@ -304,9 +302,7 @@ public class RocketMQProperties {
         @Override
         public String toString() {
             return "SimpleConsumer{" +
-                    "accessKey='" + accessKey + '\'' +
-                    ", secretKey='" + secretKey + '\'' +
-                    ", endpoints='" + endpoints + '\'' +
+                    "endpoints='" + endpoints + '\'' +
                     ", consumerGroup='" + consumerGroup + '\'' +
                     ", awaitDuration='" + awaitDuration + '\'' +
                     ", tag='" + tag + '\'' +

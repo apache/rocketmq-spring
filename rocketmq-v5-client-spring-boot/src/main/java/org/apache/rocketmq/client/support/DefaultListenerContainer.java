@@ -356,8 +356,6 @@ public class DefaultListenerContainer implements InitializingBean,
         return "DefaultListenerContainer{" +
                 "name='" + name + '\'' +
                 ", running=" + running +
-                ", accessKey='" + accessKey + '\'' +
-                ", secretKey='" + secretKey + '\'' +
                 ", endpoints='" + endpoints + '\'' +
                 ", consumerGroup='" + consumerGroup + '\'' +
                 ", tag='" + tag + '\'' +
