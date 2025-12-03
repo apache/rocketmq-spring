@@ -20,13 +20,13 @@
 	<parent>
 		<groupId>org.apache.rocketmq</groupId>
 		<artifactId>rocketmq-v5-client-spring-boot-parent</artifactId>
-		<version>2.3.5-SNAPSHOT</version>
+		<version>2.3.5</version>
 		<relativePath>../rocketmq-v5-client-spring-boot-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>rocketmq-v5-client-spring-boot-starter</artifactId>
 	<packaging>jar</packaging>
-	<version>2.3.5-SNAPSHOT</version>
+	<version>2.3.5</version>
 
 	<name>rocketmq-v5-client-spring-boot-starter</name>
 	<description>rocketmq-v5-client-spring-boot-starter</description>
