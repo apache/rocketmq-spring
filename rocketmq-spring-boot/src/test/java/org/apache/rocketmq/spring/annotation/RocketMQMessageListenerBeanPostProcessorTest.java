@@ -25,6 +25,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,17 +36,26 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
     private static final String TEST_CLASS_SIMPLE_NAME = "Receiver";
 
     private ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
+        .withConfiguration(AutoConfigurations.of(RocketMQAutoConfiguration.class));
 
     @Test
     public void testAnnotationEnhancer() {
         runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876").
-                withUserConfiguration(TestAnnotationEnhancerConfig.class, TestReceiverConfig.class).
-                run((context) -> {
-                    // Started container failed. DefaultRocketMQListenerContainer{consumerGroup='Receiver-Custom-Consumer-Group' **
-                    assertThat(context).getFailure().hasMessageContaining("connect to null failed");
-                });
+            withUserConfiguration(TestAnnotationEnhancerConfig.class, TestReceiverConfig.class).
+            run((context) -> {
+                // Started container failed. DefaultRocketMQListenerContainer{consumerGroup='Receiver-Custom-Consumer-Group' **
+                assertThat(context).getFailure().hasMessageContaining("connect to null failed");
+            });
 
+    }
+
+    @Test
+    public void testProxiedListenerAnnotationDetected() {
+        runner.withPropertyValues("rocketmq.name-server=127.0.0.1:9876")
+            .withUserConfiguration(TestProxyConfig.class)
+            .run((context) -> {
+                assertThat(context).getFailure().hasMessageContaining("connect to");
+            });
     }
 
     @Configuration
@@ -53,7 +64,7 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
         public RocketMQMessageListenerBeanPostProcessor.AnnotationEnhancer consumeContainerEnhancer() {
             return (attrs, element) -> {
                 if (element instanceof Class) {
-                    Class targetClass = (Class) element;
+                    Class targetClass = (Class)element;
                     String classSimpleName = targetClass.getSimpleName();
                     if (TEST_CLASS_SIMPLE_NAME.equals(classSimpleName)) {
                         String consumerGroup = "Receiver-Custom-Consumer-Group";
@@ -79,6 +90,22 @@ public class RocketMQMessageListenerBeanPostProcessorTest {
         @Override
         public void onMessage(Object message) {
 
+        }
+    }
+
+    @Configuration
+    static class TestProxyConfig {
+        @Bean
+        @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+        public Object proxiedReceiverListener() {
+            return new ProxiedReceiver();
+        }
+    }
+
+    @RocketMQMessageListener(consumerGroup = "proxy-group", topic = "test-proxy")
+    static class ProxiedReceiver implements RocketMQListener<Object> {
+        @Override
+        public void onMessage(Object message) {
         }
     }
 }
