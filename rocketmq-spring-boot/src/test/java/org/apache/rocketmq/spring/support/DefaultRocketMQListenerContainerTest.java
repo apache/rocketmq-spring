@@ -255,6 +255,11 @@ public class DefaultRocketMQListenerContainerTest {
         assertEquals(anno.delayLevelWhenNextConsume(), container.getDelayLevelWhenNextConsume());
         assertEquals(anno.suspendCurrentQueueTimeMillis(), container.getSuspendCurrentQueueTimeMillis());
         assertEquals(anno.instanceName(), container.getInstanceName());
+        assertEquals(anno.pullInterval(), container.getPullInterval());
+        assertEquals(anno.pullBatchSize(), container.getPullBatchSize());
+        assertEquals(anno.consumeMessageBatchMaxSize(), container.getConsumeMessageBatchMaxSize());
+        assertEquals(anno.awaitTerminationMillisWhenShutdown(), container.getAwaitTerminationMillisWhenShutdown());
+        assertEquals(anno.consumeFromWhere(), container.getConsumeFromWhere());
     }
 
     @RocketMQMessageListener(consumerGroup = "abc1", topic = "test",

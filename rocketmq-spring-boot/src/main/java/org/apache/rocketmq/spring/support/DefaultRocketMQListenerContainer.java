@@ -39,6 +39,7 @@ import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.utils.MessageUtil;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -137,6 +138,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
     private String namespace;
     private String namespaceV2;
     private long awaitTerminationMillisWhenShutdown;
+    private long pullInterval;
+    private int pullBatchSize;
+    private int consumeMessageBatchMaxSize;
+    private ConsumeFromWhere consumeFromWhere;
 
     private String instanceName;
 
@@ -252,6 +257,10 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.suspendCurrentQueueTimeMillis = anno.suspendCurrentQueueTimeMillis();
         this.awaitTerminationMillisWhenShutdown = Math.max(0, anno.awaitTerminationMillisWhenShutdown());
         this.instanceName = anno.instanceName();
+        this.pullInterval = anno.pullInterval();
+        this.pullBatchSize = anno.pullBatchSize();
+        this.consumeMessageBatchMaxSize = anno.consumeMessageBatchMaxSize();
+        this.consumeFromWhere = anno.consumeFromWhere();
     }
 
     public ConsumeMode getConsumeMode() {
@@ -316,6 +325,38 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     public void setInstanceName(String instanceName) {
         this.instanceName = instanceName;
+    }
+
+    public ConsumeFromWhere getConsumeFromWhere() {
+        return consumeFromWhere;
+    }
+
+    public void setConsumeFromWhere(ConsumeFromWhere consumeFromWhere) {
+        this.consumeFromWhere = consumeFromWhere;
+    }
+
+    public long getPullInterval() {
+        return pullInterval;
+    }
+
+    public void setPullInterval(long pullInterval) {
+        this.pullInterval = pullInterval;
+    }
+
+    public int getPullBatchSize() {
+        return pullBatchSize;
+    }
+
+    public void setPullBatchSize(int pullBatchSize) {
+        this.pullBatchSize = pullBatchSize;
+    }
+
+    public int getConsumeMessageBatchMaxSize() {
+        return consumeMessageBatchMaxSize;
+    }
+
+    public void setConsumeMessageBatchMaxSize(int consumeMessageBatchMaxSize) {
+        this.consumeMessageBatchMaxSize = consumeMessageBatchMaxSize;
     }
 
     public DefaultRocketMQListenerContainer setAwaitTerminationMillisWhenShutdown(long awaitTerminationMillisWhenShutdown) {
@@ -662,6 +703,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         consumer.setMaxReconsumeTimes(maxReconsumeTimes);
         consumer.setAwaitTerminationMillisWhenShutdown(awaitTerminationMillisWhenShutdown);
         consumer.setInstanceName(instanceName);
+        consumer.setPullInterval(pullInterval);
+        consumer.setPullBatchSize(pullBatchSize);
+        consumer.setConsumeMessageBatchMaxSize(consumeMessageBatchMaxSize);
+        consumer.setConsumeFromWhere(consumeFromWhere);
+
         switch (messageModel) {
             case BROADCASTING:
                 consumer.setMessageModel(org.apache.rocketmq.remoting.protocol.heartbeat.MessageModel.BROADCASTING);
