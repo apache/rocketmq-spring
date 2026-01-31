@@ -108,6 +108,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         container.setConsumptionThreadCount(annotation.consumptionThreadCount());
         container.setMaxCacheMessageSizeInBytes(annotation.maxCacheMessageSizeInBytes());
         container.setType(annotation.filterExpressionType());
+        container.setSslEnabled(annotation.sslEnabled());
         return container;
     }
 
