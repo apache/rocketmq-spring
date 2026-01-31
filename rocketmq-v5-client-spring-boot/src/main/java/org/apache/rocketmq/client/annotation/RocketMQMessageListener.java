@@ -59,6 +59,11 @@ public @interface RocketMQMessageListener {
     String tag() default TAG_PLACEHOLDER;
 
     /**
+     * Enable or disable the use of Secure Sockets Layer (SSL) for network transport.
+     */
+    boolean sslEnabled() default true;
+
+    /**
      * The type of filter expression
      */
     String filterExpressionType() default "tag";
