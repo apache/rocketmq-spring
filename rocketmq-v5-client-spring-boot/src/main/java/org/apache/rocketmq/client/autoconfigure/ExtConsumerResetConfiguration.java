@@ -116,7 +116,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         String endPoints = resolvePlaceholders(annotation.endpoints(), simpleConsumer.getEndpoints());
         String namespace = resolvePlaceholders(annotation.namespace(), simpleConsumer.getNamespace());
         String tag = resolvePlaceholders(annotation.tag(), simpleConsumer.getTag());
-        String filterExpressionType = resolvePlaceholders(annotation.filterExpressionType(), simpleConsumer.getFilterExpressionType());
+        // Use selectorType to determine the filter expression type, similar to rocketmq-spring-boot
+        String filterExpressionType = annotation.selectorType() == org.apache.rocketmq.client.annotation.SelectorType.TAG ? "tag" : "sql92";
         Duration requestTimeout = Duration.ofSeconds(annotation.requestTimeout());
         int awaitDuration = annotation.awaitDuration();
         Boolean sslEnabled = simpleConsumer.isSslEnabled();

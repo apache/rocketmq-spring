@@ -185,7 +185,9 @@ public class RocketMQProperties {
         private int awaitDuration = 5;
 
         /**
-         * Tag of consumer.
+         * Tag of consumer. Used for message filtering.
+         * For TAG selectorType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
+         * For SQL92 selectorType, use SQL92 expression like "a > 5 AND b < 10".
          */
         private String tag;
 
@@ -200,9 +202,11 @@ public class RocketMQProperties {
         private int requestTimeout = 3;
 
         /**
-         * The type of filter expression
+         * Control how to selector message.
+         *
+         * @see org.apache.rocketmq.client.annotation.SelectorType
          */
-        private String filterExpressionType = "tag";
+        private String selectorType = "TAG";
 
         /**
          * Enable or disable the use of Secure Sockets Layer (SSL) for network transport.
@@ -283,12 +287,12 @@ public class RocketMQProperties {
             this.sslEnabled = sslEnabled;
         }
 
-        public String getFilterExpressionType() {
-            return filterExpressionType;
+        public String getSelectorType() {
+            return selectorType;
         }
 
-        public void setFilterExpressionType(String filterExpressionType) {
-            this.filterExpressionType = filterExpressionType;
+        public void setSelectorType(String selectorType) {
+            this.selectorType = selectorType;
         }
 
         public String getNamespace() {
@@ -308,7 +312,7 @@ public class RocketMQProperties {
                     ", tag='" + tag + '\'' +
                     ", topic='" + topic + '\'' +
                     ", requestTimeout=" + requestTimeout +
-                    ", filterExpressionType='" + filterExpressionType + '\'' +
+                    ", selectorType='" + selectorType + '\'' +
                     ", sslEnabled=" + sslEnabled +
                     ", namespace='" + namespace + '\'' +
                     '}';

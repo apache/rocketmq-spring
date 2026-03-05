@@ -53,7 +53,9 @@ public @interface ExtConsumerResetConfiguration {
     String secretKey() default SECRET_KEY_PLACEHOLDER;
 
     /**
-     * Tag of consumer.
+     * Tag of consumer. Used for message filtering.
+     * For TAG selectorType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
+     * For SQL92 selectorType, use SQL92 expression like "a > 5 AND b < 10".
      */
     String tag() default TAG_PLACEHOLDER;
 
@@ -73,8 +75,17 @@ public @interface ExtConsumerResetConfiguration {
     String consumerGroup() default CONSUMER_GROUP_PLACEHOLDER;
 
     /**
-     * The type of filter expression
+     * Control how to selector message.
+     *
+     * @see SelectorType
      */
+    SelectorType selectorType() default SelectorType.TAG;
+
+    /**
+     * @deprecated Use {@link #tag()} and {@link #selectorType()} instead.
+     * This field will be removed in a future version.
+     */
+    @Deprecated
     String filterExpressionType() default FILTER_EXPRESSION_TYPE_PLACEHOLDER;
 
     /**

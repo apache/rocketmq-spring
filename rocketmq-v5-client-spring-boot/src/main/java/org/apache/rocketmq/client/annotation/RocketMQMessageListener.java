@@ -54,7 +54,16 @@ public @interface RocketMQMessageListener {
     String topic() default TOPIC_PLACEHOLDER;
 
     /**
-     * Tag of consumer.
+     * Control how to selector message.
+     *
+     * @see SelectorType
+     */
+    SelectorType selectorType() default SelectorType.TAG;
+
+    /**
+     * Control which message can be select. Grammar please see {@link SelectorType#TAG} and {@link SelectorType#SQL92}
+     * For TAG type, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
+     * For SQL92 type, use SQL92 expression like "a > 5 AND b < 10".
      */
     String tag() default TAG_PLACEHOLDER;
 
@@ -64,8 +73,10 @@ public @interface RocketMQMessageListener {
     boolean sslEnabled() default true;
 
     /**
-     * The type of filter expression
+     * @deprecated Use {@link #tag()} and {@link #selectorType()} instead.
+     * This field will be removed in a future version.
      */
+    @Deprecated
     String filterExpressionType() default "tag";
 
     /**

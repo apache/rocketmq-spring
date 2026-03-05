@@ -105,7 +105,10 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         RocketMQProperties.SimpleConsumer simpleConsumer = rocketMQProperties.getSimpleConsumer();
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         String consumerGroup = simpleConsumer.getConsumerGroup();
-        FilterExpression filterExpression = RocketMQUtil.createFilterExpression(simpleConsumer.getTag(), simpleConsumer.getFilterExpressionType());
+        // Use selectorType to determine the filter expression type, similar to rocketmq-spring-boot
+        String filterExpressionTypeValue = simpleConsumer.getSelectorType() != null ? simpleConsumer.getSelectorType() : "TAG";
+        String tagExpression = simpleConsumer.getTag() != null ? simpleConsumer.getTag() : "*";
+        FilterExpression filterExpression = RocketMQUtil.createFilterExpression(tagExpression, filterExpressionTypeValue.toLowerCase());
         ClientConfiguration clientConfiguration = RocketMQUtil.createConsumerClientConfiguration(simpleConsumer);
         SimpleConsumerBuilder simpleConsumerBuilder = provider.newSimpleConsumerBuilder()
                 .setClientConfiguration(clientConfiguration);
