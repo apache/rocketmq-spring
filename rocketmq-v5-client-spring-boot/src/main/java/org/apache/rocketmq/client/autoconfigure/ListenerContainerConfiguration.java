@@ -110,6 +110,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         container.setMaxCacheMessageSizeInBytes(annotation.maxCacheMessageSizeInBytes());
         // Use selectorType to determine the filter expression type, similar to rocketmq-spring-boot
         container.setType(annotation.selectorType() == SelectorType.TAG ? "tag" : "sql92");
+        container.setSelectorType(annotation.selectorType());
         container.setSslEnabled(annotation.sslEnabled());
         return container;
     }

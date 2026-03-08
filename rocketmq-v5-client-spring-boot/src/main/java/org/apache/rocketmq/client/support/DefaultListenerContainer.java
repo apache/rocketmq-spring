@@ -88,6 +88,8 @@ public class DefaultListenerContainer implements InitializingBean,
 
     String namespace;
 
+    String type;
+
     public String getName() {
         return name;
     }
@@ -203,6 +205,14 @@ public class DefaultListenerContainer implements InitializingBean,
 
     public RocketMQListener getMessageListener() {
         return rocketMQListener;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setMessageListener(RocketMQListener rocketMQListener) {
