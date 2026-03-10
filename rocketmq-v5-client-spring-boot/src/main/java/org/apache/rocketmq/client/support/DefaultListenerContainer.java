@@ -272,7 +272,7 @@ public class DefaultListenerContainer implements InitializingBean,
         Assert.hasText(topic, "Property 'topic' is required");
         Assert.hasText(tag, "Property 'tag' is required");
         
-        // Use filterExpressionType directly instead of converting from SelectorType
+        // Use filterExpressionType directly instead of converting from
         String filterExpressionTypeStr = this.getFilterExpressionType() != null ? this.getFilterExpressionType().toLowerCase() : "tag";
         
         FilterExpression filterExpression = null;

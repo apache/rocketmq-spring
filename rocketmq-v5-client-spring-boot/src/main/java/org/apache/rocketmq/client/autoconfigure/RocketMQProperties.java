@@ -186,8 +186,8 @@ public class RocketMQProperties {
 
         /**
          * Tag of consumer. Used for message filtering.
-         * For TAG selectorType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
-         * For SQL92 selectorType, use SQL92 expression like "a > 5 AND b < 10".
+         * For TAG filterExpressionType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
+         * For SQL92 filterExpressionType, use SQL92 expression like "a > 5 AND b < 10".
          */
         private String tag;
 
