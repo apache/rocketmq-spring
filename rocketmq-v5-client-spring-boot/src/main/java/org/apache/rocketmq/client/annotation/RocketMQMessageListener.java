@@ -31,7 +31,7 @@ public @interface RocketMQMessageListener {
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.push-consumer.secret-key:}";
     String ENDPOINTS_PLACEHOLDER = "${rocketmq.push-consumer.endpoints:}";
     String TOPIC_PLACEHOLDER = "${rocketmq.push-consumer.topic:}";
-    String TAG_PLACEHOLDER = "${rocketmq.push-consumer.tag:}";
+    String TAG_PLACEHOLDER = "${rocketmq.push-consumer.tag:*}";
 
     /**
      * The property of "access-key".

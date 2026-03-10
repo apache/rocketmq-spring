@@ -31,11 +31,11 @@ public @interface ExtConsumerResetConfiguration {
 
     String ACCESS_KEY_PLACEHOLDER = "${rocketmq.simple-consumer.accessKey:}";
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.simple-consumer.secretKey:}";
-    String TAG_PLACEHOLDER = "${rocketmq.simple-consumer.tag:}";
+    String TAG_PLACEHOLDER = "${rocketmq.simple-consumer.tag:*}";
     String TOPIC_PLACEHOLDER = "${rocketmq.simple-consumer.topic:}";
     String ENDPOINTS_PLACEHOLDER = "${rocketmq.simple-consumer.endpoints:}";
     String CONSUMER_GROUP_PLACEHOLDER = "${rocketmq.simple-consumer.consumerGroup:}";
-    String FILTER_EXPRESSION_TYPE_PLACEHOLDER = "${rocketmq.simple-consumer.filterExpressionType:}";
+    String FILTER_EXPRESSION_TYPE_PLACEHOLDER = "${rocketmq.simple-consumer.filterExpressionType:tag}";
 
     /**
      * The component name of the Consumer configuration.
