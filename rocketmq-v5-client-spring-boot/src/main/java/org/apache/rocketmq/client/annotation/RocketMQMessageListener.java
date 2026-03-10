@@ -31,6 +31,7 @@ public @interface RocketMQMessageListener {
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.push-consumer.secret-key:}";
     String ENDPOINTS_PLACEHOLDER = "${rocketmq.push-consumer.endpoints:}";
     String TOPIC_PLACEHOLDER = "${rocketmq.push-consumer.topic:}";
+    String TAG_PLACEHOLDER = "${rocketmq.push-consumer.tag:*}";
 
     /**
      * The property of "access-key".
@@ -64,7 +65,7 @@ public @interface RocketMQMessageListener {
      * For TAG type, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
      * For SQL92 type, use SQL92 expression like "a > 5 AND b < 10".
      */
-    String tag() default "*";
+    String tag() default TAG_PLACEHOLDER;
 
     /**
      * Enable or disable the use of Secure Sockets Layer (SSL) for network transport.

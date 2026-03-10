@@ -31,9 +31,11 @@ public @interface ExtConsumerResetConfiguration {
 
     String ACCESS_KEY_PLACEHOLDER = "${rocketmq.simple-consumer.accessKey:}";
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.simple-consumer.secretKey:}";
+    String TAG_PLACEHOLDER = "${rocketmq.simple-consumer.tag:*}";
     String TOPIC_PLACEHOLDER = "${rocketmq.simple-consumer.topic:}";
     String ENDPOINTS_PLACEHOLDER = "${rocketmq.simple-consumer.endpoints:}";
     String CONSUMER_GROUP_PLACEHOLDER = "${rocketmq.simple-consumer.consumerGroup:}";
+    String FILTER_EXPRESSION_TYPE_PLACEHOLDER = "${rocketmq.simple-consumer.filterExpressionType:tag}";
 
     /**
      * The component name of the Consumer configuration.
@@ -55,7 +57,7 @@ public @interface ExtConsumerResetConfiguration {
      * For TAG selectorType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
      * For SQL92 selectorType, use SQL92 expression like "a > 5 AND b < 10".
      */
-    String tag() default "*";
+    String tag() default TAG_PLACEHOLDER;
 
     /**
      * Topic name of consumer.
@@ -84,7 +86,7 @@ public @interface ExtConsumerResetConfiguration {
      * This field will be removed in a future version.
      */
     @Deprecated
-    String filterExpressionType() default "tag";
+    String filterExpressionType() default FILTER_EXPRESSION_TYPE_PLACEHOLDER;
 
     /**
      * The requestTimeout of client,it is 3s by default.
