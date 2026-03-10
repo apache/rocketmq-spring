@@ -16,7 +16,6 @@
  */
 package org.apache.rocketmq.client.autoconfigure;
 
-import org.apache.rocketmq.client.annotation.SelectorType;
 import org.apache.rocketmq.client.support.RocketMQMessageConverter;
 import org.apache.rocketmq.client.support.RocketMQUtil;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
@@ -117,8 +116,8 @@ public class ExtConsumerResetConfiguration implements ApplicationContextAware, S
         String endPoints = resolvePlaceholders(annotation.endpoints(), simpleConsumer.getEndpoints());
         String namespace = resolvePlaceholders(annotation.namespace(), simpleConsumer.getNamespace());
         String tag = resolvePlaceholders(annotation.tag(), simpleConsumer.getTag());
-        // Use selectorType to determine the filter expression type, similar to rocketmq-spring-boot
-        String filterExpressionType = annotation.selectorType() == SelectorType.TAG ? "tag" : "sql92";
+        // Use filterExpressionType to determine the filter expression type, similar to rocketmq-spring-boot
+        String filterExpressionType = annotation.filterExpressionType();
         Duration requestTimeout = Duration.ofSeconds(annotation.requestTimeout());
         int awaitDuration = annotation.awaitDuration();
         Boolean sslEnabled = simpleConsumer.isSslEnabled();

@@ -17,7 +17,6 @@
 package org.apache.rocketmq.client.support;
 
 import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.client.annotation.SelectorType;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
@@ -74,7 +73,7 @@ public class DefaultListenerContainer implements InitializingBean,
 
     String topic;
 
-    SelectorType selectorType;
+    String filterExpressionType;
 
     Duration requestTimeout;
 
@@ -179,12 +178,12 @@ public class DefaultListenerContainer implements InitializingBean,
         this.requestTimeout = requestTimeout;
     }
 
-    public SelectorType getSelectorType() {
-        return selectorType;
+    public String getFilterExpressionType() {
+        return filterExpressionType;
     }
 
-    public void setSelectorType(SelectorType selectorType) {
-        this.selectorType = selectorType;
+    public void setFilterExpressionType(String filterExpressionType) {
+        this.filterExpressionType = filterExpressionType;
     }
 
     public Boolean getSslEnabled() {
@@ -231,7 +230,7 @@ public class DefaultListenerContainer implements InitializingBean,
         this.endpoints = rocketMQMessageListener.endpoints();
         this.topic = rocketMQMessageListener.topic();
         this.tag = rocketMQMessageListener.tag();
-        this.selectorType = rocketMQMessageListener.selectorType();
+        this.filterExpressionType = rocketMQMessageListener.filterExpressionType();
         this.sslEnabled = rocketMQMessageListener.sslEnabled();
         this.consumerGroup = rocketMQMessageListener.consumerGroup();
         this.requestTimeout = Duration.ofSeconds(rocketMQMessageListener.requestTimeout());
@@ -273,9 +272,8 @@ public class DefaultListenerContainer implements InitializingBean,
         Assert.hasText(topic, "Property 'topic' is required");
         Assert.hasText(tag, "Property 'tag' is required");
         
-        // Convert SelectorType to FilterExpressionType string for createFilterExpression
-        String filterExpressionTypeStr = (selectorType != null && selectorType == SelectorType.SQL92)
-            ? "sql92" : "tag";
+        // Use filterExpressionType directly instead of converting from SelectorType
+        String filterExpressionTypeStr = this.getFilterExpressionType() != null ? this.getFilterExpressionType().toLowerCase() : "tag";
         
         FilterExpression filterExpression = null;
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
@@ -379,7 +377,7 @@ public class DefaultListenerContainer implements InitializingBean,
                 ", consumerGroup='" + consumerGroup + '\'' +
                 ", tag='" + tag + '\'' +
                 ", topic='" + topic + '\'' +
-                ", selectorType=" + selectorType +
+                ", filterExpressionType='" + filterExpressionType + '\'' +
                 ", requestTimeout=" + requestTimeout +
                 ", maxCachedMessageCount=" + maxCachedMessageCount +
                 ", maxCacheMessageSizeInBytes=" + maxCacheMessageSizeInBytes +
