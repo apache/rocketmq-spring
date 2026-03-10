@@ -567,6 +567,196 @@ rocketmq.simple-consumer.filter-expression-type=tag
 
 <a name="GSP33"></a>
 
+# SQL92 消息过滤
+
+<a name="SQL92-01"></a>
+
+## 概述
+
+RocketMQ V5 客户端支持 SQL92 消息过滤功能，允许消费者根据消息属性进行复杂的条件过滤。
+
+### 支持的过滤类型
+
+1. **TAG 过滤**（默认）：基于 Tag 的简单过滤
+2. **SQL92 过滤**：基于消息属性的复杂条件过滤
+
+<a name="SQL92-02"></a>
+
+## 配置说明
+
+### application.properties 配置
+
+```properties
+# 基本配置
+rocketmq.simple-consumer.endpoints=localhost:8081
+rocketmq.simple-consumer.consumer-group=sql92Group
+rocketmq.simple-consumer.topic=sql92Topic
+
+# TAG 过滤（默认）
+rocketmq.simple-consumer.tag=*
+rocketmq.simple-consumer.filter-expression-type=tag
+
+# SQL92 过滤
+# rocketmq.simple-consumer.tag=(type = 'vip' AND amount > 500)
+# rocketmq.simple-consumer.filter-expression-type=sql92
+```
+
+<a name="SQL92-03"></a>
+
+## SQL92 表达式语法
+
+### 比较操作符
+
+- `=` : 等于
+- `<>` : 不等于
+- `>` : 大于
+- `<` : 小于
+- `>=` : 大于等于
+- `<=` : 小于等于
+- `BETWEEN` : 在某个范围内
+- `IN` : 在集合中
+- `LIKE` : 模糊匹配
+
+### 逻辑操作符
+
+- `AND` : 与
+- `OR` : 或
+- `NOT` : 非
+
+<a name="SQL92-04"></a>
+
+## 使用示例
+
+### 示例 1：简单等值过滤
+
+只消费 type='vip' 的消息：
+
+```properties
+rocketmq.simple-consumer.filter-expression-type=sql92
+rocketmq.simple-consumer.tag=(type = 'vip')
+```
+
+发送消息时添加属性：
+
+```java
+Message<?> message = MessageBuilder.withPayload(order)
+    .setHeader("type", "vip")
+    .build();
+```
+
+### 示例 2：数值范围过滤
+
+消费金额在 100-1000 之间的订单：
+
+```properties
+rocketmq.simple-consumer.filter-expression-type=sql92
+rocketmq.simple-consumer.tag=(amount >= 100 AND amount <= 1000)
+```
+
+### 示例 3：多条件组合
+
+消费 VIP 用户且金额大于 500 的订单：
+
+```properties
+rocketmq.simple-consumer.filter-expression-type=sql92
+rocketmq.simple-consumer.tag=(type = 'vip' AND amount > 500)
+```
+
+### 示例 4：IN 操作符
+
+消费特定地区的订单：
+
+```properties
+rocketmq.simple-consumer.filter-expression-type=sql92
+rocketmq.simple-consumer.tag=(region IN ('Beijing', 'Shanghai', 'Guangzhou'))
+```
+
+### 示例 5：LIKE 模糊匹配
+
+消费以 A 开头的产品类别：
+
+```properties
+rocketmq.simple-consumer.filter-expression-type=sql92
+rocketmq.simple-consumer.tag=(category LIKE 'A%')
+```
+
+<a name="SQL92-05"></a>
+
+## 消费者代码示例
+
+```java
+@Service
+@RocketMQMessageListener(
+    endpoints = "${demo.sql92.rocketmq.endpoints:}",
+    topic = "${demo.sql92.rocketmq.topic:}",
+    consumerGroup = "${demo.sql92.rocketmq.consumer-group:}",
+    tag = "${demo.sql92.rocketmq.tag:}",
+    filterExpressionType = "${demo.sql92.rocketmq.filter-expression-type:sql92}"
+)
+public class SQL92FilterConsumer implements RocketMQListener {
+    
+    @Override
+    public ConsumeResult consume(MessageView messageView) {
+        log.info("收到 SQL92 过滤消息 - ID: {}, 属性：{}", 
+            messageView.getMessageId(), 
+            messageView.getProperties());
+        return ConsumeResult.SUCCESS;
+    }
+}
+```
+
+<a name="SQL92-06"></a>
+
+## 生产者代码示例
+
+```java
+@SpringBootApplication
+public class SQL92ProducerApplication implements CommandLineRunner {
+    
+    @Resource
+    private RocketMQClientTemplate rocketMQClientTemplate;
+    
+    @Override
+    public void run(String... args) throws ClientException {
+        // 发送带属性的消息
+        Message<?> message = MessageBuilder.withPayload("VIP Order")
+            .setHeader("type", "vip")
+            .setHeader("amount", 600)
+            .setHeader("region", "Beijing")
+            .build();
+        
+        rocketMQClientTemplate.syncSendNormalMessage("orderTopic", message);
+    }
+}
+```
+
+<a name="SQL92-07"></a>
+
+## 注意事项
+
+1. **属性名称限制**：
+   - 属性名称不能包含空格和特殊字符
+   - 建议使用字母、数字和下划线
+   
+2. **性能考虑**：
+   - SQL92 过滤比 TAG 过滤更消耗资源
+   - 简单的过滤场景优先使用 TAG 过滤
+   
+3. **表达式长度**：
+   - SQL92 表达式长度有限制，不宜过长
+   
+4. **数据类型**：
+   - 确保发送的消息属性类型与过滤表达式中的类型一致
+   - 字符串值需要用单引号包裹
+   
+5. **NULL 值处理**：
+   - 使用 `IS NULL` 或 `IS NOT NULL` 判断空值
+   - 不要使用 `= NULL`
+
+详细示例请参考 [SQL92_USAGE.md](SQL92_USAGE.md)
+
+<a name="GSP33"></a>
+
 # ACL功能
 
 <a name="PavXQ"></a>
