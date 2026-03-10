@@ -19,7 +19,6 @@ package org.apache.rocketmq.client.support;
 import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
-import org.apache.rocketmq.client.apis.consumer.FilterExpressionType;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.consumer.PushConsumerBuilder;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
@@ -74,9 +73,7 @@ public class DefaultListenerContainer implements InitializingBean,
 
     String topic;
 
-    String type;
-
-    FilterExpressionType filterExpressionType;
+    String filterExpressionType;
 
     Duration requestTimeout;
 
@@ -89,6 +86,8 @@ public class DefaultListenerContainer implements InitializingBean,
     Boolean sslEnabled;
 
     String namespace;
+
+    String type;
 
     public String getName() {
         return name;
@@ -179,12 +178,66 @@ public class DefaultListenerContainer implements InitializingBean,
         this.requestTimeout = requestTimeout;
     }
 
-    public FilterExpressionType getFilterExpressionType() {
+    public String getFilterExpressionType() {
         return filterExpressionType;
     }
 
-    public void setFilterExpressionType(FilterExpressionType filterExpressionType) {
+    public void setFilterExpressionType(String filterExpressionType) {
         this.filterExpressionType = filterExpressionType;
+    }
+
+    public Boolean getSslEnabled() {
+        return sslEnabled;
+    }
+
+    public void setSslEnabled(Boolean sslEnabled) {
+        this.sslEnabled = sslEnabled;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public RocketMQListener getMessageListener() {
+        return rocketMQListener;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setMessageListener(RocketMQListener rocketMQListener) {
+        this.rocketMQListener = rocketMQListener;
+    }
+
+    public RocketMQMessageListener getRocketMQMessageListener() {
+        return rocketMQMessageListener;
+    }
+
+    public void setRocketMQMessageListener(RocketMQMessageListener rocketMQMessageListener) {
+        this.rocketMQMessageListener = rocketMQMessageListener;
+
+        this.accessKey = rocketMQMessageListener.accessKey();
+        this.secretKey = rocketMQMessageListener.secretKey();
+        this.endpoints = rocketMQMessageListener.endpoints();
+        this.topic = rocketMQMessageListener.topic();
+        this.tag = rocketMQMessageListener.tag();
+        this.filterExpressionType = rocketMQMessageListener.filterExpressionType();
+        this.sslEnabled = rocketMQMessageListener.sslEnabled();
+        this.consumerGroup = rocketMQMessageListener.consumerGroup();
+        this.requestTimeout = Duration.ofSeconds(rocketMQMessageListener.requestTimeout());
+        this.maxCachedMessageCount = rocketMQMessageListener.maxCachedMessageCount();
+        this.maxCacheMessageSizeInBytes = rocketMQMessageListener.maxCacheMessageSizeInBytes();
+        this.consumptionThreadCount = rocketMQMessageListener.consumptionThreadCount();
+        this.namespace = rocketMQMessageListener.namespace();
     }
 
     public int getMaxCachedMessageCount() {
@@ -211,46 +264,6 @@ public class DefaultListenerContainer implements InitializingBean,
         this.consumptionThreadCount = consumptionThreadCount;
     }
 
-    public RocketMQListener getMessageListener() {
-        return rocketMQListener;
-    }
-
-    public void setMessageListener(RocketMQListener rocketMQListener) {
-        this.rocketMQListener = rocketMQListener;
-    }
-
-    public RocketMQMessageListener getRocketMQMessageListener() {
-        return rocketMQMessageListener;
-    }
-
-    public void setRocketMQMessageListener(RocketMQMessageListener rocketMQMessageListener) {
-        this.rocketMQMessageListener = rocketMQMessageListener;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Boolean getSslEnabled() {
-        return sslEnabled;
-    }
-
-    public void setSslEnabled(Boolean sslEnabled) {
-        this.sslEnabled = sslEnabled;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
     private void initRocketMQPushConsumer() {
         if (rocketMQListener == null) {
             throw new IllegalArgumentException("Property 'rocketMQListener' is required");
@@ -258,10 +271,14 @@ public class DefaultListenerContainer implements InitializingBean,
         Assert.hasText(consumerGroup, "Property 'consumerGroup' is required");
         Assert.hasText(topic, "Property 'topic' is required");
         Assert.hasText(tag, "Property 'tag' is required");
+        
+        // Use filterExpressionType directly instead of converting from
+        String filterExpressionTypeStr = this.getFilterExpressionType() != null ? this.getFilterExpressionType().toLowerCase() : "tag";
+        
         FilterExpression filterExpression = null;
         final ClientServiceProvider provider = ClientServiceProvider.loadService();
         if (StringUtils.hasLength(this.getTag())) {
-            filterExpression = RocketMQUtil.createFilterExpression(this.getTag(),this.getType());
+            filterExpression = RocketMQUtil.createFilterExpression(this.getTag(), filterExpressionTypeStr);
         }
         ClientConfiguration clientConfiguration = RocketMQUtil.createClientConfiguration(this.getAccessKey(), this.getSecretKey(),
                 this.getEndpoints(), this.getRequestTimeout(), this.sslEnabled, this.namespace);
@@ -360,8 +377,7 @@ public class DefaultListenerContainer implements InitializingBean,
                 ", consumerGroup='" + consumerGroup + '\'' +
                 ", tag='" + tag + '\'' +
                 ", topic='" + topic + '\'' +
-                ", type='" + type + '\'' +
-                ", filterExpressionType=" + filterExpressionType +
+                ", filterExpressionType='" + filterExpressionType + '\'' +
                 ", requestTimeout=" + requestTimeout +
                 ", maxCachedMessageCount=" + maxCachedMessageCount +
                 ", maxCacheMessageSizeInBytes=" + maxCacheMessageSizeInBytes +

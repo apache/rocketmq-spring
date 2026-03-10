@@ -17,7 +17,6 @@
 package org.apache.rocketmq.client.autoconfigure;
 
 import org.apache.rocketmq.client.annotation.RocketMQMessageListener;
-import org.apache.rocketmq.client.annotation.SelectorType;
 import org.apache.rocketmq.client.core.RocketMQListener;
 import org.apache.rocketmq.client.support.DefaultListenerContainer;
 import org.apache.rocketmq.client.support.RocketMQMessageConverter;
@@ -109,7 +108,7 @@ public class ListenerContainerConfiguration implements ApplicationContextAware {
         container.setConsumptionThreadCount(annotation.consumptionThreadCount());
         container.setMaxCacheMessageSizeInBytes(annotation.maxCacheMessageSizeInBytes());
         // Use selectorType to determine the filter expression type, similar to rocketmq-spring-boot
-        container.setType(annotation.selectorType() == SelectorType.TAG ? "tag" : "sql92");
+        container.setType(annotation.filterExpressionType());
         container.setSslEnabled(annotation.sslEnabled());
         return container;
     }

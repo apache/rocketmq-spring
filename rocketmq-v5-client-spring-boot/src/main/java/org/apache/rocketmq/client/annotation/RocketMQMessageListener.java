@@ -31,7 +31,7 @@ public @interface RocketMQMessageListener {
     String SECRET_KEY_PLACEHOLDER = "${rocketmq.push-consumer.secret-key:}";
     String ENDPOINTS_PLACEHOLDER = "${rocketmq.push-consumer.endpoints:}";
     String TOPIC_PLACEHOLDER = "${rocketmq.push-consumer.topic:}";
-    String TAG_PLACEHOLDER = "${rocketmq.push-consumer.tag:}";
+    String TAG_PLACEHOLDER = "${rocketmq.push-consumer.tag:*}";
 
     /**
      * The property of "access-key".
@@ -54,14 +54,7 @@ public @interface RocketMQMessageListener {
     String topic() default TOPIC_PLACEHOLDER;
 
     /**
-     * Control how to selector message.
-     *
-     * @see SelectorType
-     */
-    SelectorType selectorType() default SelectorType.TAG;
-
-    /**
-     * Control which message can be select. Grammar please see {@link SelectorType#TAG} and {@link SelectorType#SQL92}
+     * Control which message can be select.
      * For TAG type, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
      * For SQL92 type, use SQL92 expression like "a > 5 AND b < 10".
      */
@@ -73,11 +66,11 @@ public @interface RocketMQMessageListener {
     boolean sslEnabled() default true;
 
     /**
-     * @deprecated Use {@link #tag()} and {@link #selectorType()} instead.
-     * This field will be removed in a future version.
+     * Control how to filter messages.
+     * For TAG filterExpressionType, use "*" to subscribe all messages, or use "tagA||tagB" for multiple tags.
+     * For SQL92 filterExpressionType, use SQL92 expression like "a > 5 AND b < 10".
      */
-    @Deprecated
-    String filterExpressionType() default "tag";
+    String filterExpressionType() default TAG_PLACEHOLDER;
 
     /**
      * The load balancing group for the simple consumer.
