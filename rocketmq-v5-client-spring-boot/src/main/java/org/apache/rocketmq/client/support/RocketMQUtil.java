@@ -34,6 +34,8 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class RocketMQUtil {
@@ -183,5 +185,15 @@ public class RocketMQUtil {
         FilterExpressionType filterExpressionType = "tag".equalsIgnoreCase(type) ? FilterExpressionType.TAG : FilterExpressionType.SQL92;
         FilterExpression filterExpression = new FilterExpression(tag, filterExpressionType);
         return filterExpression;
+    }
+
+    public static Map<String, FilterExpression> createSubscriptionExpressions(Map<String, RocketMQProperties.FilterExpression> map) {
+        Map<String, FilterExpression> subscriptionExpressions = new HashMap<>();
+        map.forEach((topic, expression) -> {
+            FilterExpressionType filterExpressionType = "tag".equalsIgnoreCase(expression.getFilterExpressionType()) ? FilterExpressionType.TAG : FilterExpressionType.SQL92;
+            FilterExpression filterExpression = new FilterExpression(expression.getTag(), filterExpressionType);
+            subscriptionExpressions.put(topic, filterExpression);
+        });
+        return subscriptionExpressions;
     }
 }
