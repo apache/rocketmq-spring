@@ -187,7 +187,7 @@ public class RocketMQProperties {
         /**
          * Tag of consumer.
          */
-        private String tag;
+        private String tag = "*";
 
         /**
          * Topic name of consumer.
