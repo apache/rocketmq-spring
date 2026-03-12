@@ -29,11 +29,11 @@ import org.springframework.messaging.support.MessageBuilder;
 import javax.annotation.Resource;
 
 /**
- * SQL92 消息生产者示例
+ * SQL92 Message Producer Example
  * 
- * 演示如何发送带有属性的消息，以便消费者可以使用 SQL92 进行过滤
+ * Demonstrates how to send messages with attributes so consumers can use SQL92 for filtering
  * 
- * 配置文件 application.properties 中需要设置：
+ * Configuration properties that need to be set in application.properties:
  * rocketmq.producer.endpoints=localhost:8081
  * rocketmq.producer.topic=orderTopic
  * demo.rocketmq.order-topic=orderTopic
@@ -52,24 +52,24 @@ public class SQL92ProducerApplication implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws ClientException {
-        log.info("开始发送 SQL92 测试消息...");
+        log.info("Starting to send SQL92 test messages...");
         
-        // 发送 VIP 大额订单（会被 SQL92 过滤器匹配）
+        // Send VIP high-value orders (will be matched by SQL92 filter)
         sendVipOrder(1L, 600.0, "Beijing");
         sendVipOrder(2L, 800.0, "Shanghai");
         
-        // 发送普通订单（不会被 SQL92 过滤器匹配）
+        // Send normal orders (will not be matched by SQL92 filter)
         sendNormalOrder(3L, 200.0, "Guangzhou");
         sendNormalOrder(4L, 300.0, "Shenzhen");
         
-        // 发送 VIP 小额订单（不会被 SQL92 过滤器匹配）
+        // Send VIP low-value orders (will not be matched by SQL92 filter)
         sendVipOrder(5L, 100.0, "Hangzhou");
         
-        log.info("所有消息已发送完成");
+        log.info("All messages have been sent");
     }
     
     /**
-     * 发送 VIP 订单
+     * Send VIP order
      */
     private void sendVipOrder(Long orderId, Double amount, String region) throws ClientException {
         Order order = new Order();
@@ -85,11 +85,11 @@ public class SQL92ProducerApplication implements CommandLineRunner {
             .build();
         
         rocketMQClientTemplate.syncSendNormalMessage("orderTopic", message);
-        log.info("VIP 订单已发送 - ID: {}, 金额：{}, 地区：{}", orderId, amount, region);
+        log.info("VIP order sent - ID: {}, Amount: {}, Region: {}", orderId, amount, region);
     }
     
     /**
-     * 发送普通订单
+     * Send normal order
      */
     private void sendNormalOrder(Long orderId, Double amount, String region) throws ClientException {
         Order order = new Order();
@@ -105,11 +105,11 @@ public class SQL92ProducerApplication implements CommandLineRunner {
             .build();
         
         rocketMQClientTemplate.syncSendNormalMessage("orderTopic", message);
-        log.info("普通订单已发送 - ID: {}, 金额：{}, 地区：{}", orderId, amount, region);
+        log.info("Normal order sent - ID: {}, Amount: {}, Region: {}", orderId, amount, region);
     }
     
     /**
-     * 订单实体类
+     * Order entity class
      */
     public static class Order {
         private Long id;

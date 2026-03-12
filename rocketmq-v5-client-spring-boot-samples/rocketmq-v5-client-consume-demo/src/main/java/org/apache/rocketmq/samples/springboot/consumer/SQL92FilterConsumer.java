@@ -25,13 +25,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * SQL92 消息过滤消费者示例
+ * SQL92 Message Filter Consumer Example
  * 
- * 该消费者使用 SQL92 表达式过滤消息，只消费满足特定条件的消息：
- * - type = 'vip'：VIP 类型的消息
- * - amount > 500：金额大于 500
+ * This consumer uses SQL92 expression to filter messages, consuming only messages that meet specific conditions:
+ * - type = 'vip': VIP type messages
+ * - amount > 500: Amount greater than 500
  * 
- * 配置文件 application.properties 中需要设置：
+ * Configuration properties that need to be set in application.properties:
  * demo.sql92.rocketmq.endpoints=localhost:8081
  * demo.sql92.rocketmq.topic=orderTopic
  * demo.sql92.rocketmq.consumer-group=sql92VipConsumerGroup
@@ -52,16 +52,16 @@ public class SQL92FilterConsumer implements RocketMQListener {
     
     @Override
     public ConsumeResult consume(MessageView messageView) {
-        log.info("收到 SQL92 过滤消息 - ID: {}, Topic: {}, Tag: {}", 
+        log.info("Received SQL92 filtered message - ID: {}, Topic: {}, Tag: {}", 
             messageView.getMessageId(), 
             messageView.getTopic(),
             messageView.getTag().orElse(""));
         
-        // 打印消息属性
-        log.info("消息属性：{}", messageView.getProperties());
+        // Print message properties
+        log.info("Message properties: {}", messageView.getProperties());
         
-        // 这里可以添加业务逻辑处理
-        // 例如：解析消息内容，处理订单等
+        // Business logic can be added here
+        // For example: parse message content, process orders, etc.
         
         return ConsumeResult.SUCCESS;
     }

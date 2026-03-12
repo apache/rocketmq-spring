@@ -753,8 +753,6 @@ public class SQL92ProducerApplication implements CommandLineRunner {
    - 使用 `IS NULL` 或 `IS NOT NULL` 判断空值
    - 不要使用 `= NULL`
 
-详细示例请参考 [SQL92_USAGE.md](SQL92_USAGE.md)
-
 <a name="GSP33"></a>
 
 # ACL功能
