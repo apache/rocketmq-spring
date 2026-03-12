@@ -16,7 +16,6 @@
  */
 package org.apache.rocketmq.client.autoconfigure;
 
-import org.apache.rocketmq.client.common.FilterExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
@@ -328,6 +327,28 @@ public class RocketMQProperties {
                     ", sslEnabled=" + sslEnabled +
                     ", namespace='" + namespace + '\'' +
                     '}';
+        }
+    }
+
+    public static class FilterExpression {
+        private String tag;
+
+        private String filterExpressionType;
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+
+        public String getFilterExpressionType() {
+            return filterExpressionType;
+        }
+
+        public void setFilterExpressionType(String filterExpressionType) {
+            this.filterExpressionType = filterExpressionType;
         }
     }
 }
