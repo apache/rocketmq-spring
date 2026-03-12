@@ -118,13 +118,13 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         }
 
         // Set the subscription for the consumer.
-        if (simpleConsumer.getFilterExpressionMap().isEmpty()) {
+        if (simpleConsumer.getSubscriptionExpressions().isEmpty()) {
             FilterExpression filterExpression = RocketMQUtil.createFilterExpression(simpleConsumer.getTag(), simpleConsumer.getFilterExpressionType());
             if (Objects.nonNull(filterExpression)) {
                 simpleConsumerBuilder.setSubscriptionExpressions(Collections.singletonMap(simpleConsumer.getTopic(), filterExpression));
             }
         } else {
-            Map<String, FilterExpression> subscriptionExpressions = RocketMQUtil.createSubscriptionExpressions(simpleConsumer.getFilterExpressionMap());
+            Map<String, FilterExpression> subscriptionExpressions = RocketMQUtil.createSubscriptionExpressions(simpleConsumer.getSubscriptionExpressions());
             simpleConsumerBuilder.setSubscriptionExpressions(subscriptionExpressions);
         }
         return simpleConsumerBuilder;

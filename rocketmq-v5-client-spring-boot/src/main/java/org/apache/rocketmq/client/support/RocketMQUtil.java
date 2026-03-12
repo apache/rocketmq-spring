@@ -187,7 +187,7 @@ public class RocketMQUtil {
         return filterExpression;
     }
 
-    public static Map<String, FilterExpression> createSubscriptionExpressions(Map<String, RocketMQProperties.FilterExpression> map) {
+    public static Map<String, FilterExpression> createSubscriptionExpressions(Map<String, org.apache.rocketmq.client.common.FilterExpression> map) {
         Map<String, FilterExpression> subscriptionExpressions = new HashMap<>();
         map.forEach((topic, expression) -> {
             FilterExpressionType filterExpressionType = "tag".equalsIgnoreCase(expression.getFilterExpressionType()) ? FilterExpressionType.TAG : FilterExpressionType.SQL92;
