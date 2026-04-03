@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
@@ -118,7 +119,7 @@ public class RocketMQAutoConfiguration implements ApplicationContextAware {
         }
 
         // Set the subscription for the consumer.
-        if (simpleConsumer.getSubscriptionExpressions().isEmpty()) {
+        if (CollectionUtils.isEmpty(simpleConsumer.getSubscriptionExpressions())) {
             FilterExpression filterExpression = RocketMQUtil.createFilterExpression(simpleConsumer.getTag(), simpleConsumer.getFilterExpressionType());
             if (Objects.nonNull(filterExpression)) {
                 simpleConsumerBuilder.setSubscriptionExpressions(Collections.singletonMap(simpleConsumer.getTopic(), filterExpression));

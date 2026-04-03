@@ -32,14 +32,20 @@ public class V5SimpleConsumerConsumerApplication implements CommandLineRunner {
     @Resource
     private RocketMQClientTemplate rocketMQClientTemplate;
 
+    @Resource
+    private ExtRocketMQTemplate extRocketMQTemplate;
+
     public static void main(String[] args) {
         SpringApplication.run(V5SimpleConsumerConsumerApplication.class, args);
     }
 
     @Override
     public void run(String... args) throws Exception {
-        for (int i = 0; i < 10; i++) {
-            List<MessageView> messageList = rocketMQClientTemplate.receive(10, Duration.ofSeconds(60));
+        while (true){
+            List<MessageView> messageList = extRocketMQTemplate.receive(10, Duration.ofSeconds(10));
+            System.out.println(messageList);
+
+            messageList = rocketMQClientTemplate.receive(10, Duration.ofSeconds(10));
             System.out.println(messageList);
         }
     }

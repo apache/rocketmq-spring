@@ -91,4 +91,28 @@ public @interface ExtConsumerResetConfiguration {
      * The namespace of consumer.
      */
     String namespace() default "";
+
+    /**
+     * subscribing to multiple topics
+     */
+    FilterExpression[] subscriptionExpressions() default {};
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({})
+    @interface FilterExpression {
+        /**
+         * Topic name of consumer.
+         */
+        String topic();
+
+        /**
+         * Tag of consumer.
+         */
+        String tag() default "*";
+
+        /**
+         * The type of filter expression
+         */
+        String filterExpressionType() default "tag";
+    }
 }
