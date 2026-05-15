@@ -14,8 +14,22 @@
 # limitations under the License.
 
 notifications:
-  commits:      commits@rocketmq.apache.org
-  issues:       commits@rocketmq.apache.org
+  commits: commits@rocketmq.apache.org
+  issues: commits@rocketmq.apache.org
   pullrequests: commits@rocketmq.apache.org
-  jobs:         commits@rocketmq.apache.org
-  discussions:  dev@rocketmq.apache.org
+  jobs: commits@rocketmq.apache.org
+  discussions: dev@rocketmq.apache.org
+github:
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
