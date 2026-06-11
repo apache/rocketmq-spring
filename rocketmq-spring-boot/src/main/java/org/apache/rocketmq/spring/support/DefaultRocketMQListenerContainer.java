@@ -591,11 +591,11 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
                 try {
                     if (messageType instanceof Class) {
                         //if the messageType has not Generic Parameter
-                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) messageType);
+                        return this.getMessageConverter().fromMessage(MessageBuilder.withPayload(messageExt.getBody()).build(), (Class<?>) messageType);
                     } else {
                         //if the messageType has Generic Parameter, then use SmartMessageConverter#fromMessage with third parameter "conversionHint".
                         //we have validate the MessageConverter is SmartMessageConverter in this#getMethodParameter.
-                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(str).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
+                        return ((SmartMessageConverter) this.getMessageConverter()).fromMessage(MessageBuilder.withPayload(messageExt.getBody()).build(), (Class<?>) ((ParameterizedType) messageType).getRawType(), methodParameter);
                     }
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
