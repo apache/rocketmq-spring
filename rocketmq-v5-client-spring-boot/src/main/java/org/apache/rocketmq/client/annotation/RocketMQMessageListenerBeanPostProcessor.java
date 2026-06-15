@@ -180,7 +180,7 @@ public class RocketMQMessageListenerBeanPostProcessor implements ApplicationCont
                     for (AnnotationEnhancer enh : enhancers) {
                         newAttrs = enh.apply(newAttrs, element);
                     }
-                    return attrs;
+                    return newAttrs;
                 };
             }
         }
