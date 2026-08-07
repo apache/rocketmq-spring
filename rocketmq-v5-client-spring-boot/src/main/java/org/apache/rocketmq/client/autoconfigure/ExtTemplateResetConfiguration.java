@@ -18,6 +18,7 @@ package org.apache.rocketmq.client.autoconfigure;
 
 import org.apache.rocketmq.client.annotation.ExtProducerResetConfiguration;
 import org.apache.rocketmq.client.support.RocketMQMessageConverter;
+import org.apache.rocketmq.client.support.RocketMQMessagePostProcessor;
 import org.apache.rocketmq.client.support.RocketMQUtil;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
@@ -54,11 +55,15 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
 
     private RocketMQMessageConverter rocketMQMessageConverter;
 
+    private RocketMQMessagePostProcessor rocketMQMessagePostProcessor;
+
     public ExtTemplateResetConfiguration(RocketMQMessageConverter rocketMQMessageConverter,
+                                         RocketMQMessagePostProcessor rocketMQMessagePostProcessor,
                                          ConfigurableEnvironment environment, RocketMQProperties rocketMQProperties) {
         this.rocketMQMessageConverter = rocketMQMessageConverter;
         this.environment = environment;
         this.rocketMQProperties = rocketMQProperties;
+        this.rocketMQMessagePostProcessor = rocketMQMessagePostProcessor;
     }
 
     @Override
@@ -90,6 +95,7 @@ public class ExtTemplateResetConfiguration implements ApplicationContextAware, S
         RocketMQClientTemplate rocketMQTemplate = (RocketMQClientTemplate) bean;
         rocketMQTemplate.setProducerBuilder(producerBuilder);
         rocketMQTemplate.setMessageConverter(rocketMQMessageConverter.getMessageConverter());
+        rocketMQTemplate.setMessagePostProcessor(rocketMQMessagePostProcessor.getMessagePostProcessor());
         String topic = environment.resolvePlaceholders(annotation.topic());
         log.info("Set real producer to {} using topic {}", beanName, topic);
     }

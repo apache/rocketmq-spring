@@ -145,6 +145,8 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private String instanceName;
 
+    private RocketMQMessageHandler rocketMQMessageHandler = (message, chain) -> chain.doHandler(message);
+
     public long getSuspendCurrentQueueTimeMillis() {
         return suspendCurrentQueueTimeMillis;
     }
@@ -327,6 +329,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         this.instanceName = instanceName;
     }
 
+    public RocketMQMessageHandler getRocketMQMessageHandler() {
+        return rocketMQMessageHandler;
+    }
+
+    public void setRocketMQMessageHandler(RocketMQMessageHandler rocketMQMessageHandler) {
+        this.rocketMQMessageHandler = rocketMQMessageHandler;
     public ConsumeFromWhere getConsumeFromWhere() {
         return consumeFromWhere;
     }
@@ -467,15 +475,21 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         @Override
         public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
             for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
                 try {
-                    long now = System.currentTimeMillis();
-                    DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
-                    container.handleMessage(messageExt);
-                    long costTime = System.currentTimeMillis() - now;
-                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                    rocketMQMessageHandler.doHandler(messageExt, messageExt1 -> {
+                        log.debug("received msg: {}", messageExt1);
+                        try {
+                            long now = System.currentTimeMillis();
+                            DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
+                            container.handleMessage(messageExt1);
+                            long costTime = System.currentTimeMillis() - now;
+                            log.debug("consume {} cost: {} ms", messageExt1.getMsgId(), costTime);
+                        } catch (Exception e) {
+                            log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt1.getMsgId(), messageExt1.getTopic(), messageExt1.getReconsumeTimes(), e);
+                            throw e;
+                        }
+                    });
                 } catch (Exception e) {
-                    log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt.getMsgId(), messageExt.getTopic(), messageExt.getReconsumeTimes(), e);
                     context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
                     return ConsumeConcurrentlyStatus.RECONSUME_LATER;
                 }
@@ -491,15 +505,21 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
         @Override
         public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
             for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
                 try {
-                    long now = System.currentTimeMillis();
-                    DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
-                    container.handleMessage(messageExt);
-                    long costTime = System.currentTimeMillis() - now;
-                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
+                    rocketMQMessageHandler.doHandler(messageExt, messageExt1 -> {
+                        log.debug("received msg: {}", messageExt1);
+                        try {
+                            long now = System.currentTimeMillis();
+                            DefaultRocketMQListenerContainer container = applicationContext.getBean(name, DefaultRocketMQListenerContainer.class);
+                            container.handleMessage(messageExt1);
+                            long costTime = System.currentTimeMillis() - now;
+                            log.debug("consume {} cost: {} ms", messageExt1.getMsgId(), costTime);
+                        } catch (Exception e) {
+                            log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt1.getMsgId(), messageExt1.getTopic(), messageExt1.getReconsumeTimes(), e);
+                            throw e;
+                        }
+                    });
                 } catch (Exception e) {
-                    log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", messageExt.getMsgId(), messageExt.getTopic(), messageExt.getReconsumeTimes(), e);
                     context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
                     return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
                 }
