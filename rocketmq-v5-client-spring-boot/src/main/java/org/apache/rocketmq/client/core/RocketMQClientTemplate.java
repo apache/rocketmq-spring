@@ -372,9 +372,11 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public CompletableFuture<List<MessageView>> receiveAsync(int maxMessageNum, Duration invisibleDuration) throws ClientException, IOException {
         SimpleConsumer simpleConsumer = this.getSimpleConsumer();
-        CompletableFuture<List<MessageView>> listCompletableFuture = simpleConsumer.receiveAsync(maxMessageNum, invisibleDuration);
-        simpleConsumer.close();
-        return listCompletableFuture;
+        // Do not close the shared SimpleConsumer here: it is a reusable singleton whose lifecycle
+        // is managed by destroy(). Closing it right after starting the async receive aborts the
+        // in-flight future and leaves the (non-null) consumer closed, breaking every subsequent
+        // receive/ack/receiveAsync call on this template.
+        return simpleConsumer.receiveAsync(maxMessageNum, invisibleDuration);
     }
 
 
