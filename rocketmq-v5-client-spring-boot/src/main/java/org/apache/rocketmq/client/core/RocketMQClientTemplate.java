@@ -30,6 +30,7 @@ import org.apache.rocketmq.client.apis.producer.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
@@ -43,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<String> implements DisposableBean {
+public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<String> implements DisposableBean, InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(RocketMQClientTemplate.class);
 
@@ -61,15 +62,8 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public Producer getProducer() {
         if (Objects.isNull(producer)) {
-            synchronized (RocketMQClientTemplate.class) {
-                if (Objects.isNull(producer)) {
-                    try {
-                        this.producer =  producerBuilder.build();
-                    } catch (ClientException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
+            throw new IllegalStateException(
+                    "Producer is not initialized. Please check rocketmq.producer configuration.");
         }
         return producer;
     }
@@ -104,6 +98,29 @@ public class RocketMQClientTemplate extends AbstractMessageSendingTemplate<Strin
 
     public void setProducerBuilder(ProducerBuilder producerBuilder) {
         this.producerBuilder = producerBuilder;
+    }
+
+    /**
+     * Build the producer during initialization so that connection/route prefetch
+     * happens at startup rather than on the first message send.
+     */
+    public void initProducer() {
+        if (Objects.nonNull(producerBuilder) && Objects.isNull(producer)) {
+            synchronized (RocketMQClientTemplate.class) {
+                if (Objects.isNull(producer)) {
+                    try {
+                        this.producer = producerBuilder.build();
+                    } catch (ClientException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initProducer();
     }
 
     public SimpleConsumerBuilder getSimpleConsumerBuilder() {
