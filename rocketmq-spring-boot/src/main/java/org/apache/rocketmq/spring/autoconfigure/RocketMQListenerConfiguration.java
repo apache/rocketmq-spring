@@ -19,13 +19,11 @@ package org.apache.rocketmq.spring.autoconfigure;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListenerBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
 @Configuration
-@AutoConfigureAfter(RocketMQAutoConfiguration.class)
 public class RocketMQListenerConfiguration implements ImportBeanDefinitionRegistrar {
 
     @Override
